@@ -1,0 +1,307 @@
+:root {
+    /* Paleta de Cores Imperial */
+    --primary-blue: #0A2342;
+    --primary-dark: #020c1b;
+    --accent-gold: #FFB81C;
+    --accent-gold-light: #ffd57a;
+    --accent-gold-hover: #e6a300;
+    --text-white: #ffffff;
+    --text-off-white: #e0e0e0;
+    
+    /* Glassmorphism Variables */
+    --glass-bg: rgba(10, 35, 66, 0.6);
+    --glass-border: rgba(255, 184, 28, 0.3);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    --glass-blur: blur(16px);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Sora', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--primary-blue);
+    background: radial-gradient(ellipse at bottom, #1b3a5f 0%, var(--primary-blue) 60%, var(--primary-dark) 100%);
+    color: var(--text-white);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* Efeitos de Luz */
+.background-glow {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.15;
+}
+.glow-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: var(--accent-gold); }
+.glow-2 { bottom: -20%; right: -20%; width: 40vw; height: 40vw; background: #154a8a; opacity: 0.1; }
+
+/* --- HEADER ALINHADO (Trindade) --- */
+.glass-header {
+    position: relative; /* Necessário para o posicionamento absoluto funcionar */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* Centraliza o conteúdo verticalmente */
+    /* Altura mínima para garantir que caiba Logo e Foto */
+    min-height: 160px; 
+    padding: 1rem;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 184, 28, 0.15);
+}
+
+/* CONTAINER DAS IMAGENS (Logo e Foto) */
+/* Truque: Absolute joga elas para as pontas sem empurrar o texto para baixo */
+.branding-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%; /* Ocupa a altura do header */
+    display: flex;
+    justify-content: space-between; /* Ponta a ponta */
+    align-items: center; /* Centraliza na vertical */
+    padding: 0 20px; /* Margem lateral de segurança */
+    pointer-events: none; /* Deixa clicar no que estiver atrás se precisar */
+    max-width: 1280px; /* Limite para telas ultrawide */
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.img-frame {
+    pointer-events: auto; /* Reativa cliques nas imagens */
+    transition: transform 0.3s ease;
+}
+
+/* LOGO (Esquerda) */
+.img-frame.logo-frame {
+    width: auto;
+    height: 100px; 
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    border-radius: 0;
+}
+.logo-frame .header-img {
+    width: auto;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
+}
+
+/* FOTO (Direita) */
+.img-frame.photo-frame {
+    width: 85px;
+    height: 85px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-radius: 50%;
+    border: 2px solid var(--accent-gold);
+    box-shadow: 0 0 15px rgba(255, 184, 28, 0.3);
+    overflow: hidden;
+}
+.photo-frame .header-img { width: 100%; height: 100%; object-fit: cover; }
+.img-frame:hover { transform: scale(1.05); }
+
+/* TEXTO CENTRAL (Título e Subtítulo) */
+/* Fica visualmente entre as imagens */
+h1 {
+    font-size: 1.8rem; /* Levemente menor para caber no meio */
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 800;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+    line-height: 1.1;
+    text-align: center;
+    max-width: 50%; /* Garante que não encoste nas imagens laterais */
+    margin: 0 auto;
+    z-index: 2;
+}
+
+.subtitle {
+    color: var(--text-off-white);
+    font-size: 0.9rem;
+    margin-bottom: 5px; /* Espaço pequeno */
+    z-index: 2;
+}
+
+/* BOTÃO (Abaixo de tudo) */
+.btn-gold {
+    margin-top: 15px; /* Empurra para baixo do alinhamento central */
+    background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-gold-hover) 100%);
+    color: var(--primary-blue);
+    border: none;
+    padding: 12px 30px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(255, 184, 28, 0.5);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Sora', sans-serif;
+    z-index: 5; /* Garante clique */
+}
+.btn-gold:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255, 184, 28, 0.7); }
+
+/* --- GRID E CARDS (10% Menores) --- */
+.dashboard-container {
+    flex: 1;
+    width: 100%;
+    max-width: 1250px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.grid-comandos {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px; /* Gap reduzido */
+    width: 100%;
+}
+
+.card-glass {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px; /* Raio levemente menor */
+    /* Altura e padding reduzidos em ~10% */
+    padding: 18px 10px; 
+    min-height: 115px; /* De 130px para 115px */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--text-white);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: var(--glass-shadow), inset 0 0 10px rgba(255, 255, 255, 0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.card-glass:hover {
+    background: rgba(10, 35, 66, 0.8);
+    border-color: var(--accent-gold);
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(255, 184, 28, 0.2);
+}
+
+.card-glass .icon-glow {
+    /* Reduzido de 2.8rem para 2.4rem (~14% menor para balancear) */
+    font-size: 2.4rem; 
+    margin-bottom: 12px;
+    filter: drop-shadow(0 0 8px rgba(255, 184, 28, 0.6));
+    transition: transform 0.3s ease;
+}
+
+.card-glass:hover .icon-glow {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 12px rgba(255, 184, 28, 0.9));
+}
+
+.card-glass span {
+    font-size: 0.85rem; /* Fonte levemente menor */
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.2;
+    letter-spacing: 0.5px;
+}
+
+/* Destaque (Ranking) */
+.destaque-gold-card {
+    border: 2px solid var(--accent-gold);
+    background: rgba(255, 184, 28, 0.15);
+    box-shadow: 0 0 20px rgba(255, 184, 28, 0.3);
+}
+.destaque-gold-card:hover { background: rgba(255, 184, 28, 0.25); }
+
+.gold-pulse { animation: pulse-gold 2s infinite; }
+@keyframes pulse-gold {
+    0% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(255, 184, 28, 0.7)); }
+    50% { transform: scale(1.1); filter: drop-shadow(0 0 15px rgba(255, 184, 28, 1)); }
+    100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(255, 184, 28, 0.7)); }
+}
+
+/* --- FOOTER --- */
+.glass-footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(10, 35, 66, 0.8);
+}
+
+/* --- RESPONSIVIDADE TÁTICA --- */
+
+/* Tablet */
+@media (max-width: 1024px) {
+    .grid-comandos { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    h1 { font-size: 1.5rem; max-width: 60%; }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    /* No mobile, o alinhamento horizontal perfeito é difícil sem espremer o texto.
+       Aqui ajustamos para que fiquem alinhados mas com tamanhos reduzidos */
+    
+    .branding-container { padding: 0 10px; }
+    
+    .img-frame.logo-frame { height: 60px; } /* Logo menor */
+    .img-frame.photo-frame { width: 55px; height: 55px; } /* Foto menor */
+    
+    .glass-header { min-height: 120px; padding-top: 0.5rem; }
+
+    h1 {
+        font-size: 1.1rem; /* Texto reduzido para caber entre logo e foto */
+        max-width: 60%; 
+        margin-top: 5px;
+    }
+    
+    .subtitle { font-size: 0.8rem; }
+    .btn-gold { 
+        padding: 10px 25px; 
+        font-size: 0.85rem; 
+        margin-top: 10px;
+    }
+
+    .grid-comandos {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .card-glass {
+        min-height: 100px; /* Ainda menor no mobile */
+        padding: 12px 8px;
+    }
+    .card-glass .icon-glow { font-size: 2rem; margin-bottom: 8px; }
+}
+
+/* Tiny Mobile */
+@media (max-width: 360px) {
+    h1 { font-size: 0.9rem; }
+    .grid-comandos { gap: 8px; }
+}
