@@ -255,6 +255,33 @@ h1 {
     background: rgba(10, 35, 66, 0.8);
 }
 
+
+
+
+/* Remove sublinhado e força a herança de cor do pai (subtitle) */
+.clean-link {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+/* Opcional: Efeito hover para indicar interatividade */
+.clean-link:hover {
+    opacity: 0.8; /* ou outra transição visual de sua preferência */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* --- RESPONSIVIDADE TÁTICA --- */
 
 /* Tablet */

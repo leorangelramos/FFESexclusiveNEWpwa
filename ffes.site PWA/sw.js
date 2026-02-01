@@ -1,6 +1,7 @@
-const CACHE_NAME = 'ffes-exclusive-v2.1';
+const CACHE_NAME = 'ffes-exclusive-v3.0';
 
-// Lista completa de arquivos para cache offline
+// Lista TÁTICA de arquivos para cache.
+// Prioridade: Interface Global + Menus de Navegação (Backbone)
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -9,49 +10,49 @@ const ASSETS_TO_CACHE = [
   '/logo novo grande.webp',
   '/Teacher-Leo-Ramos.webp',
   
-  // Módulos Skills
-  '/Pasta003/writing001.html',
-  '/Pasta004/reading001.html',
+  // Backbone de Navegação (As portas de entrada de cada módulo)
+  '/Pasta001/indexpasta001.html',
+  '/Pasta002/indexpasta002.html',
+  '/Pasta003/indexpasta003.html',
+  '/Pasta004/indexpasta004.html',
+  '/Pasta005/indexpasta005.html',
+  '/Pasta006/indexpasta006.html',
+  '/Pasta007/indexpasta007.html',
+  '/Pasta008/indexpasta008.html',
+  '/Pasta009/indexpasta009.html',
+  '/Pasta010/indexpasta010.html',
+  '/Pasta011/indexpasta011.html',
+  '/Pasta012/indexpasta012.html',
+  '/Pasta013/indexpasta013.html',
+  '/Pasta014/indexpasta014.html',
+  '/Pasta015/indexpasta015.html',
 
-  // Módulo Gramática (Pasta 002)
-  '/Pasta002/presentsimple.html',
-  '/Pasta002/presentcontinuous.html',
-  '/Pasta002/pastsimple.html',
-  '/Pasta002/pastcontinuous.html',
-  '/Pasta002/futuresimple.html',
-  '/Pasta002/futurecontinuous.html',
-  '/Pasta002/futureperfect.html',
-  '/Pasta002/futureperfectcont.html',
-  '/Pasta002/condicional0.html',
-  '/Pasta002/condicional1.html',
-  '/Pasta002/condicional2.html',
-  '/Pasta002/condicional3.html',
-  '/Pasta002/condicionalwould1.html',
-  '/Pasta002/condicionalwould2.html',
-  '/Pasta002/condicionalwould3.html',
-  '/Pasta002/condicionalwould4.html',
-  '/Pasta002/modal01.html',
-  '/Pasta002/modal02.html',
-  '/Pasta002/modal03.html',
-  '/Pasta002/auxiliares3.html'
+  // Arquivos Chave de Games e Atividades (Exemplos detectados)
+  '/Pasta011/jogodamemoria.html',
+  '/Pasta011/word-search.html',
+  '/Pasta007/quiz01.html',
+  '/Pasta005/speaking001.html'
 ];
 
+// Instalação: Cacheia o "Kit de Sobrevivência"
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('FFES: Cacheando sistema completo...');
+      console.log('FFES System: Carregando protocolo offline...');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
   self.skipWaiting();
 });
 
+// Ativação: Limpa caches antigos (Versões obsoletas v2.1, etc)
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
           if (cache !== CACHE_NAME) {
+            console.log('FFES System: Deletando cache obsoleto ->', cache);
             return caches.delete(cache);
           }
         })
@@ -60,10 +61,18 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Fetch: Estratégia "Stale-While-Revalidate" 
+// (Tenta usar cache para velocidade, mas busca atualização em background)
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
+    caches.match(event.request).then((cachedResponse) => {
+      const fetchPromise = fetch(event.request).then((networkResponse) => {
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, networkResponse.clone());
+        });
+        return networkResponse;
+      });
+      return cachedResponse || fetchPromise;
     })
   );
 });

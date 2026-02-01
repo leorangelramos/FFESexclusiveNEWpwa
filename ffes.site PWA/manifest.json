@@ -1,22 +1,47 @@
 {
   "name": "FFES Exclusive | Sovereignty System",
-  "short_name": "Teacher Leo",
+  "short_name": "FFES Tátical",
   "description": "Plataforma tática de aceleração em inglês e treinamento de alta performance.",
   "start_url": "/index.html",
+  "id": "/?source=pwa",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#0A2342",
   "theme_color": "#0A2342",
-  "orientation": "portrait",
   "icons": [
     {
       "src": "Teacher-Leo-Ramos.webp",
       "sizes": "192x192",
-      "type": "image/webp"
+      "type": "image/webp",
+      "purpose": "any maskable"
     },
     {
       "src": "Teacher-Leo-Ramos.webp",
       "sizes": "512x512",
-      "type": "image/webp"
+      "type": "image/webp",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Ranking & XP",
+      "short_name": "Ranking",
+      "description": "Verifique seu progresso",
+      "url": "/Pasta015/indexpasta015.html",
+      "icons": [{ "src": "logo novo grande.webp", "sizes": "192x192" }]
+    },
+    {
+      "name": "Speaking Studio",
+      "short_name": "Speaking",
+      "description": "Treino de Fala",
+      "url": "/Pasta005/indexpasta005.html"
+    },
+    {
+      "name": "Game Zone",
+      "short_name": "Games",
+      "description": "Jogos de Memória e Lógica",
+      "url": "/Pasta011/indexpasta011.html"
     }
   ]
 }
+
