@@ -1,39 +1,57 @@
-// Nome do cache (versão da sua máquina)
-const CACHE_NAME = 'teacher-leo-ffes-v1';
+const CACHE_NAME = 'ffes-exclusive-v2.1';
 
-// Ativos que serão cacheados para uso offline
+// Lista completa de arquivos para cache offline
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/style.css',
   '/script.js',
-  '/logo novo grande.png',
-  '/ffeslogotransparente.png',
-  // Adicione aqui os arquivos de exercícios principais para garantir o offline
-  '/presentsimple.html',
-  '/speaking001.html',
-  '/quiz01.html'
+  '/logo novo grande.webp',
+  '/Teacher-Leo-Ramos.webp',
+  
+  // Módulos Skills
+  '/Pasta003/writing001.html',
+  '/Pasta004/reading001.html',
+
+  // Módulo Gramática (Pasta 002)
+  '/Pasta002/presentsimple.html',
+  '/Pasta002/presentcontinuous.html',
+  '/Pasta002/pastsimple.html',
+  '/Pasta002/pastcontinuous.html',
+  '/Pasta002/futuresimple.html',
+  '/Pasta002/futurecontinuous.html',
+  '/Pasta002/futureperfect.html',
+  '/Pasta002/futureperfectcont.html',
+  '/Pasta002/condicional0.html',
+  '/Pasta002/condicional1.html',
+  '/Pasta002/condicional2.html',
+  '/Pasta002/condicional3.html',
+  '/Pasta002/condicionalwould1.html',
+  '/Pasta002/condicionalwould2.html',
+  '/Pasta002/condicionalwould3.html',
+  '/Pasta002/condicionalwould4.html',
+  '/Pasta002/modal01.html',
+  '/Pasta002/modal02.html',
+  '/Pasta002/modal03.html',
+  '/Pasta002/auxiliares3.html'
 ];
 
-// Instalação: Salva os arquivos essenciais no cache do navegador
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('FFES: Cache de ativos em andamento...');
+      console.log('FFES: Cacheando sistema completo...');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
   self.skipWaiting();
 });
 
-// Ativação: Limpa caches antigos se você atualizar a versão (v2, v3...)
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
           if (cache !== CACHE_NAME) {
-            console.log('FFES: Limpando cache antigo...');
             return caches.delete(cache);
           }
         })
@@ -42,7 +60,6 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Estratégia Cache-First: Tenta carregar do cache; se não tiver, busca na rede
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {

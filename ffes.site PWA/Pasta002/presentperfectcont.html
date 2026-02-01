@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFES | Present Perfect Continuous Master</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .theory-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+        .theory-section h2 { color: #b8860b; margin-bottom: 15px; }
+        .formula-box {
+            background: rgba(184, 134, 11, 0.1);
+            border-left: 4px solid #b8860b;
+            padding: 15px;
+            font-family: 'Sora', sans-serif;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+            font-weight: bold;
+        }
+        .training-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        .mode-btn {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+        .mode-btn.active {
+            background: rgba(184, 134, 11, 0.3);
+            border-color: #b8860b;
+            box-shadow: 0 0 15px rgba(184, 134, 11, 0.3);
+        }
+        .exercise-area {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            min-height: 350px;
+            display: none;
+            border: 1px solid rgba(184, 134, 11, 0.2);
+        }
+        .word-pill {
+            display: inline-block; padding: 10px 18px; margin: 5px;
+            background: rgba(184, 134, 11, 0.15); border: 1px solid #b8860b;
+            border-radius: 25px; cursor: pointer; color: #fff;
+        }
+        .writing-input {
+            width: 100%; background: rgba(255,255,255,0.05); border: 2px solid #b8860b;
+            color: #fff; padding: 15px; border-radius: 10px; text-align: center; font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body class="dashboard-container">
+    <div class="background-glow glow-2"></div>
+
+    <header class="glass-header">
+        <h1>PRESENT PERFECT <span class="text-gold">CONTINUOUS</span></h1>
+    </header>
+
+    <main style="max-width: 900px; margin: 0 auto; padding: 20px;">
+        
+        <section class="theory-section">
+            <h2>Ênfase na Duração</h2>
+            <p>Usamos para falar de ações que começaram no passado e **ainda estão acontecendo**, ou que acabaram de parar mas deixaram um resultado evidente.</p>
+            
+            <div class="formula-box">
+                SUJEITO + HAVE/HAS + BEEN + VERBO-ING
+            </div>
+
+            <ul style="margin-left: 20px; opacity: 0.9;">
+                <li><strong>Have been:</strong> I, You, We, They</li>
+                <li><strong>Has been:</strong> He, She, It</li>
+                <li><strong>Uso:</strong> Muito comum com "for" (duração) e "since" (início).</li>
+            </ul>
+        </section>
+
+        <div class="training-grid">
+            <button class="mode-btn" onclick="startMode('mc')">Múltipla Escolha</button>
+            <button class="mode-btn" onclick="startMode('scrambled')">Ordenar Frase</button>
+            <button class="mode-btn" onclick="startMode('translation')">Tradução</button>
+            <button class="mode-btn" onclick="startMode('writing')">Escrita Livre</button>
+        </div>
+
+        <div id="exercise-display" class="exercise-area">
+            <h3 id="mode-title" class="text-gold" style="margin-bottom:20px; text-transform: uppercase; font-size: 0.9rem;"></h3>
+            <div id="quest-content"></div>
+            <div id="feedback" style="margin-top:20px; font-weight:bold; min-height: 24px;"></div>
+            <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin-top:20px; width:100%">PRÓXIMA PERGUNTA ➡</button>
+        </div>
+
+        <div style="margin-top: 40px; text-align: center;">
+            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;"><span>⬅ Painel Principal</span></a>
+        </div>
+    </main>
+
+    <script>
+        const database = {
+            mc: [
+                {q: "It _______ (rain) all day.", o: ["has been raining", "have been raining", "has raining"], c: "has been raining"},
+                {q: "How long _______ you _______ (wait)?", o: ["did / wait", "have / been waiting", "has / been waiting"], c: "have / been waiting"},
+                {q: "She _______ (work) too hard lately.", o: ["has working", "have been working", "has been working"], c: "has been working"},
+                {q: "I _______ (study) English since 2020.", o: ["have been studying", "has been studying", "am studying"], c: "have been studying"}
+            ],
+            scrambled: [
+                {f: "I have been waiting for you", w: ["been", "have", "I", "waiting", "you", "for"]},
+                {f: "She has been cooking all night", w: ["cooking", "has", "She", "been", "night", "all"]},
+                {f: "They have been living here long", w: ["long", "been", "have", "They", "here", "living"]},
+                {f: "It has been snowing lately", w: ["snowing", "has", "It", "been", "lately"]}
+            ],
+            translation: [
+                {p: "Eu estou trabalhando desde manhã.", o: ["I am working since morning", "I have been working since morning", "I have working"], c: "I have been working since morning"},
+                {p: "Ela está chorando há horas.", o: ["She has been crying for hours", "She is crying for hours", "She been crying"], c: "She has been crying for hours"},
+                {p: "O que você tem feito?", o: ["What have you doing?", "What have you been doing?", "What you doing?"], c: "What have you been doing?"},
+                {p: "Nós estamos estudando muito.", o: ["We studying hard", "We have been studying hard", "We are studying hard"], c: "We have been studying hard"}
+            ],
+            writing: [
+                {p: "Traduza: 'Eu estou lendo.' (há algum tempo)", c: "i have been reading"},
+                {p: "Traduza: 'Ela está correndo.'", c: "she has been running"},
+                {p: "Traduza: 'Eles estão jogando.'", c: "they have been playing"},
+                {p: "Traduza: 'Nós estamos esperando.'", c: "we have been waiting"}
+            ]
+        };
+
+        let currentMode = ''; let currentQ = 0; let selectedWords = [];
+
+        function startMode(mode) {
+            currentMode = mode; currentQ = 0;
+            document.getElementById('exercise-display').style.display = 'block';
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('mode-title').textContent = "Modo: " + mode.replace('mc', 'Múltipla Escolha').replace('scrambled', 'Ordenação');
+            renderQuestion();
+            document.getElementById('exercise-display').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderQuestion() {
+            const container = document.getElementById('quest-content');
+            const feedback = document.getElementById('feedback');
+            const nextBtn = document.getElementById('nextBtn');
+            const data = database[currentMode][currentQ];
+            feedback.textContent = ""; nextBtn.style.display = "none"; container.innerHTML = "";
+
+            if (currentMode === 'mc' || currentMode === 'translation') {
+                container.innerHTML = `<p style='margin-bottom:20px; font-size:1.2rem;'>${data.q || data.p}</p>`;
+                data.o.forEach(opt => {
+                    const b = document.createElement('button');
+                    b.className = 'btn-gold'; b.style.width = '100%'; b.style.marginBottom = '8px'; b.style.background = 'rgba(255,255,255,0.05)';
+                    b.textContent = opt;
+                    b.onclick = () => check(opt, data.c, b);
+                    container.appendChild(b);
+                });
+            } else if (currentMode === 'scrambled') {
+                selectedWords = [];
+                container.innerHTML = `<div id='ans' style='min-height:50px; border-bottom:2px solid #b8860b; margin-bottom:20px; font-size:1.3rem; color:#fff;'></div><div id='pool'></div>`;
+                data.w.forEach(word => {
+                    const span = document.createElement('span');
+                    span.className = 'word-pill'; span.textContent = word;
+                    span.onclick = () => { 
+                        selectedWords.push(word); span.style.display='none'; 
+                        document.getElementById('ans').textContent = selectedWords.join(" "); 
+                        if(selectedWords.length === data.w.length) check(selectedWords.join(" "), data.f); 
+                    };
+                    document.getElementById('pool').appendChild(span);
+                });
+            } else if (currentMode === 'writing') {
+                container.innerHTML = `<p style='margin-bottom:15px'>${data.p}</p><input type='text' id='winp' class='writing-input' placeholder='Escreva o contínuo...' onkeypress='if(event.key==="Enter") check(this.value, "${data.c}")'>`;
+                setTimeout(() => document.getElementById('winp').focus(), 100);
+            }
+        }
+
+        function check(user, correct, element) {
+            const f = document.getElementById('feedback');
+            if(user.toLowerCase().trim() === correct.toLowerCase()) {
+                f.textContent = "Excelente! +25 XP"; f.style.color = "#4ade80";
+                document.getElementById('nextBtn').style.display = "block";
+                if(element) element.style.background = "rgba(74, 222, 128, 0.2)";
+                let xp = parseInt(localStorage.getItem('ffes_xp')||0); localStorage.setItem('ffes_xp', xp+25);
+            } else {
+                f.textContent = "Verifique a estrutura (Have/Has been -ing)."; f.style.color = "#f87171";
+                if(element) element.style.background = "rgba(248, 113, 113, 0.2)";
+            }
+        }
+
+        function nextQuestion() {
+            currentQ++;
+            if(currentQ < 4) renderQuestion();
+            else document.getElementById('quest-content').innerHTML = "<h2 class='text-gold' style='text-align:center'>Módulo Concluído!</h2><p style='text-align:center; color:#fff;'>Duração e Continuidade dominadas.</p>";
+        }
+    </script>
+</body>
+</html>

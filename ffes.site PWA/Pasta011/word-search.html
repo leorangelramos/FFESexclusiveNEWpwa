@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFES | Caça-Palavras</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        :root {
+            --grid-size: 10;
+        }
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        #word-grid {
+            display: grid;
+            grid-template-columns: repeat(var(--grid-size), 35px);
+            grid-template-rows: repeat(var(--grid-size), 35px);
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            user-select: none;
+        }
+        .cell {
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .cell.selected {
+            background: rgba(184, 134, 11, 0.5);
+            color: #fff;
+        }
+        .cell.found {
+            background: #4ade80;
+            color: #0A2342;
+        }
+        .word-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            max-width: 400px;
+        }
+        .word-item {
+            padding: 5px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: #fff;
+            opacity: 0.6;
+        }
+        .word-item.found {
+            text-decoration: line-through;
+            opacity: 1;
+            color: #4ade80;
+            border-color: #4ade80;
+        }
+    </style>
+</head>
+<body class="dashboard-container">
+
+    <div class="background-glow glow-1"></div>
+
+    <header class="glass-header">
+        <h1>WORD <span class="text-gold">SEARCH</span></h1>
+        <p class="subtitle">Módulo 11 - Reconhecimento de Padrões</p>
+    </header>
+
+    <main class="game-container">
+        
+        <div class="word-list" id="word-list">
+            </div>
+
+        <div id="word-grid">
+            </div>
+
+        <div id="feedback" style="font-weight: bold; min-height: 24px;"></div>
+
+        <div style="margin-top: 30px; text-align: center;">
+            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;">
+                <span>⬅ Voltar ao Painel Principal</span>
+            </a>
+        </div>
+    </main>
+
+    <script>
+        const wordsToFind = ["HELLO", "WORLD", "STUDY", "SMART", "LEVEL"];
+        const gridSize = 10;
+        let grid = [];
+        let foundWords = [];
+
+        function initGrid() {
+            const gridEl = document.getElementById('word-grid');
+            const listEl = document.getElementById('word-list');
+            
+            // Criar lista visual
+            wordsToFind.forEach(w => {
+                const item = document.createElement('div');
+                item.className = 'word-item';
+                item.id = 'word-' + w;
+                item.textContent = w;
+                listEl.appendChild(item);
+            });
+
+            // Gerar Grid Vazio
+            for(let i=0; i<gridSize; i++) {
+                grid[i] = [];
+                for(let j=0; j<gridSize; j++) {
+                    grid[i][j] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+                }
+            }
+
+            // Inserir Palavras (Simplificado: apenas horizontal)
+            wordsToFind.forEach((word, idx) => {
+                let row = idx * 2;
+                let col = Math.floor(Math.random() * (gridSize - word.length));
+                for(let i=0; i<word.length; i++) {
+                    grid[row][col+i] = word[i];
+                }
+            });
+
+            // Renderizar Grid
+            for(let i=0; i<gridSize; i++) {
+                for(let j=0; j<gridSize; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.textContent = grid[i][j];
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    cell.onclick = () => toggleCell(cell);
+                    gridEl.appendChild(cell);
+                }
+            }
+        }
+
+        let currentSelection = "";
+        let selectedCells = [];
+
+        function toggleCell(cell) {
+            if (cell.classList.contains('found')) return;
+
+            cell.classList.toggle('selected');
+            
+            if (cell.classList.contains('selected')) {
+                currentSelection += cell.textContent;
+                selectedCells.push(cell);
+            } else {
+                currentSelection = ""; // Reset simples para este exemplo
+                selectedCells.forEach(c => c.classList.remove('selected'));
+                selectedCells = [];
+            }
+
+            checkWord();
+        }
+
+        function checkWord() {
+            if (wordsToFind.includes(currentSelection) && !foundWords.includes(currentSelection)) {
+                foundWords.push(currentSelection);
+                
+                selectedCells.forEach(c => {
+                    c.classList.remove('selected');
+                    c.classList.add('found');
+                });
+
+                document.getElementById('word-' + currentSelection).classList.add('found');
+                
+                // Sistema de XP (Sovereignty System)
+                let xp = localStorage.getItem('ffes_xp') || 0;
+                localStorage.setItem('ffes_xp', parseInt(xp) + 20);
+                
+                currentSelection = "";
+                selectedCells = [];
+
+                if (foundWords.length === wordsToFind.length) {
+                    document.getElementById('feedback').innerHTML = "<span class='text-gold'>Soberania Total! +100 XP</span>";
+                }
+            }
+        }
+
+        initGrid();
+    </script>
+
+    <footer class="glass-footer">
+        <p>&copy; 2026 FFES - Sovereignty System v2.1</p>
+    </footer>
+
+</body>
+</html>

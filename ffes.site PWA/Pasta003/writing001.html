@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFES | Writing Lab</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .exercise-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .word-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+            min-height: 50px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+        }
+        .word-pill {
+            background: rgba(184, 134, 11, 0.2);
+            border: 1px solid #b8860b;
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 500;
+        }
+        .word-pill:hover {
+            background: #b8860b;
+            color: #0A2342;
+        }
+        .answer-area {
+            font-size: 1.4rem;
+            color: #fff;
+            min-height: 60px;
+            border-bottom: 2px solid #b8860b;
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+        }
+        .word-selected {
+            color: #b8860b;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="dashboard-container">
+
+    <div class="background-glow glow-1"></div>
+
+    <header class="glass-header">
+        <h1>WRITING <span class="text-gold">LAB</span></h1>
+        <p class="subtitle">Módulo 03 - Sintaxe e Estrutura de Frases</p>
+    </header>
+
+    <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
+        
+        <div id="game-container" class="exercise-box">
+            <p style="color: #aaa; margin-bottom: 10px;">Clique nas palavras para formar a frase:</p>
+            
+            <div id="word-pool" class="word-pool"></div>
+            
+            <div id="answer-area" class="answer-area"></div>
+            
+            <div id="feedback" style="margin-top: 20px; font-weight: bold; min-height: 24px;"></div>
+
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+                <button onclick="checkAnswer()" class="btn-gold">VALIDAR</button>
+                <button onclick="resetCurrent()" class="btn-gold" style="background: transparent; border: 1px solid #b8860b;">LIMPAR</button>
+            </div>
+            
+            <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin: 20px auto 0;">PRÓXIMA ➡</button>
+        </div>
+
+        <div style="margin-top: 40px; text-align: center;">
+            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;">
+                <span>⬅ Voltar ao Painel Principal</span>
+            </a>
+        </div>
+    </main>
+
+    <script>
+        const sentences = [
+            { full: "I am a student", words: ["I", "am", "a", "student"] },
+            { full: "She likes to drink coffee", words: ["She", "likes", "to", "drink", "coffee"] },
+            { full: "We go to the park", words: ["We", "go", "to", "the", "park"] }
+        ];
+
+        let index = 0;
+        let selectedWords = [];
+
+        function load() {
+            if (index >= sentences.length) {
+                document.getElementById('game-container').innerHTML = `
+                    <h2 class="text-gold">Laboratório Concluído!</h2>
+                    <p style="color:#fff; margin: 20px 0;">Sua estrutura gramatical está sólida.</p>
+                    <button onclick="location.reload()" class="btn-gold" style="margin: 0 auto; display:block">RECOMEÇAR</button>
+                `;
+                return;
+            }
+
+            const q = sentences[index];
+            selectedWords = [];
+            document.getElementById('feedback').textContent = "";
+            document.getElementById('nextBtn').style.display = "none";
+            document.getElementById('answer-area').innerHTML = "";
+            
+            const pool = document.getElementById('word-pool');
+            pool.innerHTML = "";
+            
+            // Embaralhar palavras
+            [...q.words].sort(() => Math.random() - 0.5).forEach(word => {
+                const pill = document.createElement('div');
+                pill.className = 'word-pill';
+                pill.textContent = word;
+                pill.onclick = () => selectWord(word, pill);
+                pool.appendChild(pill);
+            });
+        }
+
+        function selectWord(word, el) {
+            if (el.style.display === "none") return;
+            el.style.display = "none";
+            selectedWords.push(word);
+            renderAnswer();
+        }
+
+        function renderAnswer() {
+            const area = document.getElementById('answer-area');
+            area.innerHTML = selectedWords.join(" ");
+        }
+
+        function resetCurrent() {
+            load();
+        }
+
+        function checkAnswer() {
+            const currentAnswer = selectedWords.join(" ");
+            const feedback = document.getElementById('feedback');
+            
+            if (currentAnswer === sentences[index].full) {
+                feedback.innerHTML = "<span style='color: #4ade80'>SINTAXE PERFEITA: +25 XP</span>";
+                document.getElementById('nextBtn').style.display = "block";
+                
+                let xp = localStorage.getItem('ffes_xp') || 0;
+                localStorage.setItem('ffes_xp', parseInt(xp) + 25);
+            } else {
+                feedback.innerHTML = "<span style='color: #f87171'>ORDEM INCORRETA</span>";
+            }
+        }
+
+        function nextQuestion() {
+            index++;
+            load();
+        }
+
+        load();
+    </script>
+
+    <footer class="glass-footer">
+        <p>&copy; 2026 FFES - Sovereignty System v2.1</p>
+    </footer>
+
+</body>
+</html>

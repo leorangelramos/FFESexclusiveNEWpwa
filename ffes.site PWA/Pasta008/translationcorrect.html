@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFES | Tradução Correta</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .exercise-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .phrase-to-translate {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 25px;
+            font-weight: 600;
+            padding: 20px;
+            background: rgba(184, 134, 11, 0.1);
+            border-radius: 12px;
+            border: 1px dashed #b8860b;
+        }
+        .options-grid {
+            display: grid;
+            gap: 12px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .option-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s ease;
+            color: #fff;
+            font-size: 1.1rem;
+        }
+        .option-card:hover {
+            background: rgba(184, 134, 11, 0.2);
+            border-color: #b8860b;
+            transform: scale(1.02);
+        }
+        .correct { background: rgba(74, 222, 128, 0.2) !important; border-color: #4ade80 !important; }
+        .wrong { background: rgba(248, 113, 113, 0.2) !important; border-color: #f87171 !important; }
+    </style>
+</head>
+<body class="dashboard-container">
+
+    <div class="background-glow glow-1"></div>
+
+    <header class="glass-header">
+        <h1>TRADUÇÃO <span class="text-gold">CORRETA</span></h1>
+        <p class="subtitle">Módulo 08 - Múltipla Escolha Tática</p>
+    </header>
+
+    <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
+        
+        <div id="game-container" class="exercise-box">
+            <div id="target-phrase" class="phrase-to-translate">Carregando...</div>
+            
+            <div id="options" class="options-grid"></div>
+            
+            <div id="feedback" style="margin-top: 20px; font-weight: bold; min-height: 24px; text-align: center;"></div>
+
+            <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin: 20px auto 0;">PRÓXIMA ➡</button>
+        </div>
+
+        <div style="margin-top: 40px; text-align: center;">
+            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;">
+                <span>⬅ Voltar ao Painel Principal</span>
+            </a>
+        </div>
+    </main>
+
+    <script>
+        const exercises = [
+            { p: "Eu trabalho todos os dias.", opts: ["I work every day", "I working every day", "I works every day"], correct: 0 },
+            { p: "Ela gosta de música.", opts: ["She like music", "She likes music", "She liking music"], correct: 1 },
+            { p: "Nós estamos felizes.", opts: ["We is happy", "We are happy", "We am happy"], correct: 1 },
+            { p: "Eles foram ao cinema.", opts: ["They went to the cinema", "They go to the cinema", "They gone to the cinema"], correct: 0 },
+            { p: "Você pode me ajudar?", opts: ["You can help me?", "Can you help me?", "Do you can help me?"], correct: 1 }
+        ];
+
+        let currentIdx = 0;
+
+        function load() {
+            if (currentIdx >= exercises.length) {
+                document.getElementById('game-container').innerHTML = `
+                    <h2 class="text-gold">Tradução Concluída!</h2>
+                    <p style="color:#fff; margin: 20px 0;">O seu banco de dados de tradução foi atualizado.</p>
+                    <button onclick="location.reload()" class="btn-gold" style="margin: 0 auto; display:block">RECOMEÇAR</button>
+                `;
+                return;
+            }
+
+            const ex = exercises[currentIdx];
+            document.getElementById('target-phrase').textContent = ex.p;
+            document.getElementById('feedback').textContent = "";
+            document.getElementById('nextBtn').style.display = "none";
+            
+            const optDiv = document.getElementById('options');
+            optDiv.innerHTML = "";
+
+            ex.opts.forEach((opt, i) => {
+                const card = document.createElement('div');
+                card.className = 'option-card';
+                card.textContent = opt;
+                card.onclick = () => check(i, card);
+                optDiv.appendChild(card);
+            });
+        }
+
+        function check(choice, el) {
+            const correct = exercises[currentIdx].correct;
+            const feedback = document.getElementById('feedback');
+            const cards = document.querySelectorAll('.option-card');
+            
+            cards.forEach(c => c.onclick = null);
+
+            if (choice === correct) {
+                el.classList.add('correct');
+                feedback.innerHTML = `<span style="color: #4ade80">SINTAXE CORRETA: +20 XP</span>`;
+                
+                // Sistema de XP (Sovereignty System) 
+                let xp = localStorage.getItem('ffes_xp') || 0;
+                localStorage.setItem('ffes_xp', parseInt(xp) + 20);
+            } else {
+                el.classList.add('wrong');
+                cards[correct].classList.add('correct');
+                feedback.innerHTML = `<span style="color: #f87171">ERRO DE TRADUÇÃO</span>`;
+            }
+
+            document.getElementById('nextBtn').style.display = "block";
+        }
+
+        function nextQuestion() {
+            currentIdx++;
+            load();
+        }
+
+        load();
+    </script>
+
+    <footer class="glass-footer">
+        <p>&copy; 2026 FFES - Sovereignty System v2.1 </p>
+    </footer>
+
+</body>
+</html>

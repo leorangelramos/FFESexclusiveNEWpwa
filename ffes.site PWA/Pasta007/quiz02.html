@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFES | Verdadeiro ou Falso</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .exercise-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .tf-grid {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .btn-tf {
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 2px solid rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 1.2rem;
+        }
+        .btn-true { background: rgba(74, 222, 128, 0.1); }
+        .btn-true:hover { background: rgba(74, 222, 128, 0.3); border-color: #4ade80; }
+        .btn-false { background: rgba(248, 113, 113, 0.1); }
+        .btn-false:hover { background: rgba(248, 113, 113, 0.3); border-color: #f87171; }
+    </style>
+</head>
+<body class="dashboard-container">
+
+    <div class="background-glow glow-2"></div>
+
+    <header class="glass-header">
+        <h1>VERDADEIRO OU <span class="text-gold">FALSO</span></h1>
+        <p class="subtitle">Módulo 07 - Validação de Sentenças</p>
+    </header>
+
+    <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
+        <div id="game-container" class="exercise-box">
+            <h2 id="statement" style="color: #fff; margin-bottom: 20px; font-size: 1.4rem;">"She play soccer every day" está gramaticalmente correto?</h2>
+            
+            <div class="tf-grid">
+                <div class="btn-tf btn-true" onclick="check(true)">VERDADEIRO</div>
+                <div class="btn-tf btn-false" onclick="check(false)">FALSO</div>
+            </div>
+
+            <div id="feedback" style="margin-top: 20px; font-weight: bold; min-height: 24px;"></div>
+            <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin: 20px auto 0;">PRÓXIMA ➡</button>
+        </div>
+
+        <div style="margin-top: 40px; text-align: center;">
+            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;">
+                <span>⬅ Voltar ao Painel Principal</span>
+            </a>
+        </div>
+    </main>
+
+    <script>
+        const facts = [
+            { s: "'She play soccer' está correto?", a: false },
+            { s: "'Did you go?' é uma pergunta no passado?", a: true },
+            { s: "'I am eat' é uma estrutura correta?", a: false }
+        ];
+
+        let currentIdx = 0;
+
+        function load() {
+            if (currentIdx >= facts.length) {
+                document.getElementById('game-container').innerHTML = `<h2 class="text-gold">Validação Concluída!</h2><button onclick="location.reload()" class="btn-gold" style="margin-top:20px">RECOMEÇAR</button>`;
+                return;
+            }
+            document.getElementById('statement').textContent = facts[currentIdx].s;
+            document.getElementById('feedback').textContent = "";
+            document.getElementById('nextBtn').style.display = "none";
+        }
+
+        function check(userAns) {
+            const correct = facts[currentIdx].a;
+            if (userAns === correct) {
+                document.getElementById('feedback').innerHTML = "<span style='color: #4ade80'>CORRETO! +20 XP</span>";
+                let xp = localStorage.getItem('ffes_xp') || 0;
+                localStorage.setItem('ffes_xp', parseInt(xp) + 20);
+            } else {
+                document.getElementById('feedback').innerHTML = "<span style='color: #f87171'>INCORRETO</span>";
+            }
+            document.getElementById('nextBtn').style.display = "block";
+        }
+
+        function nextQuestion() { currentIdx++; load(); }
+        load();
+    </script>
+</body>
+</html>

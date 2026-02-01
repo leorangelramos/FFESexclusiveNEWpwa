@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFES | Caça-Erros</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .exercise-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 20px;
+        }
+        .error-sentence {
+            font-size: 1.3rem;
+            color: #fff;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #b8860b;
+        }
+        .options-grid {
+            display: grid;
+            gap: 12px;
+        }
+        .option-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+            color: #fff;
+            text-align: left;
+        }
+        .option-btn:hover {
+            background: rgba(184, 134, 11, 0.2);
+            border-color: #b8860b;
+        }
+        .correct {
+            background: rgba(74, 222, 128, 0.2) !important;
+            border-color: #4ade80 !important;
+        }
+        .wrong {
+            background: rgba(248, 113, 113, 0.2) !important;
+            border-color: #f87171 !important;
+        }
+    </style>
+</head>
+<body class="dashboard-container">
+
+    <div class="background-glow glow-1"></div>
+
+    <header class="glass-header">
+        <h1>CAÇA <span class="text-gold">ERROS</span></h1>
+        <p class="subtitle">Módulo 10 - Debugging Gramatical</p>
+    </header>
+
+    <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
+        
+        <div id="game-container" class="exercise-box">
+            <p style="color: #aaa; margin-bottom: 10px;">Identifique a frase com erro ou a correção correta:</p>
+            <div id="sentence" class="error-sentence">Carregando...</div>
+            
+            <div id="options" class="options-grid"></div>
+            
+            <div id="feedback" style="margin-top: 20px; font-weight: bold; text-align: center; min-height: 24px;"></div>
+
+            <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin: 20px auto 0; display: block;">PRÓXIMO ➡</button>
+        </div>
+
+        <div style="margin-top: 40px; text-align: center;">
+            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;">
+                <span>⬅ Voltar ao Painel Principal</span>
+            </a>
+        </div>
+    </main>
+
+    <script>
+        const challenges = [
+            { 
+                wrong: "She don't like pizza for dinner.", 
+                opts: ["She doesn't like pizza", "She no like pizza", "She don't likes pizza"],
+                correct: 0,
+                explanation: "No Presente Simples, usamos 'doesn't' para a 3ª pessoa (She/He/It)."
+            },
+            { 
+                wrong: "I have went to the park yesterday.", 
+                opts: ["I have go to the park", "I went to the park", "I gone to the park"],
+                correct: 1,
+                explanation: "Para ações finalizadas com tempo definido (yesterday), usamos o Past Simple."
+            },
+            { 
+                wrong: "He is more tall than his brother.", 
+                opts: ["He is more taller", "He is taller", "He is as tall"],
+                correct: 1,
+                explanation: "Adjetivos curtos recebem o sufixo '-er' no comparativo."
+            }
+        ];
+
+        let currentIdx = 0;
+
+        function loadChallenge() {
+            if (currentIdx >= challenges.length) {
+                document.getElementById('game-container').innerHTML = `
+                    <h2 class="text-gold" style="text-align:center">Debugging Completo!</h2>
+                    <p style="color:#fff; text-align:center; margin: 20px 0;">O seu código mental está otimizado.</p>
+                    <button onclick="location.reload()" class="btn-gold" style="margin: 0 auto; display:block">RECOMEÇAR</button>
+                `;
+                return;
+            }
+
+            const item = challenges[currentIdx];
+            document.getElementById('sentence').textContent = `Erro: "${item.wrong}"`;
+            document.getElementById('feedback').textContent = "";
+            document.getElementById('nextBtn').style.display = "none";
+            
+            const optionsEl = document.getElementById('options');
+            optionsEl.innerHTML = "";
+
+            item.opts.forEach((opt, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.onclick = () => check(i, btn);
+                optionsEl.appendChild(btn);
+            });
+        }
+
+        function check(choice, el) {
+            const correct = challenges[currentIdx].correct;
+            const feedback = document.getElementById('feedback');
+            const btns = document.querySelectorAll('.option-btn');
+            
+            btns.forEach(b => b.onclick = null);
+
+            if (choice === correct) {
+                el.classList.add('correct');
+                feedback.innerHTML = `<span style="color: #4ade80">CORRETO! +20 XP</span><br><small style="color: #fff; font-weight: normal">${challenges[currentIdx].explanation}</small>`;
+                
+                let xp = localStorage.getItem('ffes_xp') || 0;
+                localStorage.setItem('ffes_xp', parseInt(xp) + 20);
+            } else {
+                el.classList.add('wrong');
+                btns[correct].classList.add('correct');
+                feedback.innerHTML = `<span style="color: #f87171">SINTAXE INVÁLIDA</span>`;
+            }
+
+            document.getElementById('nextBtn').style.display = "block";
+        }
+
+        function nextQuestion() {
+            currentIdx++;
+            loadChallenge();
+        }
+
+        loadChallenge();
+    </script>
+
+    <footer class="glass-footer">
+        <p>&copy; 2026 FFES - Sovereignty System v2.1</p>
+    </footer>
+
+</body>
+</html>

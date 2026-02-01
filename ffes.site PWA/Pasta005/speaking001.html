@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFES | Speaking Studio</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .exercise-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .sentence-display {
+            font-size: 1.8rem;
+            color: #fff;
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(184, 134, 11, 0.1);
+            border-radius: 15px;
+            border-left: 5px solid #b8860b;
+            font-weight: 600;
+        }
+        .mic-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: none;
+            background: #b8860b;
+            color: #0A2342;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 0 20px rgba(184, 134, 11, 0.4);
+        }
+        .mic-btn.recording {
+            background: #f87171;
+            animation: pulse-red 1.5s infinite;
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(248, 113, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0); }
+        }
+        #status {
+            margin-top: 15px;
+            font-style: italic;
+            color: rgba(255,255,255,0.6);
+            height: 20px;
+        }
+    </style>
+</head>
+<body class="dashboard-container">
+
+    <div class="background-glow glow-1"></div>
+
+    <header class="glass-header">
+        <h1>SPEAKING <span class="text-gold">STUDIO</span></h1>
+        <p class="subtitle">Módulo 05 - Reconhecimento de Voz em Tempo Real</p>
+    </header>
+
+    <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
+        
+        <div id="game-container" class="exercise-box">
+            <p style="color: #aaa;">Leia a frase abaixo em voz alta:</p>
+            
+            <div id="sentence" class="sentence-display">Carregando...</div>
+            
+            <button id="micBtn" onclick="startRecording()" class="mic-btn">🎙️</button>
+            
+            <p id="status"></p>
+            
+            <div id="feedback" style="margin-top: 20px; font-weight: bold; min-height: 24px;"></div>
+
+            <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin: 25px auto 0;">PRÓXIMA FRASE ➡</button>
+        </div>
+
+        <div style="margin-top: 40px; text-align: center;">
+            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;">
+                <span>⬅ Voltar ao Painel Principal</span>
+            </a>
+        </div>
+    </main>
+
+    <script>
+        const sentences = [
+            "Hello, how are you?",
+            "My name is Leo Ramos.",
+            "I want to learn English.",
+            "The sky is blue today.",
+            "I love programming in JavaScript."
+        ];
+
+        let index = 0;
+        let recognition;
+
+        // Inicialização da API de Reconhecimento de Fala
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript.toLowerCase().replace(/[.,?!]/g, "");
+                const target = sentences[index].toLowerCase().replace(/[.,?!]/g, "");
+                
+                check(transcript, target);
+            };
+
+            recognition.onerror = () => {
+                document.getElementById('status').textContent = "Erro no microfone. Tente novamente.";
+                stopUI();
+            };
+
+            recognition.onend = () => stopUI();
+        } else {
+            alert("Seu navegador não suporta reconhecimento de voz.");
+        }
+
+        function load() {
+            if (index >= sentences.length) {
+                document.getElementById('game-container').innerHTML = `
+                    <h2 class="text-gold">Pronúncia Validada!</h2>
+                    <p style="color:#fff; margin: 20px 0;">Seu hardware de fala está operante.</p>
+                    <button onclick="location.reload()" class="btn-gold" style="margin: 0 auto; display:block">RECOMEÇAR TREINO</button>
+                `;
+                return;
+            }
+            document.getElementById('sentence').textContent = sentences[index];
+            document.getElementById('feedback').textContent = "";
+            document.getElementById('status').textContent = "Aguardando gravação...";
+            document.getElementById('nextBtn').style.display = "none";
+        }
+
+        function startRecording() {
+            const btn = document.getElementById('micBtn');
+            btn.classList.add('recording');
+            document.getElementById('status').textContent = "Ouvindo... fale agora!";
+            recognition.start();
+        }
+
+        function stopUI() {
+            document.getElementById('micBtn').classList.remove('recording');
+        }
+
+        function check(said, target) {
+            const feedback = document.getElementById('feedback');
+            
+            if (said === target) {
+                feedback.innerHTML = `<span style="color: #4ade80">SINAL LIMPO: +50 XP</span><br><small style="color:rgba(255,255,255,0.5)">Você disse: "${said}"</small>`;
+                
+                // Sistema de XP (Sovereignty System)
+                let xp = localStorage.getItem('ffes_xp') || 0;
+                localStorage.setItem('ffes_xp', parseInt(xp) + 50);
+            } else {
+                feedback.innerHTML = `<span style="color: #f87171">RUÍDO DETECTADO</span><br><small style="color:rgba(255,255,255,0.5)">Você disse: "${said}"</small>`;
+            }
+            document.getElementById('nextBtn').style.display = "block";
+        }
+
+        function nextQuestion() {
+            index++;
+            load();
+        }
+
+        load();
+    </script>
+
+    <footer class="glass-footer">
+        <p>&copy; 2026 FFES - Sovereignty System v2.1</p>
+    </footer>
+
+</body>
+</html>

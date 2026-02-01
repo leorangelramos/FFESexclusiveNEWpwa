@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFES | Family Members (A1)</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .exercise-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .input-gold {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #b8860b;
+            color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            width: 100%;
+            max-width: 300px;
+            margin: 10px 0;
+            outline: none;
+            text-align: center;
+        }
+        .feedback {
+            margin-top: 15px;
+            font-weight: bold;
+            min-height: 24px;
+        }
+        .correct { color: #4ade80; }
+        .incorrect { color: #f87171; }
+    </style>
+</head>
+<body class="dashboard-container">
+
+    <div class="background-glow glow-1"></div>
+
+    <header class="glass-header">
+        <h1>FAMILY <span class="text-gold">MEMBERS</span></h1>
+        <p class="subtitle">Vocabulary Training - Level A1</p>
+    </header>
+
+    <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
+        
+        <div id="exercise-content" class="exercise-box">
+            <h2 id="question" style="color: #fff; margin-bottom: 20px;">Como se diz "Pai" em Inglês?</h2>
+            
+            <input type="text" id="answerInput" class="input-gold" placeholder="Sua resposta..." autocomplete="off">
+            
+            <div class="feedback" id="feedback"></div>
+
+            <div style="margin-top: 30px; display: flex; gap: 10px; justify-content: center;">
+                <button onclick="checkAnswer()" class="btn-gold">VERIFICAR</button>
+                <button onclick="nextQuestion()" id="nextBtn" class="btn-gold" style="display:none; background: rgba(184, 134, 11, 0.2); border: 1px solid #b8860b;">PRÓXIMO ➡</button>
+            </div>
+        </div>
+
+        <div style="margin-top: 40px; text-align: center;">
+            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 10px 30px; text-decoration: none;">
+                <span>⬅ Voltar ao Painel Principal</span>
+            </a>
+        </div>
+    </main>
+
+    <script>
+        const questions = [
+            { q: "Como se diz 'Pai' em Inglês?", a: "father" },
+            { q: "Como se diz 'Mãe' em Inglês?", a: "mother" },
+            { q: "Como se diz 'Irmão' em Inglês?", a: "brother" },
+            { q: "Como se diz 'Irmã' em Inglês?", a: "sister" },
+            { q: "Como se diz 'Filho' em Inglês?", a: "son" }
+        ];
+
+        let currentQuestion = 0;
+
+        function checkAnswer() {
+            const userInput = document.getElementById('answerInput').value.toLowerCase().trim();
+            const feedback = document.getElementById('feedback');
+            const nextBtn = document.getElementById('nextBtn');
+
+            if (userInput === questions[currentQuestion].a) {
+                feedback.textContent = "CORRETO! +10 XP";
+                feedback.className = "feedback correct";
+                nextBtn.style.display = "inline-block";
+                
+                // Persistência de Gamificação (Destaque técnico do projeto)
+                let xp = localStorage.getItem('ffes_xp') || 0;
+                localStorage.setItem('ffes_xp', parseInt(xp) + 10); 
+            } else {
+                feedback.textContent = "TENTE NOVAMENTE!";
+                feedback.className = "feedback incorrect";
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                document.getElementById('question').textContent = questions[currentQuestion].q;
+                document.getElementById('answerInput').value = "";
+                document.getElementById('feedback').textContent = "";
+                document.getElementById('nextBtn').style.display = "none";
+            } else {
+                document.getElementById('exercise-content').innerHTML = `
+                    <h2 class="text-gold">Módulo Concluído!</h2>
+                    <p style="color:#fff; margin: 20px 0;">Você dominou o vocabulário básico de família.</p>
+                    <button onclick="location.reload()" class="btn-gold">RECOMEÇAR</button>
+                `;
+            }
+        }
+
+        document.getElementById('answerInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') checkAnswer();
+        });
+    </script>
+
+    <footer class="glass-footer">
+        <p>&copy; 2026 FFES - Sovereignty System v2.1</p>
+    </footer>
+
+</body>
+</html>

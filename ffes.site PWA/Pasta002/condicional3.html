@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFES | Third Conditional (Arrependimento)</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .theory-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+        .theory-section h2 { color: #b8860b; margin-bottom: 15px; }
+        .formula-box {
+            background: rgba(184, 134, 11, 0.1);
+            border-left: 4px solid #b8860b;
+            padding: 15px;
+            font-family: 'Sora', sans-serif;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+            font-weight: bold;
+        }
+        .training-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        .mode-btn {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+        .mode-btn.active {
+            background: rgba(184, 134, 11, 0.3);
+            border-color: #b8860b;
+            box-shadow: 0 0 15px rgba(184, 134, 11, 0.3);
+        }
+        .exercise-area {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            min-height: 350px;
+            display: none;
+            border: 1px solid rgba(184, 134, 11, 0.2);
+        }
+        .word-pill {
+            display: inline-block; padding: 10px 18px; margin: 5px;
+            background: rgba(184, 134, 11, 0.15); border: 1px solid #b8860b;
+            border-radius: 25px; cursor: pointer; color: #fff;
+        }
+        .writing-input {
+            width: 100%; background: rgba(255,255,255,0.05); border: 2px solid #b8860b;
+            color: #fff; padding: 15px; border-radius: 10px; text-align: center; font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body class="dashboard-container">
+    <div class="background-glow glow-2"></div>
+
+    <header class="glass-header">
+        <h1>THIRD <span class="text-gold">CONDITIONAL</span></h1>
+    </header>
+
+    <main style="max-width: 900px; margin: 0 auto; padding: 20px;">
+        
+        <section class="theory-section">
+            <h2>Arrependimentos e Passado Hipotético</h2>
+            <p>Usamos para falar de situações que **não aconteceram** no passado e imaginar o seu resultado. É a condicional do "Se eu tivesse feito... eu teria..."</p>
+            
+            <div class="formula-box">
+                IF + PAST PERFECT, (...) WOULD HAVE + PARTICIPLE
+            </div>
+
+            <ul style="margin-left: 20px; opacity: 0.9;">
+                <li><strong>Foco:</strong> Eventos passados que são impossíveis de mudar.</li>
+                <li><strong>Exemplo:</strong> If I <strong>had studied</strong> more, I <strong>would have passed</strong>.</li>
+                <li><strong>Dica:</strong> É a estrutura mais longa, exigindo atenção dobrada aos particípios.</li>
+            </ul>
+        </section>
+
+        <div class="training-grid">
+            <button class="mode-btn" onclick="startMode('mc')">Múltipla Escolha</button>
+            <button class="mode-btn" onclick="startMode('scrambled')">Ordenar Frase</button>
+            <button class="mode-btn" onclick="startMode('translation')">Tradução</button>
+            <button class="mode-btn" onclick="startMode('writing')">Escrita Livre</button>
+        </div>
+
+        <div id="exercise-display" class="exercise-area">
+            <h3 id="mode-title" class="text-gold" style="margin-bottom:20px; text-transform: uppercase; font-size: 0.9rem;"></h3>
+            <div id="quest-content"></div>
+            <div id="feedback" style="margin-top:20px; font-weight:bold; min-height: 24px;"></div>
+            <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin-top:20px; width:100%">PRÓXIMA PERGUNTA ➡</button>
+        </div>
+
+        <div style="margin-top: 40px; text-align: center;">
+            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;"><span>⬅ Voltar ao Painel</span></a>
+        </div>
+    </main>
+
+    <script>
+        const database = {
+            mc: [
+                {q: "If I _______ (know) about the meeting, I would have gone.", o: ["knew", "had known", "have known"], c: "had known"},
+                {q: "She would have won if she _______ (run) faster.", o: ["had run", "had ran", "ran"], c: "had run"},
+                {q: "If they _______ (not/miss) the train, they would have arrived on time.", o: ["didn't miss", "hadn't missed", "haven't missed"], c: "hadn't missed"},
+                {q: "We _______ (buy) it if we had had enough money.", o: ["would have bought", "would bought", "had bought"], c: "would have bought"}
+            ],
+            scrambled: [
+                {f: "If I had seen him I would have spoken", w: ["seen", "would", "I", "spoken", "had", "If", "I", "have", "him"]},
+                {f: "She would have been happy if you had called", w: ["been", "if", "happy", "She", "would", "you", "have", "called", "had"]},
+                {f: "If we had tried we would have won", w: ["won", "tried", "would", "we", "If", "we", "have", "had"]},
+                {f: "They would have helped if they had known", w: ["helped", "known", "would", "They", "if", "they", "have", "had"]}
+            ],
+            translation: [
+                {p: "Se eu tivesse visto, eu teria dito.", o: ["If I had seen, I would have said", "If I saw, I would say", "If I had see, I would have said"], c: "If I had seen, I would have said"},
+                {p: "Ela teria ido se você tivesse pedido.", o: ["She would have gone if you had asked", "She would gone if you asked", "She had gone if you had asked"], c: "She would have gone if you had asked"},
+                {p: "Se nós tivéssemos corrido, teríamos ganho.", o: ["If we had run, we would have won", "If we run, we win", "If we had ran, we would won"], c: "If we had run, we would have won"},
+                {p: "Eles teriam feito se tivessem tempo.", o: ["They would have done if they had had time", "They would do if they have time", "They done if they had time"], c: "They would have done if they had had time"}
+            ],
+            writing: [
+                {p: "Traduza: 'Se eu tivesse estudado, eu teria passado.'", c: "if i had studied i would have passed"},
+                {p: "Traduza: 'Se ela tivesse ligado, eu teria ido.'", c: "if she had called i would have gone"},
+                {p: "Traduza: 'Se eles tivessem tentado, eles teriam conseguido.'", c: "if they had tried they would have succeeded"},
+                {p: "Traduza: 'Se nós tivéssemos ganho, teríamos comemorado.'", c: "if we had won we would have celebrated"}
+            ]
+        };
+
+        let currentMode = ''; let currentQ = 0; let selectedWords = [];
+
+        function startMode(mode) {
+            currentMode = mode; currentQ = 0;
+            document.getElementById('exercise-display').style.display = 'block';
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('mode-title').textContent = "Modo: " + mode.replace('mc', 'Múltipla Escolha').replace('scrambled', 'Ordenação');
+            renderQuestion();
+            document.getElementById('exercise-display').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderQuestion() {
+            const container = document.getElementById('quest-content');
+            const feedback = document.getElementById('feedback');
+            const nextBtn = document.getElementById('nextBtn');
+            const data = database[currentMode][currentQ];
+            feedback.textContent = ""; nextBtn.style.display = "none"; container.innerHTML = "";
+
+            if (currentMode === 'mc' || currentMode === 'translation') {
+                container.innerHTML = `<p style='margin-bottom:20px; font-size:1.2rem;'>${data.q || data.p}</p>`;
+                data.o.forEach(opt => {
+                    const b = document.createElement('button');
+                    b.className = 'btn-gold'; b.style.width = '100%'; b.style.marginBottom = '8px'; b.style.background = 'rgba(255,255,255,0.05)';
+                    b.textContent = opt;
+                    b.onclick = () => check(opt, data.c, b);
+                    container.appendChild(b);
+                });
+            } else if (currentMode === 'scrambled') {
+                selectedWords = [];
+                container.innerHTML = `<div id='ans' style='min-height:50px; border-bottom:2px solid #b8860b; margin-bottom:20px; font-size:1.3rem; color:#fff;'></div><div id='pool'></div>`;
+                data.w.forEach(word => {
+                    const span = document.createElement('span');
+                    span.className = 'word-pill'; span.textContent = word;
+                    span.onclick = () => { 
+                        selectedWords.push(word); span.style.display='none'; 
+                        document.getElementById('ans').textContent = selectedWords.join(" "); 
+                        if(selectedWords.length === data.w.length) check(selectedWords.join(" "), data.f); 
+                    };
+                    document.getElementById('pool').appendChild(span);
+                });
+            } else if (currentMode === 'writing') {
+                container.innerHTML = `<p style='margin-bottom:15px'>${data.p}</p><input type='text' id='winp' class='writing-input' placeholder='Had + PP, Would have + PP...' onkeypress='if(event.key==="Enter") check(this.value, "${data.c}")'>`;
+                setTimeout(() => document.getElementById('winp').focus(), 100);
+            }
+        }
+
+        function check(user, correct, element) {
+            const f = document.getElementById('feedback');
+            const cleanUser = user.toLowerCase().replace(/[.,!]/g, "").trim();
+            const cleanCorrect = correct.toLowerCase().replace(/[.,!]/g, "").trim();
+            
+            if(cleanUser === cleanCorrect) {
+                f.textContent = "Análise Histórica Perfeita! +25 XP"; f.style.color = "#4ade80";
+                document.getElementById('nextBtn').style.display = "block";
+                if(element) element.style.background = "rgba(74, 222, 128, 0.2)";
+                let xp = parseInt(localStorage.getItem('ffes_xp')||0); localStorage.setItem('ffes_xp', xp+25);
+            } else {
+                f.textContent = "Erro na Terceira Condicional. Verifique a estrutura complexa."; f.style.color = "#f87171";
+                if(element) element.style.background = "rgba(248, 113, 113, 0.2)";
+            }
+        }
+
+        function nextQuestion() {
+            currentQ++;
+            if(currentQ < 4) renderQuestion();
+            else document.getElementById('quest-content').innerHTML = "<h2 class='text-gold' style='text-align:center'>Missão Concluída!</h2><p style='text-align:center; color:#fff;'>Você dominou todas as estruturas condicionais.</p>";
+        }
+    </script>
+</body>
+</html>

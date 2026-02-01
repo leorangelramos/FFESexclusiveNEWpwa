@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFES | Verbos Dinâmicos (Quiz)</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .exercise-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .mc-options {
+            display: grid;
+            gap: 12px;
+            margin: 25px 0;
+        }
+        .mc-option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #fff;
+            font-weight: 500;
+        }
+        .mc-option:hover {
+            background: rgba(184, 134, 11, 0.25);
+            border-color: #b8860b;
+            transform: translateY(-2px);
+        }
+        .correct-answer {
+            background: rgba(74, 222, 128, 0.25) !important;
+            border-color: #4ade80 !important;
+        }
+        .wrong-answer {
+            background: rgba(248, 113, 113, 0.25) !important;
+            border-color: #f87171 !important;
+        }
+        .placar-mini {
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body class="dashboard-container">
+
+    <div class="background-glow glow-1"></div>
+
+    <header class="glass-header">
+        <h1>VERBOS <span class="text-gold">DINÂMICOS</span></h1>
+        <p class="subtitle">Módulo 12 - Domínio de Tempos Verbais</p>
+    </header>
+
+    <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
+        
+        <div id="quiz-container" class="exercise-box">
+            <div class="placar-mini">
+                Acertos: <span id="hits" class="text-gold">0</span> | 
+                Erros: <span id="misses" style="color: #f87171;">0</span>
+            </div>
+
+            <h2 id="question" style="color: #fff; margin-bottom: 20px;">Carregando...</h2>
+            
+            <div id="options" class="mc-options"></div>
+            
+            <div id="feedback" style="margin-top: 15px; min-height: 24px; font-weight: bold;"></div>
+
+            <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin-top: 20px;">PRÓXIMA ➡</button>
+        </div>
+
+        <div style="margin-top: 40px; text-align: center;">
+            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;">
+                <span>⬅ Painel de Controle</span>
+            </a>
+        </div>
+    </main>
+
+    <script>
+        const verbQuestions = [
+            { q: "Qual a forma correta do Past Simple de 'GO'?", opts: ["Went", "Gone", "Goes"], correct: 0 },
+            { q: "Complete: 'I ___ (work) here for five years.' (Present Perfect)", opts: ["have worked", "work", "worked"], correct: 0 },
+            { q: "Qual o particípio passado (PP) do verbo 'DO'?", opts: ["Did", "Done", "Does"], correct: 1 },
+            { q: "I ___ (see) that movie yesterday.", opts: ["saw", "seen", "have seen"], correct: 0 },
+            { q: "They ___ (play) soccer right now.", opts: ["are playing", "plays", "played"], correct: 0 }
+        ];
+
+        let index = 0;
+        let hits = 0;
+        let misses = 0;
+
+        function load() {
+            if (index >= verbQuestions.length) {
+                document.getElementById('quiz-container').innerHTML = `
+                    <h2 class="text-gold">Excelente Trabalho!</h2>
+                    <p style="color:#fff; margin: 20px 0;">Sua precisão verbal foi registrada no sistema.</p>
+                    <button onclick="location.reload()" class="btn-gold">REPETIR TREINO</button>
+                `;
+                return;
+            }
+
+            const current = verbQuestions[index];
+            document.getElementById('question').textContent = current.q;
+            document.getElementById('feedback').textContent = "";
+            document.getElementById('nextBtn').style.display = "none";
+            
+            const optDiv = document.getElementById('options');
+            optDiv.innerHTML = "";
+
+            current.opts.forEach((o, i) => {
+                const b = document.createElement('div');
+                b.className = 'mc-option';
+                b.textContent = o;
+                b.onclick = () => check(i, b);
+                optDiv.appendChild(b);
+            });
+        }
+
+        function check(choice, el) {
+            const correct = verbQuestions[index].correct;
+            const feedback = document.getElementById('feedback');
+            const btns = document.querySelectorAll('.mc-option');
+            
+            btns.forEach(b => b.onclick = null);
+
+            if (choice === correct) {
+                el.classList.add('correct-answer');
+                feedback.textContent = "SISTEMA OPERANTE: +10 XP";
+                feedback.style.color = "#4ade80";
+                hits++;
+                document.getElementById('hits').textContent = hits;
+                
+                // Salva XP localmente (Engenharia LMS Lite)
+                let xp = localStorage.getItem('ffes_xp') || 0;
+                localStorage.setItem('ffes_xp', parseInt(xp) + 10);
+            } else {
+                el.classList.add('wrong-answer');
+                btns[correct].classList.add('correct-answer');
+                feedback.textContent = "ERRO DE SINTAXE DETECTADO";
+                feedback.style.color = "#f87171";
+                misses++;
+                document.getElementById('misses').textContent = misses;
+            }
+
+            document.getElementById('nextBtn').style.display = "inline-block";
+        }
+
+        function nextQuestion() {
+            index++;
+            load();
+        }
+
+        load();
+    </script>
+
+    <footer class="glass-footer">
+        <p>&copy; 2026 FFES - Sovereignty System v2.1</p>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFES | Future Perfect Continuous Master</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .theory-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+        .theory-section h2 { color: #b8860b; margin-bottom: 15px; }
+        .formula-box {
+            background: rgba(184, 134, 11, 0.1);
+            border-left: 4px solid #b8860b;
+            padding: 15px;
+            font-family: 'Sora', sans-serif;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+            font-weight: bold;
+        }
+        .training-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        .mode-btn {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+        .mode-btn.active {
+            background: rgba(184, 134, 11, 0.3);
+            border-color: #b8860b;
+            box-shadow: 0 0 15px rgba(184, 134, 11, 0.3);
+        }
+        .exercise-area {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            min-height: 350px;
+            display: none;
+            border: 1px solid rgba(184, 134, 11, 0.2);
+        }
+        .word-pill {
+            display: inline-block; padding: 10px 18px; margin: 5px;
+            background: rgba(184, 134, 11, 0.15); border: 1px solid #b8860b;
+            border-radius: 25px; cursor: pointer; color: #fff;
+        }
+        .writing-input {
+            width: 100%; background: rgba(255,255,255,0.05); border: 2px solid #b8860b;
+            color: #fff; padding: 15px; border-radius: 10px; text-align: center; font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body class="dashboard-container">
+    <div class="background-glow glow-2"></div>
+
+    <header class="glass-header">
+        <h1>FUTURE PERFECT <span class="text-gold">CONTINUOUS</span></h1>
+    </header>
+
+    <main style="max-width: 900px; margin: 0 auto; padding: 20px;">
+        
+        <section class="theory-section">
+            <h2>Duração Projetada no Futuro</h2>
+            <p>Usamos para enfatizar **há quanto tempo** uma ação estará em progresso antes de um determinado momento no futuro.</p>
+            
+            <div class="formula-box">
+                SUJEITO + WILL HAVE BEEN + VERBO-ING
+            </div>
+
+            <ul style="margin-left: 20px; opacity: 0.9;">
+                <li><strong>Foco:</strong> A continuidade da ação até um marco futuro.</li>
+                <li><strong>Exemplo:</strong> By next month, I <strong>will have been studying</strong> here for a year.</li>
+                <li><strong>Dica:</strong> Quase sempre acompanhado por "for" (duração) e "by..." (prazo).</li>
+            </ul>
+        </section>
+
+        <div class="training-grid">
+            <button class="mode-btn" onclick="startMode('mc')">Múltipla Escolha</button>
+            <button class="mode-btn" onclick="startMode('scrambled')">Ordenar Frase</button>
+            <button class="mode-btn" onclick="startMode('translation')">Tradução</button>
+            <button class="mode-btn" onclick="startMode('writing')">Escrita Livre</button>
+        </div>
+
+        <div id="exercise-display" class="exercise-area">
+            <h3 id="mode-title" class="text-gold" style="margin-bottom:20px; text-transform: uppercase; font-size: 0.9rem;"></h3>
+            <div id="quest-content"></div>
+            <div id="feedback" style="margin-top:20px; font-weight:bold; min-height: 24px;"></div>
+            <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin-top:20px; width:100%">PRÓXIMA PERGUNTA ➡</button>
+        </div>
+
+        <div style="margin-top: 40px; text-align: center;">
+            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;"><span>⬅ Voltar ao Painel Principal</span></a>
+        </div>
+    </main>
+
+    <script>
+        const database = {
+            mc: [
+                {q: "By next year, I _______ (live) here for a decade.", o: ["will have been living", "will have living", "will living"], c: "will have been living"},
+                {q: "How long _______ you _______ (study) by the time exams start?", o: ["will / have studying", "will / have been studying", "will / been studying"], c: "will / have been studying"},
+                {q: "She _______ (work) for 8 hours by 5 PM.", o: ["will have been working", "will been working", "have been working"], c: "will have been working"},
+                {q: "In June, they _______ (travel) for six months.", o: ["will have been traveling", "will have traveling", "will traveling"], c: "will have been traveling"}
+            ],
+            scrambled: [
+                {f: "I will have been waiting for hours", w: ["been", "have", "I", "waiting", "will", "hours", "for"]},
+                {f: "She will have been sleeping all day", w: ["sleeping", "will", "She", "been", "day", "all", "have"]},
+                {f: "They will have been playing soccer long", w: ["long", "been", "have", "They", "playing", "soccer", "will"]},
+                {f: "By then we will have been driving", w: ["driving", "will", "we", "then", "By", "been", "have"]}
+            ],
+            translation: [
+                {p: "Eu estarei trabalhando há 10 horas.", o: ["I will have been working for 10 hours", "I will working 10 hours", "I have been working"], c: "I will have been working for 10 hours"},
+                {p: "Ela estará morando aqui há um ano.", o: ["She will be living here", "She will have been living here for a year", "She has been living here"], c: "She will have been living here for a year"},
+                {p: "Quanto tempo você estará estudando?", o: ["How long will you have been studying?", "How long you studying?", "How long will you studying?"], c: "How long will you have been studying?"},
+                {p: "Nós estaremos viajando há meses.", o: ["We will have been traveling for months", "We will traveling months", "We have traveling"], c: "We will have been traveling for months"}
+            ],
+            writing: [
+                {p: "Traduza: 'Eu estarei estudando.' (will have been...)", c: "i will have been studying"},
+                {p: "Traduza: 'Ela estará correndo.'", c: "she will have been running"},
+                {p: "Traduza: 'Eles estarão jogando.'", c: "they will have been playing"},
+                {p: "Traduza: 'Nós estaremos esperando.'", c: "we will have been waiting"}
+            ]
+        };
+
+        let currentMode = ''; let currentQ = 0; let selectedWords = [];
+
+        function startMode(mode) {
+            currentMode = mode; currentQ = 0;
+            document.getElementById('exercise-display').style.display = 'block';
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('mode-title').textContent = "Modo: " + mode.replace('mc', 'Múltipla Escolha').replace('scrambled', 'Ordenação');
+            renderQuestion();
+            document.getElementById('exercise-display').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderQuestion() {
+            const container = document.getElementById('quest-content');
+            const feedback = document.getElementById('feedback');
+            const nextBtn = document.getElementById('nextBtn');
+            const data = database[currentMode][currentQ];
+            feedback.textContent = ""; nextBtn.style.display = "none"; container.innerHTML = "";
+
+            if (currentMode === 'mc' || currentMode === 'translation') {
+                container.innerHTML = `<p style='margin-bottom:20px; font-size:1.2rem;'>${data.q || data.p}</p>`;
+                data.o.forEach(opt => {
+                    const b = document.createElement('button');
+                    b.className = 'btn-gold'; b.style.width = '100%'; b.style.marginBottom = '8px'; b.style.background = 'rgba(255,255,255,0.05)';
+                    b.textContent = opt;
+                    b.onclick = () => check(opt, data.c, b);
+                    container.appendChild(b);
+                });
+            } else if (currentMode === 'scrambled') {
+                selectedWords = [];
+                container.innerHTML = `<div id='ans' style='min-height:50px; border-bottom:2px solid #b8860b; margin-bottom:20px; font-size:1.3rem; color:#fff;'></div><div id='pool'></div>`;
+                data.w.forEach(word => {
+                    const span = document.createElement('span');
+                    span.className = 'word-pill'; span.textContent = word;
+                    span.onclick = () => { 
+                        selectedWords.push(word); span.style.display='none'; 
+                        document.getElementById('ans').textContent = selectedWords.join(" "); 
+                        if(selectedWords.length === data.w.length) check(selectedWords.join(" "), data.f); 
+                    };
+                    document.getElementById('pool').appendChild(span);
+                });
+            } else if (currentMode === 'writing') {
+                container.innerHTML = `<p style='margin-bottom:15px'>${data.p}</p><input type='text' id='winp' class='writing-input' placeholder='Will have been + ing...' onkeypress='if(event.key==="Enter") check(this.value, "${data.c}")'>`;
+                setTimeout(() => document.getElementById('winp').focus(), 100);
+            }
+        }
+
+        function check(user, correct, element) {
+            const f = document.getElementById('feedback');
+            if(user.toLowerCase().trim() === correct.toLowerCase()) {
+                f.textContent = "Visão de Futuro Perfeita! +25 XP"; f.style.color = "#4ade80";
+                document.getElementById('nextBtn').style.display = "block";
+                if(element) element.style.background = "rgba(74, 222, 128, 0.2)";
+                let xp = parseInt(localStorage.getItem('ffes_xp')||0); localStorage.setItem('ffes_xp', xp+25);
+            } else {
+                f.textContent = "Erro: Will have been + verbo-ing."; f.style.color = "#f87171";
+                if(element) element.style.background = "rgba(248, 113, 113, 0.2)";
+            }
+        }
+
+        function nextQuestion() {
+            currentQ++;
+            if(currentQ < 4) renderQuestion();
+            else document.getElementById('quest-content').innerHTML = "<h2 class='text-gold' style='text-align:center'>Módulo Concluído!</h2><p style='text-align:center; color:#fff;'>Você dominou a duração máxima no futuro.</p>";
+        }
+    </script>
+</body>
+</html>

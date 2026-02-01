@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFES | Jogo da Memória</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .memory-game {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            max-width: 500px;
+            margin: 20px auto;
+            perspective: 1000px;
+        }
+        .memory-card {
+            height: 100px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            color: transparent;
+            transition: transform 0.3s, background 0.3s;
+            text-align: center;
+            font-size: 0.9rem;
+            padding: 5px;
+        }
+        .memory-card.flip {
+            background: rgba(184, 134, 11, 0.3);
+            border-color: #b8860b;
+            color: #fff;
+            transform: rotateY(180deg);
+        }
+        .memory-card.matched {
+            background: rgba(74, 222, 128, 0.2);
+            border-color: #4ade80;
+            color: #4ade80;
+            cursor: default;
+        }
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body class="dashboard-container">
+
+    <div class="background-glow glow-2"></div>
+
+    <header class="glass-header">
+        <h1>MEMORY <span class="text-gold">GAME</span></h1>
+        <p class="subtitle">Módulo 11 - Vocabulário Ativo</p>
+    </header>
+
+    <main style="padding: 20px;">
+        <div class="controls">
+            <span class="text-gold">Pares encontrados: <span id="matches">0</span> / 6</span>
+        </div>
+
+        <div class="memory-game" id="game-board">
+            </div>
+
+        <div id="feedback" style="text-align:center; margin-top:20px; font-weight:bold; min-height:24px;"></div>
+
+        <div style="margin-top: 40px; text-align: center;">
+            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;">
+                <span>⬅ Voltar ao Painel Principal</span>
+            </a>
+        </div>
+    </main>
+
+    <script>
+        const vocabulary = [
+            { en: "Apple", pt: "Maçã" },
+            { en: "House", pt: "Casa" },
+            { en: "Car", pt: "Carro" },
+            { en: "Book", pt: "Livro" },
+            { en: "Water", pt: "Água" },
+            { en: "Friend", pt: "Amigo" }
+        ];
+
+        let cards = [];
+        vocabulary.forEach(item => {
+            cards.push({ text: item.en, match: item.pt });
+            cards.push({ text: item.pt, match: item.en });
+        });
+
+        // Shuffle cards
+        cards.sort(() => Math.random() - 0.5);
+
+        const board = document.getElementById('game-board');
+        let flippedCards = [];
+        let matchedCount = 0;
+
+        cards.forEach((cardData, index) => {
+            const card = document.createElement('div');
+            card.className = 'memory-card';
+            card.dataset.text = cardData.text;
+            card.dataset.match = cardData.match;
+            card.textContent = cardData.text;
+            card.onclick = () => flipCard(card);
+            board.appendChild(card);
+        });
+
+        function flipCard(card) {
+            if (flippedCards.length < 2 && !card.classList.contains('flip') && !card.classList.contains('matched')) {
+                card.classList.add('flip');
+                flippedCards.push(card);
+
+                if (flippedCards.length === 2) {
+                    checkMatch();
+                }
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            const isMatch = card1.dataset.text === card2.dataset.match;
+
+            if (isMatch) {
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                matchedCount++;
+                document.getElementById('matches').textContent = matchedCount;
+                
+                // Sistema de XP
+                let xp = localStorage.getItem('ffes_xp') || 0;
+                localStorage.setItem('ffes_xp', parseInt(xp) + 5);
+                
+                flippedCards = [];
+                if (matchedCount === 6) {
+                    document.getElementById('feedback').innerHTML = "<span class='text-gold'>EXCELENTE! +30 XP TOTAL</span>";
+                }
+            } else {
+                setTimeout(() => {
+                    card1.classList.remove('flip');
+                    card2.classList.remove('flip');
+                    flippedCards = [];
+                }, 1000);
+            }
+        }
+    </script>
+
+    <footer class="glass-footer">
+        <p>&copy; 2026 FFES - Sovereignty System v2.1</p>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFES | Future Simple</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .theory-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+        .theory-section h2 { color: #b8860b; margin-bottom: 15px; }
+        .formula-box {
+            background: rgba(184, 134, 11, 0.1);
+            border-left: 4px solid #b8860b;
+            padding: 15px;
+            font-family: 'Sora', sans-serif;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+            font-weight: bold;
+        }
+        .training-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        .mode-btn {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+        .mode-btn.active {
+            background: rgba(184, 134, 11, 0.3);
+            border-color: #b8860b;
+            box-shadow: 0 0 15px rgba(184, 134, 11, 0.3);
+        }
+        .exercise-area {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            min-height: 350px;
+            display: none;
+            border: 1px solid rgba(184, 134, 11, 0.2);
+        }
+        .word-pill {
+            display: inline-block; padding: 10px 18px; margin: 5px;
+            background: rgba(184, 134, 11, 0.15); border: 1px solid #b8860b;
+            border-radius: 25px; cursor: pointer; color: #fff;
+        }
+        .writing-input {
+            width: 100%; background: rgba(255,255,255,0.05); border: 2px solid #b8860b;
+            color: #fff; padding: 15px; border-radius: 10px; text-align: center; font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body class="dashboard-container">
+    <div class="background-glow glow-1"></div>
+
+    <header class="glass-header">
+        <h1>FUTURE <span class="text-gold">SIMPLE</span></h1>
+    </header>
+
+    <main style="max-width: 900px; margin: 0 auto; padding: 20px;">
+        
+        <section class="theory-section">
+            <h2>O Futuro "Will"</h2>
+            <p>Usamos para decisões tomadas no momento da fala, previsões sem evidência concreta, promessas e ofertas de ajuda.</p>
+            
+            <div class="formula-box">
+                SUJEITO + WILL + VERBO (BASE)
+            </div>
+
+            <ul style="margin-left: 20px; opacity: 0.9;">
+                <li><strong>Auxiliar:</strong> WILL (para todos os sujeitos).</li>
+                <li><strong>Negativa:</strong> Will not = Won't.</li>
+                <li><strong>Exemplo:</strong> I think it <strong>will rain</strong> tomorrow (Eu acho que vai chover amanhã).</li>
+            </ul>
+        </section>
+
+        <div class="training-grid">
+            <button class="mode-btn" onclick="startMode('mc')">Múltipla Escolha</button>
+            <button class="mode-btn" onclick="startMode('scrambled')">Ordenar Frase</button>
+            <button class="mode-btn" onclick="startMode('translation')">Tradução</button>
+            <button class="mode-btn" onclick="startMode('writing')">Escrita Livre</button>
+        </div>
+
+        <div id="exercise-display" class="exercise-area">
+            <h3 id="mode-title" class="text-gold" style="margin-bottom:20px; text-transform: uppercase; font-size: 0.9rem;"></h3>
+            <div id="quest-content"></div>
+            <div id="feedback" style="margin-top:20px; font-weight:bold; min-height: 24px;"></div>
+            <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin-top:20px; width:100%">PRÓXIMA PERGUNTA ➡</button>
+        </div>
+
+        <div style="margin-top: 40px; text-align: center;">
+            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;"><span>⬅ Voltar ao Painel</span></a>
+        </div>
+    </main>
+
+    <script>
+        const database = {
+            mc: [
+                {q: "I _______ (help) you with your bags.", o: ["will help", "help", "am help"], c: "will help"},
+                {q: "She _______ (not/come) to the party.", o: ["won't come", "will not comes", "doesn't come"], c: "won't come"},
+                {q: "_______ you marry me?", o: ["Will", "Do", "Are"], c: "Will"},
+                {q: "It _______ (rain) tomorrow, I think.", o: ["will rain", "rains", "raining"], c: "will rain"}
+            ],
+            scrambled: [
+                {f: "I will call you later", w: ["later", "will", "I", "you", "call"]},
+                {f: "She will not go there", w: ["go", "will", "She", "there", "not"]},
+                {f: "They will win the game", w: ["game", "win", "They", "the", "will"]},
+                {f: "Will you open the door", w: ["open", "you", "Will", "door", "the"]}
+            ],
+            translation: [
+                {p: "Eu irei amanhã.", o: ["I will go tomorrow", "I go tomorrow", "I am go tomorrow"], c: "I will go tomorrow"},
+                {p: "Eles não ajudarão.", o: ["They won't help", "They not help", "They don't help"], c: "They won't help"},
+                {p: "Você virá?", o: ["Will you come?", "Do you come?", "You come?"], c: "Will you come?"},
+                {p: "Ela comprará um carro.", o: ["She will buy a car", "She buys a car", "She buying a car"], c: "She will buy a car"}
+            ],
+            writing: [
+                {p: "Traduza: 'Eu farei.'", c: "i will do"},
+                {p: "Traduza: 'Ela amará.'", c: "she will love"},
+                {p: "Traduza: 'Eles verão.'", c: "they will see"},
+                {p: "Traduza: 'Nós iremos.'", c: "we will go"}
+            ]
+        };
+
+        let currentMode = ''; let currentQ = 0; let selectedWords = [];
+
+        function startMode(mode) {
+            currentMode = mode; currentQ = 0;
+            document.getElementById('exercise-display').style.display = 'block';
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('mode-title').textContent = "Modo: " + mode.replace('mc', 'Múltipla Escolha').replace('scrambled', 'Ordenação');
+            renderQuestion();
+            document.getElementById('exercise-display').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderQuestion() {
+            const container = document.getElementById('quest-content');
+            const feedback = document.getElementById('feedback');
+            const nextBtn = document.getElementById('nextBtn');
+            const data = database[currentMode][currentQ];
+            feedback.textContent = ""; nextBtn.style.display = "none"; container.innerHTML = "";
+
+            if (currentMode === 'mc' || currentMode === 'translation') {
+                container.innerHTML = `<p style='margin-bottom:20px; font-size:1.2rem;'>${data.q || data.p}</p>`;
+                data.o.forEach(opt => {
+                    const b = document.createElement('button');
+                    b.className = 'btn-gold'; b.style.width = '100%'; b.style.marginBottom = '8px'; b.style.background = 'rgba(255,255,255,0.05)';
+                    b.textContent = opt;
+                    b.onclick = () => check(opt, data.c, b);
+                    container.appendChild(b);
+                });
+            } else if (currentMode === 'scrambled') {
+                selectedWords = [];
+                container.innerHTML = `<div id='ans' style='min-height:50px; border-bottom:2px solid #b8860b; margin-bottom:20px; font-size:1.3rem; color:#fff;'></div><div id='pool'></div>`;
+                data.w.forEach(word => {
+                    const span = document.createElement('span');
+                    span.className = 'word-pill'; span.textContent = word;
+                    span.onclick = () => { 
+                        selectedWords.push(word); span.style.display='none'; 
+                        document.getElementById('ans').textContent = selectedWords.join(" "); 
+                        if(selectedWords.length === data.w.length) check(selectedWords.join(" "), data.f); 
+                    };
+                    document.getElementById('pool').appendChild(span);
+                });
+            } else if (currentMode === 'writing') {
+                container.innerHTML = `<p style='margin-bottom:15px'>${data.p}</p><input type='text' id='winp' class='writing-input' placeholder='Will + verbo...' onkeypress='if(event.key==="Enter") check(this.value, "${data.c}")'>`;
+                setTimeout(() => document.getElementById('winp').focus(), 100);
+            }
+        }
+
+        function check(user, correct, element) {
+            const f = document.getElementById('feedback');
+            if(user.toLowerCase().trim() === correct.toLowerCase()) {
+                f.textContent = "Previsão Confirmada! +25 XP"; f.style.color = "#4ade80";
+                document.getElementById('nextBtn').style.display = "block";
+                if(element) element.style.background = "rgba(74, 222, 128, 0.2)";
+                let xp = parseInt(localStorage.getItem('ffes_xp')||0); localStorage.setItem('ffes_xp', xp+25);
+            } else {
+                f.textContent = "Erro. Use 'Will' + Verbo."; f.style.color = "#f87171";
+                if(element) element.style.background = "rgba(248, 113, 113, 0.2)";
+            }
+        }
+
+        function nextQuestion() {
+            currentQ++;
+            if(currentQ < 4) renderQuestion();
+            else document.getElementById('quest-content').innerHTML = "<h2 class='text-gold' style='text-align:center'>Módulo Concluído!</h2><p style='text-align:center; color:#fff;'>Seu futuro é brilhante.</p>";
+        }
+    </script>
+</body>
+</html>

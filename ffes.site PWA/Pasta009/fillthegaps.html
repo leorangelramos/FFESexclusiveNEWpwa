@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFES | Preencher Lacunas (Conectores)</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .exercise-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .sentence-display {
+            font-size: 1.4rem;
+            color: #fff;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+        }
+        .gap-highlight {
+            color: #b8860b;
+            font-weight: 800;
+            border-bottom: 2px dashed #b8860b;
+            padding: 0 5px;
+        }
+        .mc-options {
+            display: grid;
+            gap: 12px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .mc-option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+            color: #fff;
+            font-size: 1.1rem;
+        }
+        .mc-option:hover {
+            background: rgba(184, 134, 11, 0.2);
+            border-color: #b8860b;
+        }
+        .correct { background: rgba(74, 222, 128, 0.2) !important; border-color: #4ade80 !important; }
+        .wrong { background: rgba(248, 113, 113, 0.2) !important; border-color: #f87171 !important; }
+        .placar-box {
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.6);
+        }
+    </style>
+</head>
+<body class="dashboard-container">
+
+    <div class="background-glow glow-2"></div>
+
+    <header class="glass-header">
+        <h1>CONECTORES <span class="text-gold">TÁTICOS</span></h1>
+        <p class="subtitle">Módulo 09 - Coesão e Fluidez</p>
+    </header>
+
+    <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
+        
+        <div id="game-container" class="exercise-box">
+            <div class="placar-box">
+                Sessão Atual: <span id="hits" class="text-gold">0</span> acertos
+            </div>
+
+            <div id="sentence" class="sentence-display">Carregando...</div>
+            
+            <div id="options" class="mc-options"></div>
+            
+            <div id="feedback" style="margin-top: 20px; font-weight: bold; min-height: 24px;"></div>
+
+            <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin: 20px auto 0; display: block;">PRÓXIMA ➡</button>
+        </div>
+
+        <div style="margin-top: 40px; text-align: center;">
+            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;">
+                <span>⬅ Voltar ao Painel Principal</span>
+            </a>
+        </div>
+    </main>
+
+    <script>
+        const allQuestions = [
+            { s: "I like tea, [_____] she prefers coffee.", opts: ["but", "so", "and"], correct: 0 },
+            { s: "He studied hard, [_____] he failed the test.", opts: ["so", "but", "because"], correct: 1 },
+            { s: "[_____] it was cold, he went out without a jacket.", opts: ["Although", "Because", "So"], correct: 0 },
+            { s: "I stayed home [_____] I was sick.", opts: ["because", "although", "so"], correct: 0 },
+            { s: "He was sick, [_____] he didn't go to work.", opts: ["but", "so", "because"], correct: 1 }
+        ];
+
+        let index = 0;
+        let score = 0;
+
+        function load() {
+            if (index >= allQuestions.length) {
+                document.getElementById('game-container').innerHTML = `
+                    <h2 class="text-gold">Soberania em Conectores!</h2>
+                    <p style="color:#fff; margin: 20px 0;">Sua capacidade de ligar ideias foi validada.</p>
+                    <button onclick="location.reload()" class="btn-gold" style="margin: 0 auto; display:block">REPETIR MÓDULO</button>
+                `;
+                return;
+            }
+
+            const q = allQuestions[index];
+            // Formata a frase para destacar a lacuna
+            document.getElementById('sentence').innerHTML = q.s.replace("[_____]", "<span class='gap-highlight'>_____</span>");
+            document.getElementById('feedback').textContent = "";
+            document.getElementById('nextBtn').style.display = "none";
+            
+            const optDiv = document.getElementById('options');
+            optDiv.innerHTML = "";
+
+            q.opts.forEach((opt, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'mc-option';
+                btn.textContent = opt;
+                btn.onclick = () => check(i, btn);
+                optDiv.appendChild(btn);
+            });
+        }
+
+        function check(choice, el) {
+            const correct = allQuestions[index].correct;
+            const feedback = document.getElementById('feedback');
+            const btns = document.querySelectorAll('.mc-option');
+            
+            btns.forEach(b => b.onclick = null);
+
+            if (choice === correct) {
+                el.classList.add('correct');
+                feedback.innerHTML = `<span style="color: #4ade80">CONEXÃO ESTABELECIDA: +20 XP</span>`;
+                score++;
+                document.getElementById('hits').textContent = score;
+                
+                let xp = localStorage.getItem('ffes_xp') || 0;
+                localStorage.setItem('ffes_xp', parseInt(xp) + 20);
+            } else {
+                el.classList.add('wrong');
+                btns[correct].classList.add('correct');
+                feedback.innerHTML = `<span style="color: #f87171">FALHA NA CONEXÃO LÓGICA</span>`;
+            }
+
+            document.getElementById('nextBtn').style.display = "block";
+        }
+
+        function nextQuestion() {
+            index++;
+            load();
+        }
+
+        load();
+    </script>
+
+    <footer class="glass-footer">
+        <p>&copy; 2026 FFES - Sovereignty System v2.1</p>
+    </footer>
+
+</body>
+</html>

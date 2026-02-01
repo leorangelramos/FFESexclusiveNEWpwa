@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFES | Condicional Zero (Fatos e Verdades)</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .theory-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+        .theory-section h2 { color: #b8860b; margin-bottom: 15px; }
+        .formula-box {
+            background: rgba(184, 134, 11, 0.1);
+            border-left: 4px solid #b8860b;
+            padding: 15px;
+            font-family: 'Sora', sans-serif;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+            font-weight: bold;
+        }
+        .training-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        .mode-btn {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+        .mode-btn.active {
+            background: rgba(184, 134, 11, 0.3);
+            border-color: #b8860b;
+            box-shadow: 0 0 15px rgba(184, 134, 11, 0.3);
+        }
+        .exercise-area {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            min-height: 350px;
+            display: none;
+            border: 1px solid rgba(184, 134, 11, 0.2);
+        }
+        .word-pill {
+            display: inline-block; padding: 10px 18px; margin: 5px;
+            background: rgba(184, 134, 11, 0.15); border: 1px solid #b8860b;
+            border-radius: 25px; cursor: pointer; color: #fff;
+        }
+        .writing-input {
+            width: 100%; background: rgba(255,255,255,0.05); border: 2px solid #b8860b;
+            color: #fff; padding: 15px; border-radius: 10px; text-align: center; font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body class="dashboard-container">
+    <div class="background-glow glow-1"></div>
+
+    <header class="glass-header">
+        <h1>ZERO <span class="text-gold">CONDITIONAL</span></h1>
+    </header>
+
+    <main style="max-width: 900px; margin: 0 auto; padding: 20px;">
+        
+        <section class="theory-section">
+            <h2>Fatos e Leis Universais</h2>
+            <p>Usamos para falar de coisas que são sempre verdadeiras. Se a condição acontece, o resultado é **garantido**.</p>
+            
+            <div class="formula-box">
+                IF + PRESENT SIMPLE, (...) PRESENT SIMPLE
+            </div>
+
+            <ul style="margin-left: 20px; opacity: 0.9;">
+                <li><strong>Uso:</strong> Ciência, instruções, rotinas automáticas.</li>
+                <li><strong>Exemplo:</strong> If you heat ice, it <strong>melts</strong>.</li>
+                <li><strong>Dica:</strong> O "if" pode ser substituído por "when" sem mudar o sentido.</li>
+            </ul>
+        </section>
+
+        <div class="training-grid">
+            <button class="mode-btn" onclick="startMode('mc')">Múltipla Escolha</button>
+            <button class="mode-btn" onclick="startMode('scrambled')">Ordenar Frase</button>
+            <button class="mode-btn" onclick="startMode('translation')">Tradução</button>
+            <button class="mode-btn" onclick="startMode('writing')">Escrita Livre</button>
+        </div>
+
+        <div id="exercise-display" class="exercise-area">
+            <h3 id="mode-title" class="text-gold" style="margin-bottom:20px; text-transform: uppercase; font-size: 0.9rem;"></h3>
+            <div id="quest-content"></div>
+            <div id="feedback" style="margin-top:20px; font-weight:bold; min-height: 24px;"></div>
+            <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin-top:20px; width:100%">PRÓXIMA PERGUNTA ➡</button>
+        </div>
+
+        <div style="margin-top: 40px; text-align: center;">
+            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;"><span>⬅ Voltar ao Painel</span></a>
+        </div>
+    </main>
+
+    <script>
+        const database = {
+            mc: [
+                {q: "If you heat water to 100°C, it _______ (boil).", o: ["boils", "will boil", "boiled"], c: "boils"},
+                {q: "Plants die if they _______ (not/get) enough water.", o: ["doesn't get", "don't get", "won't get"], c: "don't get"},
+                {q: "If you mix red and blue, you _______ (get) purple.", o: ["got", "gets", "get"], c: "get"},
+                {q: "If it rains, the ground _______ (get) wet.", o: ["gets", "get", "got"], c: "gets"}
+            ],
+            scrambled: [
+                {f: "If I sleep late I feel tired", w: ["late", "sleep", "tired", "I", "feel", "If", "I"]},
+                {f: "Ice melts if you heat it", w: ["heat", "melts", "it", "If", "you", "Ice"]},
+                {f: "When you cry you get sad", w: ["sad", "get", "you", "When", "you", "cry"]},
+                {f: "If you freeze water it turns to ice", w: ["turns", "freeze", "it", "If", "you", "water", "ice", "to"]}
+            ],
+            translation: [
+                {p: "Se você toca o fogo, você se queima.", o: ["If you touch fire, you burn", "If you touch fire, you will burn", "You touch fire, you burns"], c: "If you touch fire, you burn"},
+                {p: "Se não chove, a grama seca.", o: ["If it no rain, grass dry", "If it doesn't rain, the grass dries", "If no rain, grass dries"], c: "If it doesn't rain, the grass dries"},
+                {p: "O gelo derrete se está quente.", o: ["Ice melts if it is hot", "Ice melt if is hot", "Ice melts when is hot"], c: "Ice melts if it is hot"},
+                {p: "Se eu acordo cedo, eu trabalho.", o: ["If I wake up early, I work", "If I wake up, I working", "When wake up, I work"], c: "If I wake up early, I work"}
+            ],
+            writing: [
+                {p: "Traduza: 'Se eu como, eu fico feliz.'", c: "if i eat i am happy"},
+                {p: "Traduza: 'Se você corre, você fica cansado.'", c: "if you run you get tired"},
+                {p: "Traduza: 'Se chove, eu fico em casa.'", c: "if it rains i stay home"},
+                {p: "Traduza: 'Se você estuda, você aprende.'", c: "if you study you learn"}
+            ]
+        };
+
+        let currentMode = ''; let currentQ = 0; let selectedWords = [];
+
+        function startMode(mode) {
+            currentMode = mode; currentQ = 0;
+            document.getElementById('exercise-display').style.display = 'block';
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('mode-title').textContent = "Modo: " + mode.replace('mc', 'Múltipla Escolha').replace('scrambled', 'Ordenação');
+            renderQuestion();
+            document.getElementById('exercise-display').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderQuestion() {
+            const container = document.getElementById('quest-content');
+            const feedback = document.getElementById('feedback');
+            const nextBtn = document.getElementById('nextBtn');
+            const data = database[currentMode][currentQ];
+            feedback.textContent = ""; nextBtn.style.display = "none"; container.innerHTML = "";
+
+            if (currentMode === 'mc' || currentMode === 'translation') {
+                container.innerHTML = `<p style='margin-bottom:20px; font-size:1.2rem;'>${data.q || data.p}</p>`;
+                data.o.forEach(opt => {
+                    const b = document.createElement('button');
+                    b.className = 'btn-gold'; b.style.width = '100%'; b.style.marginBottom = '8px'; b.style.background = 'rgba(255,255,255,0.05)';
+                    b.textContent = opt;
+                    b.onclick = () => check(opt, data.c, b);
+                    container.appendChild(b);
+                });
+            } else if (currentMode === 'scrambled') {
+                selectedWords = [];
+                container.innerHTML = `<div id='ans' style='min-height:50px; border-bottom:2px solid #b8860b; margin-bottom:20px; font-size:1.3rem; color:#fff;'></div><div id='pool'></div>`;
+                data.w.forEach(word => {
+                    const span = document.createElement('span');
+                    span.className = 'word-pill'; span.textContent = word;
+                    span.onclick = () => { 
+                        selectedWords.push(word); span.style.display='none'; 
+                        document.getElementById('ans').textContent = selectedWords.join(" "); 
+                        if(selectedWords.length === data.w.length) check(selectedWords.join(" "), data.f); 
+                    };
+                    document.getElementById('pool').appendChild(span);
+                });
+            } else if (currentMode === 'writing') {
+                container.innerHTML = `<p style='margin-bottom:15px'>${data.p}</p><input type='text' id='winp' class='writing-input' placeholder='Presente + Presente...' onkeypress='if(event.key==="Enter") check(this.value, "${data.c}")'>`;
+                setTimeout(() => document.getElementById('winp').focus(), 100);
+            }
+        }
+
+        function check(user, correct, element) {
+            const f = document.getElementById('feedback');
+            const cleanUser = user.toLowerCase().replace(/[.,!]/g, "").trim();
+            const cleanCorrect = correct.toLowerCase().replace(/[.,!]/g, "").trim();
+            
+            if(cleanUser === cleanCorrect) {
+                f.textContent = "Verdade Universal Validada! +25 XP"; f.style.color = "#4ade80";
+                document.getElementById('nextBtn').style.display = "block";
+                if(element) element.style.background = "rgba(74, 222, 128, 0.2)";
+                let xp = parseInt(localStorage.getItem('ffes_xp')||0); localStorage.setItem('ffes_xp', xp+25);
+            } else {
+                f.textContent = "Erro na Lei. Use Presente + Presente."; f.style.color = "#f87171";
+                if(element) element.style.background = "rgba(248, 113, 113, 0.2)";
+            }
+        }
+
+        function nextQuestion() {
+            currentQ++;
+            if(currentQ < 4) renderQuestion();
+            else document.getElementById('quest-content').innerHTML = "<h2 class='text-gold' style='text-align:center'>Módulo Concluído!</h2><p style='text-align:center; color:#fff;'>Você dominou as verdades absolutas da Condicional Zero.</p>";
+        }
+    </script>
+</body>
+</html>

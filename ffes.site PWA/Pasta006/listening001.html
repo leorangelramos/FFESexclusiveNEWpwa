@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFES | Listening Station</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .exercise-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .audio-btn {
+            background: #b8860b;
+            color: #0A2342;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 0 20px rgba(184, 134, 11, 0.4);
+            margin-bottom: 30px;
+        }
+        .audio-btn:hover {
+            transform: scale(1.05);
+            background: #d4a017;
+        }
+        .audio-btn:disabled {
+            background: #444;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .opt-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+            color: #fff;
+            font-weight: bold;
+        }
+        .opt-card:hover {
+            background: rgba(184, 134, 11, 0.2);
+            border-color: #b8860b;
+        }
+        .correct { background: rgba(74, 222, 128, 0.2) !important; border-color: #4ade80 !important; }
+        .wrong { background: rgba(248, 113, 113, 0.2) !important; border-color: #f87171 !important; }
+    </style>
+</head>
+<body class="dashboard-container">
+
+    <div class="background-glow glow-1"></div>
+
+    <header class="glass-header">
+        <h1>LISTENING <span class="text-gold">STATION</span></h1>
+        <p class="subtitle">Módulo 06 - Pares Mínimos e Fonemas</p>
+    </header>
+
+    <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
+        
+        <div id="game-container" class="exercise-box">
+            <p style="color: #aaa; margin-bottom: 20px;">Clique no botão para ouvir e identifique a palavra:</p>
+            
+            <button id="listenBtn" onclick="playAudio()" class="audio-btn">▶️ OUVIR</button>
+            
+            <div id="options" class="options-grid"></div>
+            
+            <div id="feedback" style="margin-top: 20px; font-weight: bold; min-height: 24px;"></div>
+
+            <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin: 20px auto 0;">PRÓXIMA ➡</button>
+        </div>
+
+        <div style="margin-top: 40px; text-align: center;">
+            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;">
+                <span>⬅ Voltar ao Início</span>
+            </a>
+        </div>
+    </main>
+
+    <script>
+        const questions = [
+            { opts: ["ship", "sheep", "shop"], correct: 0 },
+            { opts: ["this", "these", "the"], correct: 0 },
+            { opts: ["bad", "bed", "bat"], correct: 0 },
+            { opts: ["walk", "work", "wake"], correct: 1 },
+            { opts: ["three", "tree", "through"], correct: 0 }
+        ];
+
+        let index = 0;
+        const synth = window.speechSynthesis;
+
+        function load() {
+            if (index >= questions.length) {
+                document.getElementById('game-container').innerHTML = `
+                    <h2 class="text-gold">Audição Calibrada!</h2>
+                    <p style="color:#fff; margin: 20px 0;">Sua latência de processamento auditivo diminuiu.</p>
+                    <button onclick="location.reload()" class="btn-gold" style="margin: 0 auto; display:block">RECOMEÇAR</button>
+                `;
+                return;
+            }
+
+            const q = questions[index];
+            document.getElementById('feedback').textContent = "";
+            document.getElementById('nextBtn').style.display = "none";
+            document.getElementById('listenBtn').disabled = false;
+            
+            const optDiv = document.getElementById('options');
+            optDiv.innerHTML = "";
+
+            q.opts.forEach((opt, i) => {
+                const card = document.createElement('div');
+                card.className = 'opt-card';
+                card.textContent = opt;
+                card.onclick = () => check(i, card);
+                optDiv.appendChild(card);
+            });
+        }
+
+        function playAudio() {
+            const word = questions[index].opts[questions[index].correct];
+            const utterance = new SpeechSynthesisUtterance(word);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.8;
+            synth.speak(utterance);
+        }
+
+        function check(choice, el) {
+            const correct = questions[index].correct;
+            const btns = document.querySelectorAll('.opt-card');
+            
+            btns.forEach(b => b.onclick = null);
+            document.getElementById('listenBtn').disabled = true;
+
+            if (choice === correct) {
+                el.classList.add('correct');
+                document.getElementById('feedback').innerHTML = "<span style='color: #4ade80'>SINAL RECEBIDO: +20 XP</span>";
+                
+                let xp = localStorage.getItem('ffes_xp') || 0;
+                localStorage.setItem('ffes_xp', parseInt(xp) + 20);
+            } else {
+                el.classList.add('wrong');
+                btns[correct].classList.add('correct');
+                document.getElementById('feedback').innerHTML = "<span style='color: #f87171'>ERRO DE FREQUÊNCIA</span>";
+            }
+
+            document.getElementById('nextBtn').style.display = "block";
+        }
+
+        function nextQuestion() {
+            index++;
+            load();
+        }
+
+        load();
+    </script>
+
+    <footer class="glass-footer">
+        <p>&copy; 2026 FFES - Sovereignty System v2.1</p>
+    </footer>
+
+</body>
+</html>

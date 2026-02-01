@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFES | Present Simple</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .theory-section { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 2rem; margin-bottom: 30px; color: #fff; }
+        .formula-box { background: rgba(184, 134, 11, 0.1); border-left: 4px solid #b8860b; padding: 15px; margin: 20px 0; border-radius: 0 10px 10px 0; font-weight: bold; }
+        .training-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 30px; }
+        .mode-btn { background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 12px; color: #fff; cursor: pointer; transition: 0.3s; font-weight: bold; }
+        .mode-btn.active { background: rgba(184, 134, 11, 0.3); border-color: #b8860b; }
+        .exercise-area { background: rgba(255, 255, 255, 0.05); border-radius: 20px; padding: 2rem; min-height: 350px; display: none; border: 1px solid rgba(184, 134, 11, 0.2); }
+        .word-pill { display: inline-block; padding: 10px 18px; margin: 5px; background: rgba(184, 134, 11, 0.15); border: 1px solid #b8860b; border-radius: 25px; cursor: pointer; color: #fff; }
+        .writing-input { width: 100%; background: rgba(255,255,255,0.05); border: 2px solid #b8860b; color: #fff; padding: 15px; border-radius: 10px; text-align: center; font-size: 1.2rem; }
+    </style>
+</head>
+<body class="dashboard-container">
+    <div class="background-glow glow-1"></div>
+    <header class="glass-header"><h1>PRESENT <span class="text-gold">SIMPLE</span></h1></header>
+    <main style="max-width: 900px; margin: 0 auto; padding: 20px;">
+        <section class="theory-section">
+            <h2 class="text-gold">Rotinas e Fatos</h2>
+            <p>Usado para verdades universais, hábitos e situações permanentes.</p>
+            <div class="formula-box">SUJEITO + VERBO (S para He/She/It)</div>
+            <ul style="margin-left: 20px; opacity: 0.9;">
+                <li><strong>Auxiliares:</strong> Do (I, You, We, They) / Does (He, She, It).</li>
+                <li><strong>Afirmativa:</strong> She work<strong>s</strong> here.</li>
+                <li><strong>Negativa/Interrogativa:</strong> O verbo volta ao normal (Does she work?).</li>
+            </ul>
+        </section>
+        <div class="training-grid">
+            <button class="mode-btn" onclick="startMode('mc')">Múltipla Escolha</button>
+            <button class="mode-btn" onclick="startMode('scrambled')">Ordenar</button>
+            <button class="mode-btn" onclick="startMode('translation')">Tradução</button>
+            <button class="mode-btn" onclick="startMode('writing')">Escrita</button>
+        </div>
+        <div id="exercise-display" class="exercise-area">
+            <h3 id="mode-title" class="text-gold" style="margin-bottom:20px; text-transform: uppercase; font-size: 0.9rem;"></h3>
+            <div id="quest-content"></div>
+            <div id="feedback" style="margin-top:20px; font-weight:bold; min-height: 24px;"></div>
+            <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin-top:20px; width:100%">PRÓXIMA ➡</button>
+        </div>
+    </main>
+    <script>
+        const database = {
+            mc: [
+                {q: "She _______ (work) every day.", o: ["work", "works", "working"], c: "works"},
+                {q: "They _______ (not/like) pizza.", o: ["doesn't like", "don't like", "not like"], c: "don't like"},
+                {q: "_______ he speak English?", o: ["Do", "Does", "Is"], c: "Does"},
+                {q: "I _______ (play) tennis on Sundays.", o: ["play", "plays", "am play"], c: "play"}
+            ],
+            scrambled: [
+                {f: "She does not live here", w: ["live", "does", "She", "here", "not"]},
+                {f: "Do you like coffee", w: ["like", "Do", "coffee", "you"]},
+                {f: "He works in a bank", w: ["works", "He", "bank", "in", "a"]},
+                {f: "We eat apple every morning", w: ["eat", "morning", "We", "apple", "every"]}
+            ],
+            translation: [
+                {p: "Eu estudo inglês.", o: ["I study English", "I studies English", "I am study English"], c: "I study English"},
+                {p: "Ela não trabalha.", o: ["She doesn't work", "She don't work", "She not works"], c: "She doesn't work"},
+                {p: "Você mora aqui?", o: ["Do you live here?", "Does you live here?", "You live here?"], c: "Do you live here?"},
+                {p: "O sol brilha.", o: ["The sun shine", "The sun shines", "The sun shining"], c: "The sun shines"}
+            ],
+            writing: [
+                {p: "Traduza: 'Eu bebo água.'", c: "i drink water"},
+                {p: "Traduza: 'Ela fala.'", c: "she speaks"},
+                {p: "Traduza: 'Eles jogam.'", c: "they play"},
+                {p: "Traduza: 'Nós vamos.'", c: "we go"}
+            ]
+        };
+        let currentMode = ''; let currentQ = 0; let selectedWords = [];
+        function startMode(mode) {
+            currentMode = mode; currentQ = 0; document.getElementById('exercise-display').style.display = 'block';
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active')); event.target.classList.add('active'); renderQuestion();
+        }
+        function renderQuestion() {
+            const container = document.getElementById('quest-content'); const feedback = document.getElementById('feedback');
+            const nextBtn = document.getElementById('nextBtn'); const data = database[currentMode][currentQ];
+            feedback.textContent = ""; nextBtn.style.display = "none"; container.innerHTML = "";
+            if (currentMode === 'mc' || currentMode === 'translation') {
+                container.innerHTML = `<p style='margin-bottom:20px'>${data.q || data.p}</p>`;
+                data.o.forEach(opt => { const b = document.createElement('button'); b.className = 'btn-gold'; b.style.width = '100%'; b.style.marginBottom = '8px'; b.textContent = opt; b.onclick = () => check(opt, data.c, b); container.appendChild(b); });
+            } else if (currentMode === 'scrambled') {
+                selectedWords = []; container.innerHTML = `<div id='ans' style='min-height:50px; border-bottom:2px solid #b8860b; margin-bottom:20px;'></div><div id='pool'></div>`;
+                data.w.forEach(word => { const span = document.createElement('span'); span.className = 'word-pill'; span.textContent = word; span.onclick = () => { selectedWords.push(word); span.style.display='none'; document.getElementById('ans').textContent = selectedWords.join(" "); if(selectedWords.length === data.w.length) check(selectedWords.join(" "), data.f); }; document.getElementById('pool').appendChild(span); });
+            } else if (currentMode === 'writing') {
+                container.innerHTML = `<p style='margin-bottom:15px'>${data.p}</p><input type='text' id='winp' class='writing-input' onkeypress='if(event.key==="Enter") check(this.value, "${data.c}")'>`;
+            }
+        }
+        function check(user, correct, element) {
+            const f = document.getElementById('feedback'); if(user.toLowerCase().trim() === correct.toLowerCase()) { f.textContent = "Acerto Crítico! +20 XP"; f.style.color = "#4ade80"; document.getElementById('nextBtn').style.display = "block"; let xp = parseInt(localStorage.getItem('ffes_xp')||0); localStorage.setItem('ffes_xp', xp+20); }
+            else { f.textContent = "Erro de Rotina. Tente novamente."; f.style.color = "#f87171"; }
+        }
+        function nextQuestion() { currentQ++; if(currentQ < 4) renderQuestion(); else document.getElementById('quest-content').innerHTML = "<h2 class='text-gold'>Módulo Concluído!</h2>"; }
+    </script>
+</body>
+</html>
