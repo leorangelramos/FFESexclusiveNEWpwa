@@ -1,98 +1,552 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FFES | Present Simple</title>
     <link rel="stylesheet" href="../style.css">
     <style>
-        .theory-section { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 2rem; margin-bottom: 30px; color: #fff; }
-        .formula-box { background: rgba(184, 134, 11, 0.1); border-left: 4px solid #b8860b; padding: 15px; margin: 20px 0; border-radius: 0 10px 10px 0; font-weight: bold; }
-        .training-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 30px; }
-        .mode-btn { background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 12px; color: #fff; cursor: pointer; transition: 0.3s; font-weight: bold; }
-        .mode-btn.active { background: rgba(184, 134, 11, 0.3); border-color: #b8860b; }
-        .exercise-area { background: rgba(255, 255, 255, 0.05); border-radius: 20px; padding: 2rem; min-height: 350px; display: none; border: 1px solid rgba(184, 134, 11, 0.2); }
-        .word-pill { display: inline-block; padding: 10px 18px; margin: 5px; background: rgba(184, 134, 11, 0.15); border: 1px solid #b8860b; border-radius: 25px; cursor: pointer; color: #fff; }
-        .writing-input { width: 100%; background: rgba(255,255,255,0.05); border: 2px solid #b8860b; color: #fff; padding: 15px; border-radius: 10px; text-align: center; font-size: 1.2rem; }
+        /* === ESTILO UNIFICADO (PADRÃO PWA) === */
+        
+        /* Layout Principal */
+        .game-wrapper {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
+            margin: 0 auto;
+        }
+
+        /* Card do Jogo (Glassmorphism) */
+        .game-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 2px solid var(--accent-gold);
+            border-radius: 24px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: var(--glass-shadow);
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative; /* Importante para efeitos */
+            overflow: hidden;   /* Importante para efeitos */
+        }
+
+        /* Tipografia do Display */
+        #display, #display-sentence {
+            font-size: 1.8rem;
+            font-weight: 700;
+            line-height: 1.4;
+            color: var(--text-white);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            z-index: 2;
+        }
+
+        /* Lacunas */
+        .gap { 
+            color: var(--accent-gold); 
+            border-bottom: 3px solid var(--accent-gold); 
+            padding: 0 8px; 
+            display: inline-block; 
+            min-width: 60px; 
+        }
+
+        /* Feedback Visual */
+        #feedback {
+            height: 30px;
+            text-align: center;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            opacity: 0;
+            margin-bottom: 10px;
+        }
+        #feedback.visible { opacity: 1; transform: translateY(-5px); }
+
+        /* Controles e Botões */
+        .game-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .btn-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-white);
+            padding: 20px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: var(--glass-blur);
+            text-transform: capitalize;
+        }
+
+        .btn-option:hover {
+            border-color: var(--accent-gold);
+            background: rgba(255, 184, 28, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .btn-option.correct {
+            background: #00e676 !important;
+            color: #000 !important;
+            border-color: #00e676 !important;
+        }
+
+        .btn-option.wrong {
+            background: #ff1744 !important;
+            opacity: 0.5;
+        }
+
+        /* XP Pill */
+        .xp-pill {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--accent-gold);
+            padding: 5px 15px;
+            border-radius: 50px;
+            color: var(--accent-gold);
+            font-weight: 800;
+            font-size: 1.1rem;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        /* === Elementos Específicos (Teoria e Scramble) === */
+        .theory-section { 
+            background: rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            border-radius: 20px; 
+            padding: 2rem; 
+            margin-bottom: 30px; 
+            color: var(--text-white); 
+        }
+        
+        .formula-box { 
+            background: rgba(184, 134, 11, 0.1); 
+            border-left: 4px solid var(--accent-gold); 
+            padding: 15px; 
+            margin: 20px 0; 
+            border-radius: 0 10px 10px 0; 
+            font-weight: bold; 
+        }
+
+        .mode-selector { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 10px; 
+            margin-bottom: 30px; 
+        }
+        
+        .mode-btn { 
+            background: rgba(255, 255, 255, 0.07); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            padding: 15px; 
+            border-radius: 12px; 
+            color: var(--text-white); 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: 0.3s; 
+        }
+        
+        .mode-btn:hover, .mode-btn.active { 
+            background: rgba(184, 134, 11, 0.3); 
+            border-color: var(--accent-gold); 
+        }
+
+        .word-pill { 
+            display: inline-block; 
+            padding: 10px 15px; 
+            margin: 5px; 
+            background: rgba(0,0,0,0.3); 
+            border: 1px solid var(--accent-gold); 
+            border-radius: 20px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            color: var(--accent-gold); 
+        }
+        
+        #scramble-answer { 
+            min-height: 40px; 
+            border-bottom: 2px solid var(--accent-gold); 
+            margin: 20px 0; 
+            font-size: 1.4rem; 
+            color: var(--text-white); 
+            width: 100%; 
+        }
+        
+        .text-gold { color: var(--accent-gold); }
+
+        /* === NOVA ANIMAÇÃO CASSINO (Moedas) === */
+        .casino-coin {
+            position: fixed;
+            width: 25px;
+            height: 25px;
+            background: var(--accent-gold);
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.9), inset 0 0 5px rgba(255, 255, 255, 0.5);
+            pointer-events: none;
+            z-index: 9999;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes coin-explosion {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(1) rotate(720deg);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
-<body class="dashboard-container">
+<body>
     <div class="background-glow glow-1"></div>
-    <header class="glass-header"><h1>PRESENT <span class="text-gold">SIMPLE</span></h1></header>
-    <main style="max-width: 900px; margin: 0 auto; padding: 20px;">
+    <header class="glass-header">
+        <h1>PRESENT <span class="text-gold">SIMPLE</span></h1>
+        <p class="subtitle">Módulo 01 - Presente Simples</p>
+        <div class="xp-pill">XP: <span id="xp-val">0</span></div>
+    </header>
+
+
+
+
+    <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
+        
         <section class="theory-section">
             <h2 class="text-gold">Rotinas e Fatos</h2>
             <p>Usado para verdades universais, hábitos e situações permanentes.</p>
-            <div class="formula-box">SUJEITO + VERBO (S para He/She/It)</div>
+            <div class="formula-box">SUJEITO + VERBO (I/You/We/They)</div>
+            <div class="formula-box">SUJEITO + VERBO (S) (He/She/It)</div>
             <ul style="margin-left: 20px; opacity: 0.9;">
                 <li><strong>Auxiliares:</strong> Do (I, You, We, They) / Does (He, She, It).</li>
-                <li><strong>Afirmativa:</strong> She work<strong>s</strong> here.</li>
-                <li><strong>Negativa/Interrogativa:</strong> O verbo volta ao normal (Does she work?).</li>
+                <li><strong>Afirmativa:</strong> She work<strong>s</strong>.</li>
+                <li><strong>Negativa:</strong> She does not work.</li>
+                <li><strong>Interrogativa:</strong> Does she work?</li>
             </ul>
         </section>
-        <div class="training-grid">
-            <button class="mode-btn" onclick="startMode('mc')">Múltipla Escolha</button>
-            <button class="mode-btn" onclick="startMode('scrambled')">Ordenar</button>
-            <button class="mode-btn" onclick="startMode('translation')">Tradução</button>
-            <button class="mode-btn" onclick="startMode('writing')">Escrita</button>
+
+        <div class="mode-selector">
+            <button class="mode-btn" onclick="startGame('mc')">Múltipla Escolha</button>
+            <button class="mode-btn" onclick="startGame('scramble')">Ordenar</button>
+            <button class="mode-btn" onclick="startGame('translation')">Tradução</button>
         </div>
-        <div id="exercise-display" class="exercise-area">
-            <h3 id="mode-title" class="text-gold" style="margin-bottom:20px; text-transform: uppercase; font-size: 0.9rem;"></h3>
-            <div id="quest-content"></div>
-            <div id="feedback" style="margin-top:20px; font-weight:bold; min-height: 24px;"></div>
-            <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin-top:20px; width:100%">PRÓXIMA ➡</button>
+
+        <div id="game-container" class="game-wrapper">
+            <div id="feedback"></div>
+
+            <div class="game-card">
+                <div id="display-sentence">Prepare-se...</div>
+                
+                <div id="scramble-ui" style="display:none; width: 100%;">
+                    <div id="scramble-answer"></div>
+                    <div id="scramble-pool"></div>
+                </div>
+            </div>
+
+            <div class="game-controls" id="ab-controls">
+                <button id="btn1" class="btn-option" onclick="checkAnswer(1)">A</button>
+                <button id="btn2" class="btn-option" onclick="checkAnswer(2)">B</button>
+            </div>
+            
+            <button id="btn-check-scramble" class="btn-option" style="display:none; width:100%" onclick="verifyScramble()">VERIFICAR</button>
         </div>
     </main>
+
+    <footer class="glass-footer">
+        © 2026 FFES - Sovereignty System v2.1
+    </footer>
+
     <script>
-        const database = {
-            mc: [
-                {q: "She _______ (work) every day.", o: ["work", "works", "working"], c: "works"},
-                {q: "They _______ (not/like) pizza.", o: ["doesn't like", "don't like", "not like"], c: "don't like"},
-                {q: "_______ he speak English?", o: ["Do", "Does", "Is"], c: "Does"},
-                {q: "I _______ (play) tennis on Sundays.", o: ["play", "plays", "am play"], c: "play"}
-            ],
-            scrambled: [
-                {f: "She does not live here", w: ["live", "does", "She", "here", "not"]},
-                {f: "Do you like coffee", w: ["like", "Do", "coffee", "you"]},
-                {f: "He works in a bank", w: ["works", "He", "bank", "in", "a"]},
-                {f: "We eat apple every morning", w: ["eat", "morning", "We", "apple", "every"]}
-            ],
-            translation: [
-                {p: "Eu estudo inglês.", o: ["I study English", "I studies English", "I am study English"], c: "I study English"},
-                {p: "Ela não trabalha.", o: ["She doesn't work", "She don't work", "She not works"], c: "She doesn't work"},
-                {p: "Você mora aqui?", o: ["Do you live here?", "Does you live here?", "You live here?"], c: "Do you live here?"},
-                {p: "O sol brilha.", o: ["The sun shine", "The sun shines", "The sun shining"], c: "The sun shines"}
-            ],
-            writing: [
-                {p: "Traduza: 'Eu bebo água.'", c: "i drink water"},
-                {p: "Traduza: 'Ela fala.'", c: "she speaks"},
-                {p: "Traduza: 'Eles jogam.'", c: "they play"},
-                {p: "Traduza: 'Nós vamos.'", c: "we go"}
-            ]
-        };
-        let currentMode = ''; let currentQ = 0; let selectedWords = [];
-        function startMode(mode) {
-            currentMode = mode; currentQ = 0; document.getElementById('exercise-display').style.display = 'block';
-            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active')); event.target.classList.add('active'); renderQuestion();
+        // === 0. SISTEMA DE ÁUDIO & ANIMAÇÃO (DOPAMINA CASSINO) ===
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playWinSound() {
+            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(1200, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(2000, audioCtx.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.3);
         }
-        function renderQuestion() {
-            const container = document.getElementById('quest-content'); const feedback = document.getElementById('feedback');
-            const nextBtn = document.getElementById('nextBtn'); const data = database[currentMode][currentQ];
-            feedback.textContent = ""; nextBtn.style.display = "none"; container.innerHTML = "";
-            if (currentMode === 'mc' || currentMode === 'translation') {
-                container.innerHTML = `<p style='margin-bottom:20px'>${data.q || data.p}</p>`;
-                data.o.forEach(opt => { const b = document.createElement('button'); b.className = 'btn-gold'; b.style.width = '100%'; b.style.marginBottom = '8px'; b.textContent = opt; b.onclick = () => check(opt, data.c, b); container.appendChild(b); });
-            } else if (currentMode === 'scrambled') {
-                selectedWords = []; container.innerHTML = `<div id='ans' style='min-height:50px; border-bottom:2px solid #b8860b; margin-bottom:20px;'></div><div id='pool'></div>`;
-                data.w.forEach(word => { const span = document.createElement('span'); span.className = 'word-pill'; span.textContent = word; span.onclick = () => { selectedWords.push(word); span.style.display='none'; document.getElementById('ans').textContent = selectedWords.join(" "); if(selectedWords.length === data.w.length) check(selectedWords.join(" "), data.f); }; document.getElementById('pool').appendChild(span); });
-            } else if (currentMode === 'writing') {
-                container.innerHTML = `<p style='margin-bottom:15px'>${data.p}</p><input type='text' id='winp' class='writing-input' onkeypress='if(event.key==="Enter") check(this.value, "${data.c}")'>`;
+
+        // Função que cria a explosão de moedas
+        function triggerCasinoEffect() {
+            const numCoins = 20; // Quantidade de moedas
+            for (let i = 0; i < numCoins; i++) {
+                const coin = document.createElement('div');
+                coin.classList.add('casino-coin');
+                
+                // Calcula direção aleatória para explosão
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 150 + Math.random() * 200; // Raio da explosão
+                const tx = Math.cos(angle) * distance + 'px';
+                const ty = Math.sin(angle) * distance + 'px';
+                
+                // Define as variáveis CSS para a trajetória única desta moeda
+                coin.style.setProperty('--tx', tx);
+                coin.style.setProperty('--ty', ty);
+                
+                // Duração e tempo aleatórios para parecer natural
+                coin.style.animation = `coin-explosion ${0.8 + Math.random() * 0.5}s ease-out forwards`;
+                
+                document.body.appendChild(coin);
+                
+                // Limpa o elemento do DOM após a animação
+                setTimeout(() => { coin.remove(); }, 1500);
             }
         }
-        function check(user, correct, element) {
-            const f = document.getElementById('feedback'); if(user.toLowerCase().trim() === correct.toLowerCase()) { f.textContent = "Acerto Crítico! +20 XP"; f.style.color = "#4ade80"; document.getElementById('nextBtn').style.display = "block"; let xp = parseInt(localStorage.getItem('ffes_xp')||0); localStorage.setItem('ffes_xp', xp+20); }
-            else { f.textContent = "Erro de Rotina. Tente novamente."; f.style.color = "#f87171"; }
+
+        // === 1. DATA ASSETS ===
+        const subjects = [
+            { en: "I", pt: "Eu", type: "pl", p: "eu" },
+            { en: "You", pt: "Você", type: "pl", p: "ele" },
+            { en: "We", pt: "Nós", type: "pl", p: "nos" },
+            { en: "They", pt: "Eles", type: "pl", p: "eles" },
+            { en: "He", pt: "Ele", type: "3s", p: "ele" },
+            { en: "She", pt: "Ela", type: "3s", p: "ele" }
+        ];
+        const objectBank = [
+            { en: "the bank", pt: "banco", type: "place_work", gen: "m" },
+            { en: "the office", pt: "escritório", type: "place_work", gen: "m" },
+            { en: "the store", pt: "loja", type: "place_work", gen: "f" },
+            { en: "the hospital", pt: "hospital", type: "place_work", gen: "m" },
+            { en: "school", pt: "escola", type: "place_study", gen: "f" },
+            { en: "the library", pt: "biblioteca", type: "place_study", gen: "f" },
+            { en: "the park", pt: "parque", type: "place_leisure", gen: "m" },
+            { en: "the beach", pt: "praia", type: "place_leisure", gen: "f" },
+            { en: "home", pt: "casa", type: "place_home", gen: "null" },
+            { en: "Brazil", pt: "Brasil", type: "city", gen: "m" },
+            { en: "pizza", pt: "pizza", type: "food", gen: "f" },
+            { en: "bread", pt: "pão", type: "food", gen: "m" },
+            { en: "an apple", pt: "uma maçã", type: "food", gen: "f" },
+            { en: "water", pt: "água", type: "liquid", gen: "f" },
+            { en: "coffee", pt: "café", type: "liquid", gen: "m" },
+            { en: "milk", pt: "leite", type: "liquid", gen: "m" },
+            { en: "soccer", pt: "futebol", type: "sport", gen: "m" },
+            { en: "tennis", pt: "tênis", type: "sport", gen: "m" },
+            { en: "English", pt: "inglês", type: "lang", gen: "m" },
+            { en: "Portuguese", pt: "português", type: "lang", gen: "m" }
+        ];
+        const verbs = [
+            { en: "work", cats: ["place_work"], conn: "at", pt: { eu: "trabalho", ele: "trabalha", nos: "trabalhamos", eles: "trabalham" } },
+            { en: "study", cats: ["place_study", "lang"], conn: "at", pt: { eu: "estudo", ele: "estuda", nos: "estudamos", eles: "estudam" } },
+            { en: "live", cats: ["place_home", "city"], conn: "in", pt: { eu: "moro", ele: "mora", nos: "moramos", eles: "moram" } },
+            { en: "go", cats: ["place_work", "place_study", "place_leisure", "place_home", "city"], conn: "to", pt: { eu: "vou", ele: "vai", nos: "vamos", eles: "vão" } },
+            { en: "eat", cats: ["food"], conn: "", pt: { eu: "como", ele: "come", nos: "comemos", eles: "comem" } },
+            { en: "drink", cats: ["liquid"], conn: "", pt: { eu: "bebo", ele: "bebe", nos: "bebemos", eles: "bebem" } },
+            { en: "play", cats: ["sport"], conn: "", pt: { eu: "jogo", ele: "joga", nos: "jogamos", eles: "jogam" } },
+            { en: "speak", cats: ["lang"], conn: "", pt: { eu: "falo", ele: "fala", nos: "falamos", eles: "falam" } }
+        ];
+
+        // === 2. ENGINE LINGUÍSTICA ===
+        function getPortuguesePreposition(connEn, genderPt) {
+            if (genderPt === "null") {
+                if (connEn === "to") return "para";
+                if (connEn === "at" || connEn === "in") return "em";
+                return "";
+            }
+            if (connEn === "at" || connEn === "in") return genderPt === "m" ? "no" : "na";
+            if (connEn === "to") return genderPt === "m" ? "ao" : "à";
+            return genderPt === "m" ? "o" : "a";
         }
-        function nextQuestion() { currentQ++; if(currentQ < 4) renderQuestion(); else document.getElementById('quest-content').innerHTML = "<h2 class='text-gold'>Módulo Concluído!</h2>"; }
+
+        // === 3. ENGINE DO JOGO ===
+        let xp = parseInt(localStorage.getItem('ffes_xp') || 0);
+        document.getElementById('xp-val').innerText = xp;
+        let currentMode = '';
+        let correctIdx = 0;
+        let currentSolutionScramble = "";
+        let userScramble = [];
+
+        function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        function conjugateEn(verb, type) {
+            if (type === "pl") return verb;
+            if (verb === "go") return "goes";
+            if (verb === "do") return "does";
+            if (verb === "study") return "studies";
+            return verb + "s"; 
+        }
+
+        function getRoundData() {
+            const subj = rand(subjects);
+            const verbData = rand(verbs); 
+            const allowedObjects = objectBank.filter(obj => verbData.cats.includes(obj.type));
+            const obj = allowedObjects.length > 0 ? rand(allowedObjects) : { en: "it", pt: "isso", type: "misc", gen: "m" };
+            let connectorEn = verbData.conn;
+            if (obj.type === "lang") connectorEn = "";
+            if (verbData.en === "go" && obj.en === "home") connectorEn = "";
+            const conjVerbEn = conjugateEn(verbData.en, subj.type);
+            let parts = [subj.en, conjVerbEn];
+            if (connectorEn) parts.push(connectorEn);
+            parts.push(obj.en);
+            const fullEn = parts.join(" ");
+            const verbPt = verbData.pt[subj.p]; 
+            let midPt = "";
+            if (connectorEn) {
+                midPt = getPortuguesePreposition(connectorEn, obj.gen);
+            } else if (verbData.en === "eat" || verbData.en === "drink" || verbData.en === "speak" || verbData.en === "play") {
+                midPt = ""; 
+            }
+            const fullPt = `${subj.pt} ${verbPt} ${midPt ? midPt + " " : ""}${obj.pt}`.replace(/\s+/g, ' ').trim();
+            return { subj, verbData, obj, parts, fullEn, fullPt, connector: connectorEn };
+        }
+
+        function startGame(mode) {
+            currentMode = mode;
+            document.getElementById('game-container').style.display = 'flex';
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            const abControls = document.getElementById('ab-controls');
+            const scCheck = document.getElementById('btn-check-scramble');
+            const display = document.getElementById('display-sentence');
+            const scrambleUI = document.getElementById('scramble-ui');
+            if (mode === 'scramble') {
+                abControls.style.display = 'none';
+                scCheck.style.display = 'block';
+                display.style.display = 'none';
+                scrambleUI.style.display = 'block';
+            } else {
+                abControls.style.display = 'grid';
+                scCheck.style.display = 'none';
+                display.style.display = 'block';
+                scrambleUI.style.display = 'none';
+            }
+            generate();
+        }
+
+        function generate() {
+            const data = getRoundData();
+            const display = document.getElementById('display-sentence');
+            const fb = document.getElementById('feedback');
+            fb.className = ''; fb.innerText = '';
+            document.getElementById('btn1').className = 'btn-option';
+            document.getElementById('btn2').className = 'btn-option';
+            document.getElementById('btn-check-scramble').className = 'btn-option';
+            if (currentMode === 'mc') {
+                if (Math.random() > 0.5) {
+                    let sentenceHtml = `${data.parts[0]} <span class="gap">_____</span> ${data.parts.slice(2).join(" ")}.`;
+                    display.innerHTML = sentenceHtml;
+                    const correct = data.parts[1]; 
+                    const wrong = data.subj.type === '3s' ? data.verbData.en : conjugateEn(data.verbData.en, '3s');
+                    setOptions(correct, wrong);
+                } else {
+                    const auxCorrect = data.subj.type === '3s' ? "Does" : "Do";
+                    const auxWrong = data.subj.type === '3s' ? "Do" : "Does";
+                    const baseVerb = data.verbData.en; 
+                    let rest = [baseVerb, ...data.parts.slice(2)].join(" ");
+                    display.innerHTML = `<span class="gap">_____</span> ${data.subj.en} ${rest}?`;
+                    setOptions(auxCorrect, auxWrong);
+                }
+            } 
+            else if (currentMode === 'translation') {
+                display.innerHTML = `"${data.fullPt}"`;
+                const correct = data.fullEn;
+                let wrong = "";
+                const r = Math.random();
+                if(r < 0.33) {
+                    wrong = data.fullEn.replace(data.parts[1], data.subj.type === '3s' ? data.verbData.en : data.verbData.en + "s");
+                } else if (r < 0.66 && data.connector) {
+                    const wrongConn = data.connector === "to" ? "at" : "to";
+                    wrong = data.fullEn.replace(` ${data.connector} `, ` ${wrongConn} `);
+                } else {
+                    const wrongSubj = data.subj.en === "He" ? "I" : "He";
+                    wrong = data.fullEn.replace(data.subj.en, wrongSubj);
+                }
+                setOptions(correct, wrong);
+            }
+            else if (currentMode === 'scramble') {
+                currentSolutionScramble = data.fullEn;
+                userScramble = [];
+                const pool = document.getElementById('scramble-pool');
+                const ans = document.getElementById('scramble-answer');
+                pool.innerHTML = "";
+                ans.innerText = "";
+                let words = [...data.parts];
+                words.sort(() => Math.random() - 0.5);
+                words.forEach(w => {
+                    const pill = document.createElement('span');
+                    pill.className = 'word-pill';
+                    pill.innerText = w;
+                    pill.onclick = () => {
+                        userScramble.push(w);
+                        ans.innerText = userScramble.join(" ");
+                        pill.style.display = 'none';
+                    };
+                    pool.appendChild(pill);
+                });
+            }
+        }
+
+        function setOptions(correct, wrong) {
+            correctIdx = Math.random() > 0.5 ? 1 : 2;
+            document.getElementById(`btn${correctIdx}`).innerText = correct;
+            document.getElementById(`btn${correctIdx === 1 ? 2 : 1}`).innerText = wrong;
+        }
+
+        function checkAnswer(idx) {
+            const fb = document.getElementById('feedback');
+            const btn = document.getElementById(`btn${idx}`);
+            if (idx === correctIdx) {
+                fb.innerText = "PERFEITO!"; fb.style.color = "#00e676"; fb.className = "visible";
+                btn.classList.add('correct'); addXP(15); 
+                playWinSound(); // Som
+                triggerCasinoEffect(); // Animação de moedas
+                setTimeout(generate, 1500); // Aumentei um pouco o tempo para apreciar a animação
+            } else {
+                fb.innerText = "TENTE NOVAMENTE"; fb.style.color = "#ff1744"; fb.className = "visible";
+                btn.classList.add('wrong'); addXP(-5);
+            }
+        }
+
+        function verifyScramble() {
+            const fb = document.getElementById('feedback');
+            const btn = document.getElementById('btn-check-scramble');
+            if (userScramble.join(" ") === currentSolutionScramble) {
+                fb.innerText = "EXCELENTE!"; fb.style.color = "#00e676"; fb.className = "visible";
+                btn.classList.add('correct'); addXP(20);
+                playWinSound(); // Som
+                triggerCasinoEffect(); // Animação de moedas
+                setTimeout(() => { btn.classList.remove('correct'); generate(); }, 1500);
+            } else {
+                fb.innerText = "ORDEM ERRADA"; fb.style.color = "#ff1744"; fb.className = "visible";
+                btn.classList.add('wrong');
+                setTimeout(() => {
+                    btn.classList.remove('wrong'); userScramble = [];
+                    document.getElementById('scramble-answer').innerText = "";
+                    document.querySelectorAll('.word-pill').forEach(p => p.style.display = 'inline-block');
+                }, 1000);
+            }
+        }
+
+        function addXP(val) {
+            xp = Math.max(0, xp + val); localStorage.setItem('ffes_xp', xp);
+            document.getElementById('xp-val').innerText = xp;
+        }
     </script>
+
+    
 </body>
 </html>

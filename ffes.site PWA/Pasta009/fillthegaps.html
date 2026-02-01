@@ -3,169 +3,450 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FFES | Preencher Lacunas (Conectores)</title>
+    <title>FFES PWA - Preencher Lacunas</title>
     <link rel="stylesheet" href="../style.css">
+
     <style>
-        .exercise-box {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-top: 20px;
-            text-align: center;
-        }
-        .sentence-display {
-            font-size: 1.4rem;
-            color: #fff;
-            margin-bottom: 30px;
-            line-height: 1.6;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 15px;
-        }
-        .gap-highlight {
-            color: #b8860b;
-            font-weight: 800;
-            border-bottom: 2px dashed #b8860b;
-            padding: 0 5px;
-        }
-        .mc-options {
-            display: grid;
-            gap: 12px;
-            max-width: 400px;
+        /* === ESTILO UNIFICADO (PADRÃO PWA) === */
+        
+        /* Layout Principal */
+        .game-wrapper {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
             margin: 0 auto;
         }
-        .mc-option {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 15px;
-            border-radius: 12px;
+
+        /* Card do Jogo (Glassmorphism) */
+        .game-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 2px solid var(--accent-gold);
+            border-radius: 24px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: var(--glass-shadow);
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative; /* Importante para efeitos */
+            overflow: hidden;   /* Importante para efeitos */
+        }
+
+        /* Tipografia do Display */
+        #display, #display-sentence {
+            font-size: 1.8rem;
+            font-weight: 700;
+            line-height: 1.4;
+            color: var(--text-white);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            z-index: 2;
+        }
+
+        /* Lacunas */
+        .gap { 
+            color: var(--accent-gold); 
+            border-bottom: 3px solid var(--accent-gold); 
+            padding: 0 8px; 
+            display: inline-block; 
+            min-width: 60px; 
+        }
+
+        /* Feedback Visual */
+        #feedback {
+            height: 30px;
+            text-align: center;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            opacity: 0;
+            margin-bottom: 10px;
+        }
+        #feedback.visible { opacity: 1; transform: translateY(-5px); }
+
+        /* Controles e Botões */
+        .game-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .btn-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-white);
+            padding: 20px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            border-radius: 16px;
             cursor: pointer;
-            transition: 0.3s;
-            color: #fff;
+            transition: all 0.2s ease;
+            backdrop-filter: var(--glass-blur);
+            text-transform: capitalize;
+        }
+
+        .btn-option:hover {
+            border-color: var(--accent-gold);
+            background: rgba(255, 184, 28, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .btn-option.correct {
+            background: #00e676 !important;
+            color: #000 !important;
+            border-color: #00e676 !important;
+        }
+
+        .btn-option.wrong {
+            background: #ff1744 !important;
+            opacity: 0.5;
+        }
+
+        /* XP Pill */
+        .xp-pill {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--accent-gold);
+            padding: 5px 15px;
+            border-radius: 50px;
+            color: var(--accent-gold);
+            font-weight: 800;
             font-size: 1.1rem;
+            margin-top: 10px;
+            display: inline-block;
         }
-        .mc-option:hover {
-            background: rgba(184, 134, 11, 0.2);
-            border-color: #b8860b;
+
+        /* === Elementos Específicos (Teoria e Scramble) === */
+        .theory-section { 
+            background: rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            border-radius: 20px; 
+            padding: 2rem; 
+            margin-bottom: 30px; 
+            color: var(--text-white); 
         }
-        .correct { background: rgba(74, 222, 128, 0.2) !important; border-color: #4ade80 !important; }
-        .wrong { background: rgba(248, 113, 113, 0.2) !important; border-color: #f87171 !important; }
-        .placar-box {
-            margin-bottom: 15px;
-            font-size: 0.9rem;
-            color: rgba(255,255,255,0.6);
+        
+        .formula-box { 
+            background: rgba(184, 134, 11, 0.1); 
+            border-left: 4px solid var(--accent-gold); 
+            padding: 15px; 
+            margin: 20px 0; 
+            border-radius: 0 10px 10px 0; 
+            font-weight: bold; 
+        }
+
+        .mode-selector { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 10px; 
+            margin-bottom: 30px; 
+        }
+        
+        .mode-btn { 
+            background: rgba(255, 255, 255, 0.07); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            padding: 15px; 
+            border-radius: 12px; 
+            color: var(--text-white); 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: 0.3s; 
+        }
+        
+        .mode-btn:hover, .mode-btn.active { 
+            background: rgba(184, 134, 11, 0.3); 
+            border-color: var(--accent-gold); 
+        }
+
+        .word-pill { 
+            display: inline-block; 
+            padding: 10px 15px; 
+            margin: 5px; 
+            background: rgba(0,0,0,0.3); 
+            border: 1px solid var(--accent-gold); 
+            border-radius: 20px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            color: var(--accent-gold); 
+        }
+        
+        #scramble-answer { 
+            min-height: 40px; 
+            border-bottom: 2px solid var(--accent-gold); 
+            margin: 20px 0; 
+            font-size: 1.4rem; 
+            color: var(--text-white); 
+            width: 100%; 
+        }
+        
+        .text-gold { color: var(--accent-gold); }
+
+        /* === NOVA ANIMAÇÃO CASSINO (Moedas) === */
+        .casino-coin {
+            position: fixed;
+            width: 25px;
+            height: 25px;
+            background: var(--accent-gold);
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.9), inset 0 0 5px rgba(255, 255, 255, 0.5);
+            pointer-events: none;
+            z-index: 9999;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes coin-explosion {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(1) rotate(720deg);
+                opacity: 0;
+            }
         }
     </style>
+    
 </head>
-<body class="dashboard-container">
+<body>
 
+    <div class="background-glow glow-1"></div>
     <div class="background-glow glow-2"></div>
 
     <header class="glass-header">
-        <h1>CONECTORES <span class="text-gold">TÁTICOS</span></h1>
-        <p class="subtitle">Módulo 09 - Coesão e Fluidez</p>
+  
+        
+        <h1 class="clean-link">Preencher Lacunas</h1>
+        <p class="subtitle">Módulo 09 - Fill the gaps</p>
+        
+        <div class="xp-pill">XP: <span id="xp-val">0</span></div>
     </header>
 
-    <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
-        
-        <div id="game-container" class="exercise-box">
-            <div class="placar-box">
-                Sessão Atual: <span id="hits" class="text-gold">0</span> acertos
+    <main class="dashboard-container">
+        <div class="game-wrapper">
+            
+            <div id="feedback"></div>
+
+            <div class="game-card">
+                <div id="display">Loading...</div>
             </div>
 
-            <div id="sentence" class="sentence-display">Carregando...</div>
-            
-            <div id="options" class="mc-options"></div>
-            
-            <div id="feedback" style="margin-top: 20px; font-weight: bold; min-height: 24px;"></div>
+            <div class="game-controls">
+                <button id="btn1" class="btn-option" onclick="check(1)">A</button>
+                <button id="btn2" class="btn-option" onclick="check(2)">B</button>
+            </div>
 
-            <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin: 20px auto 0; display: block;">PRÓXIMA ➡</button>
-        </div>
-
-        <div style="margin-top: 40px; text-align: center;">
-            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;">
-                <span>⬅ Voltar ao Painel Principal</span>
-            </a>
         </div>
     </main>
 
+    <footer class="glass-footer">
+        © 2026 FFES - Sovereignty System v2.1
+    </footer>
+
     <script>
-        const allQuestions = [
-            { s: "I like tea, [_____] she prefers coffee.", opts: ["but", "so", "and"], correct: 0 },
-            { s: "He studied hard, [_____] he failed the test.", opts: ["so", "but", "because"], correct: 1 },
-            { s: "[_____] it was cold, he went out without a jacket.", opts: ["Although", "Because", "So"], correct: 0 },
-            { s: "I stayed home [_____] I was sick.", opts: ["because", "although", "so"], correct: 0 },
-            { s: "He was sick, [_____] he didn't go to work.", opts: ["but", "so", "because"], correct: 1 }
-        ];
+        // === 0. SISTEMA DE ÁUDIO & ANIMAÇÃO (DOPAMINA CASSINO) ===
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        let index = 0;
-        let score = 0;
-
-        function load() {
-            if (index >= allQuestions.length) {
-                document.getElementById('game-container').innerHTML = `
-                    <h2 class="text-gold">Soberania em Conectores!</h2>
-                    <p style="color:#fff; margin: 20px 0;">Sua capacidade de ligar ideias foi validada.</p>
-                    <button onclick="location.reload()" class="btn-gold" style="margin: 0 auto; display:block">REPETIR MÓDULO</button>
-                `;
-                return;
-            }
-
-            const q = allQuestions[index];
-            // Formata a frase para destacar a lacuna
-            document.getElementById('sentence').innerHTML = q.s.replace("[_____]", "<span class='gap-highlight'>_____</span>");
-            document.getElementById('feedback').textContent = "";
-            document.getElementById('nextBtn').style.display = "none";
-            
-            const optDiv = document.getElementById('options');
-            optDiv.innerHTML = "";
-
-            q.opts.forEach((opt, i) => {
-                const btn = document.createElement('div');
-                btn.className = 'mc-option';
-                btn.textContent = opt;
-                btn.onclick = () => check(i, btn);
-                optDiv.appendChild(btn);
-            });
+        function playWinSound() {
+            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(1200, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(2000, audioCtx.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.3);
         }
 
-        function check(choice, el) {
-            const correct = allQuestions[index].correct;
-            const feedback = document.getElementById('feedback');
-            const btns = document.querySelectorAll('.mc-option');
-            
-            btns.forEach(b => b.onclick = null);
-
-            if (choice === correct) {
-                el.classList.add('correct');
-                feedback.innerHTML = `<span style="color: #4ade80">CONEXÃO ESTABELECIDA: +20 XP</span>`;
-                score++;
-                document.getElementById('hits').textContent = score;
+        // Função que cria a explosão de moedas
+        function triggerCasinoEffect() {
+            const numCoins = 20; // Quantidade de moedas
+            for (let i = 0; i < numCoins; i++) {
+                const coin = document.createElement('div');
+                coin.classList.add('casino-coin');
                 
-                let xp = localStorage.getItem('ffes_xp') || 0;
-                localStorage.setItem('ffes_xp', parseInt(xp) + 20);
-            } else {
-                el.classList.add('wrong');
-                btns[correct].classList.add('correct');
-                feedback.innerHTML = `<span style="color: #f87171">FALHA NA CONEXÃO LÓGICA</span>`;
+                // Calcula direção aleatória para explosão
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 150 + Math.random() * 200; // Raio da explosão
+                const tx = Math.cos(angle) * distance + 'px';
+                const ty = Math.sin(angle) * distance + 'px';
+                
+                // Define as variáveis CSS para a trajetória única desta moeda
+                coin.style.setProperty('--tx', tx);
+                coin.style.setProperty('--ty', ty);
+                
+                // Duração e tempo aleatórios para parecer natural
+                coin.style.animation = `coin-explosion ${0.8 + Math.random() * 0.5}s ease-out forwards`;
+                
+                document.body.appendChild(coin);
+                
+                // Limpa o elemento do DOM após a animação
+                setTimeout(() => { coin.remove(); }, 1500);
             }
-
-            document.getElementById('nextBtn').style.display = "block";
         }
 
-        function nextQuestion() {
-            index++;
-            load();
+        // === 1. SUJEITOS ===
+        const subjects = [
+            { t: "I", type: "pl" }, { t: "You", type: "pl" }, { t: "We", type: "pl" }, { t: "They", type: "pl" },
+            { t: "He", type: "3s" }, { t: "She", type: "3s" }, 
+            { t: "The boy", type: "3s" }, { t: "The girl", type: "3s" },
+            { t: "My mom", type: "3s" }, { t: "The teacher", type: "3s" }
+        ];
+        const objects = {
+            cookable: ["pizza", "bread", "meat", "pasta", "cake"],
+            fruit: ["fruit", "an apple"],
+            liquid: ["water", "coffee", "beer", "juice", "milk", "tea"],
+            gadget: ["the phone", "the computer", "the camera"],
+            app: ["the app", "the game"],
+            info: ["the email", "the book", "the news", "the message"],
+            bedding: ["the bed"], seat: ["the chair"], fixture: ["the door", "the window"], 
+            home: ["the house"], place: ["the park", "school", "the bank"], 
+            car: ["the car"], transport: ["the bus"],
+            language: ["English", "Portuguese"], sport: ["soccer", "tennis"]
+        };
+        const verbs = [
+            { root: "eat", cats: ["cookable", "fruit"], conn: "", allowModal: true },
+            { root: "drink", cats: ["liquid"], conn: "", allowModal: true },
+            { root: "cook", cats: ["cookable"], conn: "", allowModal: true },
+            { root: "buy", cats: ["cookable", "fruit", "liquid", "gadget", "car"], conn: "", allowModal: true },
+            { root: "want", cats: ["cookable", "fruit", "gadget", "car", "home"], conn: "", allowModal: false }, 
+            { root: "have", cats: ["gadget", "car", "home"], conn: "", allowModal: true },
+            { root: "go", cats: ["place", "home"], conn: "to", allowModal: true },
+            { root: "come", cats: ["place", "home"], conn: "to", allowModal: true },
+            { root: "drive", cats: ["place", "home"], conn: "to", allowModal: true }, 
+            { root: "drive", cats: ["car", "transport"], conn: "", allowModal: true }, 
+            { root: "take", cats: ["transport"], conn: "", allowModal: true },
+            { root: "live", cats: ["home"], conn: "in", allowModal: true }, 
+            { root: "sleep", cats: ["home", "bedding"], conn: "in", allowModal: true }, 
+            { root: "sit", cats: ["seat"], conn: "on", allowModal: true }, 
+            { root: "work", cats: ["place"], conn: "at", allowModal: true }, 
+            { root: "speak", cats: ["language"], conn: "", allowModal: true }, 
+            { root: "study", cats: ["language"], conn: "", allowModal: true }, 
+            { root: "read", cats: ["info"], conn: "", allowModal: true },
+            { root: "write", cats: ["info"], conn: "", allowModal: true },
+            { root: "play", cats: ["sport", "app"], conn: "", allowModal: true }, 
+            { root: "use", cats: ["gadget", "app"], conn: "", allowModal: true }, 
+            { root: "open", cats: ["fixture", "home", "app"], conn: "", allowModal: true }, 
+            { root: "close", cats: ["fixture", "home", "app"], conn: "", allowModal: true },
+            { root: "like", cats: ["cookable", "fruit", "sport", "gadget"], conn: "", allowModal: false }
+        ];
+        const modals = ["can", "will", "must", "should"];
+        const wildcards = ["to", "for", "in", "on", "at", "the", "a", "an"];
+
+        // === ENGINE ===
+        let xp = 0;
+        let correctTxt = "";
+        let correctIdx = 0;
+
+        function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        function conjugate(verb, subjType) {
+            if (subjType === "3s") {
+                if (verb === "go") return "goes";
+                if (verb === "do") return "does";
+                if (verb === "study") return "studies";
+                if (verb === "have") return "has";
+                return verb + "s";
+            }
+            return verb;
         }
 
-        load();
+        function generate() {
+            const roll = Math.random();
+            if (roll < 0.60) generateVerbRound();      
+            else if (roll < 0.85) generateModalRound(); 
+            else generateAuxRound();                    
+        }
+
+        function generateVerbRound() {
+            const s = rand(subjects);
+            const vData = rand(verbs);
+            const cat = rand(vData.cats);
+            const obj = rand(objects[cat]);
+            const correctV = conjugate(vData.root, s.type);
+            let wrongV = "";
+            if (Math.random() > 0.4) {
+                let randomV = rand(verbs);
+                while ((randomV.cats.includes(cat) || randomV.root === vData.root)) { randomV = rand(verbs); }
+                wrongV = conjugate(randomV.root, s.type);
+            } else { wrongV = rand(wildcards); }
+            correctTxt = correctV;
+            const conn = vData.conn ? vData.conn + " " : "";
+            render(`${s.t} <span class="gap">_____</span> ${conn}${obj}.`, correctV, wrongV);
+        }
+
+        function generateModalRound() {
+            const s = rand(subjects);
+            let vData = rand(verbs);
+            while (vData.allowModal === false) { vData = rand(verbs); }
+            const cat = rand(vData.cats);
+            const obj = rand(objects[cat]);
+            const modal = rand(modals);
+            correctTxt = modal;
+            const wrong = Math.random() > 0.5 ? rand(wildcards) : conjugate(vData.root, "3s"); 
+            const conn = vData.conn ? vData.conn + " " : "";
+            render(`${s.t} <span class="gap">_____</span> ${vData.root} ${conn}${obj}.`, modal, wrong);
+        }
+
+        function generateAuxRound() {
+            const s = rand(subjects);
+            const vData = rand(verbs);
+            const cat = rand(vData.cats);
+            const obj = rand(objects[cat]);
+            const correctAux = s.type === "3s" ? "Does" : "Do";
+            const wrongAux = s.type === "3s" ? "Do" : "Does";
+            correctTxt = correctAux;
+            const conn = vData.conn ? vData.conn + " " : "";
+            render(`<span class="gap">_____</span> ${s.t.toLowerCase()} ${vData.root} ${conn}${obj}?`, correctAux, wrongAux);
+        }
+
+        function render(html, correct, wrong) {
+            document.getElementById('display').innerHTML = html;
+            const fb = document.getElementById('feedback');
+            fb.className = ''; fb.innerText = '';
+            document.getElementById('btn1').className = 'btn-option';
+            document.getElementById('btn2').className = 'btn-option';
+            correctIdx = Math.random() > 0.5 ? 1 : 2;
+            document.getElementById(`btn${correctIdx}`).innerText = correct;
+            document.getElementById(`btn${correctIdx === 1 ? 2 : 1}`).innerText = wrong;
+        }
+
+        function check(idx) {
+            const fb = document.getElementById('feedback');
+            const btn = document.getElementById(`btn${idx}`);
+            if (idx === correctIdx) {
+                xp += 15;
+                fb.innerText = "PERFEITO!"; fb.style.color = "#00e676";
+                fb.className = "visible"; btn.classList.add('correct');
+                document.querySelector('.gap').innerText = correctTxt;
+                playWinSound(); // Som
+                triggerCasinoEffect(); // Animação de moedas
+                setTimeout(generate, 1500); // Aumentei o tempo para apreciar a animação
+            } else {
+                xp = Math.max(0, xp - 5);
+                fb.innerText = "OPS! TENTE NOVAMENTE"; fb.style.color = "#ff1744";
+                fb.className = "visible"; btn.classList.add('wrong');
+            }
+            document.getElementById('xp-val').innerText = xp;
+        }
+
+        generate();
     </script>
 
-    <footer class="glass-footer">
-        <p>&copy; 2026 FFES - Sovereignty System v2.1</p>
-    </footer>
+
 
 </body>
 </html>
