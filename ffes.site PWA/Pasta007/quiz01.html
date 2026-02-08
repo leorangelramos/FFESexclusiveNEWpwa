@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FFES | Qual não pertence?</title>
+    <title>FFES | Verdadeiro ou Falso</title>
     <link rel="stylesheet" href="../style.css">
     <style>
         .exercise-box {
@@ -15,41 +15,46 @@
             margin-top: 20px;
             text-align: center;
         }
-        .mc-options {
-            display: grid;
-            gap: 12px;
-            margin: 25px 0;
+        .tf-grid {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 30px 0;
         }
-        .mc-option {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 15px;
-            border-radius: 12px;
+        .btn-tf {
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-weight: bold;
             cursor: pointer;
             transition: 0.3s;
+            border: 2px solid rgba(255,255,255,0.1);
             color: #fff;
+            font-size: 1.2rem;
         }
-        .mc-option:hover {
-            background: rgba(184, 134, 11, 0.2);
-            border-color: #b8860b;
-        }
-        .correct { background: rgba(74, 222, 128, 0.2) !important; border-color: #4ade80 !important; }
-        .wrong { background: rgba(248, 113, 113, 0.2) !important; border-color: #f87171 !important; }
+        .btn-true { background: rgba(74, 222, 128, 0.1); }
+        .btn-true:hover { background: rgba(74, 222, 128, 0.3); border-color: #4ade80; }
+        .btn-false { background: rgba(248, 113, 113, 0.1); }
+        .btn-false:hover { background: rgba(248, 113, 113, 0.3); border-color: #f87171; }
     </style>
 </head>
 <body class="dashboard-container">
 
-    <div class="background-glow glow-1"></div>
+    <div class="background-glow glow-2"></div>
 
     <header class="glass-header">
-        <h1>QUAL NÃO <span class="text-gold">PERTENCE?</span></h1>
-        <p class="subtitle">Módulo 07 - Lógica Semântica</p>
+        <h1>VERDADEIRO OU <span class="text-gold">FALSO</span></h1>
+        <p class="subtitle">Módulo 07 - Validação de Sentenças</p>
     </header>
 
     <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
         <div id="game-container" class="exercise-box">
-            <h2 id="question" style="color: #fff; margin-bottom: 20px;">Carregando desafio...</h2>
-            <div id="options" class="mc-options"></div>
+            <h2 id="statement" style="color: #fff; margin-bottom: 20px; font-size: 1.4rem;">"She play soccer every day" está gramaticalmente correto?</h2>
+            
+            <div class="tf-grid">
+                <div class="btn-tf btn-true" onclick="check(true)">VERDADEIRO</div>
+                <div class="btn-tf btn-false" onclick="check(false)">FALSO</div>
+            </div>
+
             <div id="feedback" style="margin-top: 20px; font-weight: bold; min-height: 24px;"></div>
             <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin: 20px auto 0;">PRÓXIMA ➡</button>
         </div>
@@ -62,46 +67,31 @@
     </main>
 
     <script>
-        const challenges = [
-            { q: "Qual palavra não pertence ao grupo?", opts: ["Apple", "Banana", "Car", "Orange"], correct: 2 },
-            { q: "Qual destes não é um verbo no passado?", opts: ["Played", "Went", "Eating", "Did"], correct: 2 },
-            { q: "Qual palavra é o intruso?", opts: ["Brother", "Teacher", "Sister", "Father"], correct: 1 }
+        const facts = [
+            { s: "'She play soccer' está correto?", a: false },
+            { s: "'Did you go?' é uma pergunta no passado?", a: true },
+            { s: "'I am eat' é uma estrutura correta?", a: false }
         ];
 
         let currentIdx = 0;
 
         function load() {
-            if (currentIdx >= challenges.length) {
-                document.getElementById('game-container').innerHTML = `<h2 class="text-gold">Lógica Concluída!</h2><button onclick="location.reload()" class="btn-gold" style="margin-top:20px">RECOMEÇAR</button>`;
+            if (currentIdx >= facts.length) {
+                document.getElementById('game-container').innerHTML = `<h2 class="text-gold">Validação Concluída!</h2><button onclick="location.reload()" class="btn-gold" style="margin-top:20px">RECOMEÇAR</button>`;
                 return;
             }
-            const item = challenges[currentIdx];
-            document.getElementById('question').textContent = item.q;
+            document.getElementById('statement').textContent = facts[currentIdx].s;
             document.getElementById('feedback').textContent = "";
             document.getElementById('nextBtn').style.display = "none";
-            const optDiv = document.getElementById('options');
-            optDiv.innerHTML = "";
-            item.opts.forEach((opt, i) => {
-                const btn = document.createElement('div');
-                btn.className = 'mc-option';
-                btn.textContent = opt;
-                btn.onclick = () => check(i, btn);
-                optDiv.appendChild(btn);
-            });
         }
 
-        function check(choice, el) {
-            const correct = challenges[currentIdx].correct;
-            const btns = document.querySelectorAll('.mc-option');
-            btns.forEach(b => b.onclick = null);
-            if (choice === correct) {
-                el.classList.add('correct');
+        function check(userAns) {
+            const correct = facts[currentIdx].a;
+            if (userAns === correct) {
                 document.getElementById('feedback').innerHTML = "<span style='color: #4ade80'>CORRETO! +20 XP</span>";
                 let xp = localStorage.getItem('ffes_xp') || 0;
                 localStorage.setItem('ffes_xp', parseInt(xp) + 20);
             } else {
-                el.classList.add('wrong');
-                btns[correct].classList.add('correct');
                 document.getElementById('feedback').innerHTML = "<span style='color: #f87171'>INCORRETO</span>";
             }
             document.getElementById('nextBtn').style.display = "block";
