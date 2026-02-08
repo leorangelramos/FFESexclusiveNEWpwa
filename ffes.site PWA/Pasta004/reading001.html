@@ -6,62 +6,62 @@
     <title>FFES | Reading Zone Master 100</title>
     <link rel="stylesheet" href="../style.css">
     <style>
-        /* === ESTILO ORIGINAL PRESERVADO === */
+        /* === LAYOUT TÁTICO (MOBILE FIRST) === */
         .exercise-box {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
-            padding: 1.5rem;
-            margin-top: 20px;
+            padding: 1rem;
+            margin-top: 10px;
         }
+
         .game-area {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 20px;
+            display: flex;
+            flex-direction: column; /* Vertical para celular (Fragmentos em cima) */
+            gap: 15px;
+            margin-top: 15px;
         }
-        @media (max-width: 600px) { .game-area { grid-template-columns: 1fr; } }
 
         .column-box {
             background: rgba(255, 255, 255, 0.03);
             border-radius: 15px;
-            padding: 15px;
-            min-height: 300px;
+            padding: 12px;
+            min-height: 200px;
             border: 1px dashed rgba(255, 255, 255, 0.1);
-            transition: border 0.3s;
-        }
-        .paragraph-block {
-            background: rgba(184, 134, 11, 0.15);
-            border: 1px solid rgba(184, 134, 11, 0.4);
-            padding: 15px;
-            margin-bottom: 12px;
-            border-radius: 10px;
-            cursor: grab;
-            color: #fff;
-            font-size: 1rem;
-            line-height: 1.4;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.2s, background 0.2s;
-        }
-        .paragraph-block:active { cursor: grabbing; transform: scale(0.98); }
-        .paragraph-block:hover { background: rgba(184, 134, 11, 0.25); }
-        
-        .drop-zone {
-            min-height: 100%; /* Ocupa a altura toda para soltar em qualquer lugar */
+            position: relative;
         }
 
         .column-title {
             text-align: center;
             font-size: 0.9rem;
             color: #b8860b;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: 800;
+            pointer-events: none; /* Evita cliques no título */
         }
 
-        /* Elementos do Sistema FFES (Moedas e XP) */
+        .paragraph-block {
+            background: rgba(184, 134, 11, 0.15);
+            border: 1px solid rgba(184, 134, 11, 0.4);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            cursor: pointer; /* Indica que é clicável */
+            color: #fff;
+            font-size: 1rem; /* Fonte legível no mobile */
+            line-height: 1.4;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s, background 0.2s;
+            touch-action: manipulation; /* Melhora resposta ao toque */
+        }
+
+        .paragraph-block:active { transform: scale(0.98); background: rgba(184, 134, 11, 0.3); }
+        .paragraph-block:hover { background: rgba(184, 134, 11, 0.25); border-color: var(--accent-gold); }
+        
+        /* Efeitos Visuais (Moedas e XP) */
         .casino-coin {
             position: fixed; width: 25px; height: 25px;
             background: var(--accent-gold); border-radius: 50%;
@@ -75,19 +75,15 @@
         }
         
         .xp-pill {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--accent-gold);
-            padding: 5px 15px;
-            border-radius: 50px;
-            color: var(--accent-gold);
-            font-weight: 800;
-            display: inline-block;
+            background: rgba(0, 0, 0, 0.3); border: 1px solid var(--accent-gold);
+            padding: 5px 15px; border-radius: 50px; color: var(--accent-gold);
+            font-weight: 800; display: inline-block;
         }
     </style>
 </head>
 <body class="dashboard-container">
 
-    <div class="background-glow glow-2"></div>
+    <div class="background-glow glow-1"></div>
 
     <header class="glass-header">
         <h1>READING <span class="text-gold">ZONE</span></h1>
@@ -95,32 +91,31 @@
         <div class="xp-pill">XP: <span id="xp-val">0</span></div>
     </header>
 
-    <main style="max-width: 900px; margin: 0 auto; padding: 20px;">
-        
+    <main style="max-width: 600px; margin: 0 auto; padding: 10px;">
         <div id="game-content" class="exercise-box">
-            <h2 id="story-title" style="color: #fff; text-align: center; margin-bottom: 10px;">Carregando...</h2>
-            <p style="text-align: center; color: #aaa; font-size: 0.9rem; margin-bottom: 20px;">Arraste os blocos para a direita na ordem correta.</p>
+            <h2 id="story-title" style="color: #fff; text-align: center; font-size: 1.2rem; margin-bottom: 5px;">Carregando...</h2>
+            <p style="text-align: center; color: #aaa; font-size: 0.85rem; margin-bottom: 15px;">Toque ou arraste os blocos para organizar.</p>
             
             <div class="game-area">
-                <div id="source" class="column-box drop-zone" ondragover="allowDrop(event)" ondrop="drop(event)">
-                    </div>
+                <div id="source" class="column-box" ondragover="allowDrop(event)" ondrop="drop(event)">
+                    <div class="column-title">Fragmentos (Bagunçados)</div>
+                </div>
                 
-                <div id="target" class="column-box drop-zone" ondragover="allowDrop(event)" ondrop="drop(event)">
-                    </div>
+                <div id="target" class="column-box" ondragover="allowDrop(event)" ondrop="drop(event)">
+                    <div class="column-title">Sua Ordem (Correta)</div>
+                </div>
             </div>
 
-            <div id="feedback" style="text-align:center; margin-top:20px; font-weight:900; min-height:30px; letter-spacing: 1px;"></div>
+            <div id="feedback" style="text-align:center; margin-top:15px; font-weight:900; min-height:25px; letter-spacing: 1px;"></div>
 
-            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+            <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
                 <button onclick="checkOrder()" class="btn-gold">CONFIRMAR ORDEM</button>
                 <button id="nextBtn" onclick="nextStory()" class="btn-gold" style="display:none; background: transparent; border: 1px solid #b8860b; color: #fff;">PRÓXIMA ➡</button>
             </div>
-        </div>
-
-        <div style="margin-top: 40px; text-align: center;">
-            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;">
-                <span>⬅ Voltar ao Painel</span>
-            </a>
+            
+            <div style="margin-top: 30px; text-align: center;">
+                <a href="../index.html" style="color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.9rem;">⬅ Voltar ao Painel</a>
+            </div>
         </div>
     </main>
 
@@ -137,8 +132,6 @@
             { title: "Shopping", paragraphs: ["I go to the supermarket.", "I take a shopping cart.", "I pick some apples.", "I pay for the food."] },
             { title: "The Letter", paragraphs: ["I write a letter.", "I put it in an envelope.", "I put a stamp on it.", "I mail the letter."] },
             { title: "Washing Hands", paragraphs: ["I turn on the water.", "I put soap on my hands.", "I wash them well.", "I dry my hands."] },
-            
-            // Set 11-20
             { title: "The Flower", paragraphs: ["I plant a seed.", "I water the seed.", "The sun shines on it.", "A flower grows."] },
             { title: "The Dog Walk", paragraphs: ["I call my dog, Rex.", "I put on his leash.", "We walk in the park.", "We go back home."] },
             { title: "Watching TV", paragraphs: ["I sit on the sofa.", "I take the remote control.", "I turn on the TV.", "I watch a movie."] },
@@ -149,8 +142,6 @@
             { title: "The Apple", paragraphs: ["I see a red apple.", "I wash the apple.", "I take a bite.", "It is sweet."] },
             { title: "The Gift", paragraphs: ["I buy a gift.", "I wrap it in paper.", "I give it to my friend.", "She opens it."] },
             { title: "Cleaning", paragraphs: ["The floor is dirty.", "I take the broom.", "I sweep the floor.", "Now it is clean."] },
-
-            // Set 21-30
             { title: "The Pizza", paragraphs: ["I order a pizza.", "The delivery man arrives.", "I pay him.", "I eat the pizza."] },
             { title: "The Shoes", paragraphs: ["My shoes are old.", "I go to the shoe store.", "I try on new shoes.", "I buy them."] },
             { title: "The Movie", paragraphs: ["I buy a ticket.", "I buy popcorn.", "I sit in the cinema.", "The movie starts."] },
@@ -161,8 +152,6 @@
             { title: "The Alarm", paragraphs: ["The alarm rings.", "I turn it off.", "I stretch my arms.", "I get out of bed."] },
             { title: "Tea Time", paragraphs: ["I boil water.", "I put a tea bag in the cup.", "I add hot water.", "I add sugar."] },
             { title: "The Library", paragraphs: ["I go to the library.", "I find a good book.", "I show my card.", "I take the book home."] },
-
-            // Set 31-40
             { title: "The Taxi", paragraphs: ["I raise my hand.", "A taxi stops.", "I tell the driver the address.", "We arrive at the hotel."] },
             { title: "The Computer", paragraphs: ["I press the power button.", "The screen turns on.", "I type my password.", "I open the internet."] },
             { title: "Running", paragraphs: ["I put on my running shoes.", "I go to the park.", "I run for 20 minutes.", "I stop and drink water."] },
@@ -173,8 +162,6 @@
             { title: "The Train", paragraphs: ["I buy a ticket.", "I wait on the platform.", "The train arrives.", "I find a seat."] },
             { title: "The Salad", paragraphs: ["I wash the lettuce.", "I cut the tomatoes.", "I add olive oil.", "I mix the salad."] },
             { title: "The Lamp", paragraphs: ["The room is dark.", "I find the switch.", "I press it.", "The light turns on."] },
-
-            // Set 41-50
             { title: "Fishing", paragraphs: ["I go to the lake.", "I put a worm on the hook.", "I wait quietly.", "I catch a fish."] },
             { title: "The Toothache", paragraphs: ["My tooth hurts.", "I call the dentist.", "I go to the clinic.", "The dentist fixes it."] },
             { title: "The Wallet", paragraphs: ["I look for my wallet.", "I check my pockets.", "I check the table.", "I find it under the bed."] },
@@ -185,8 +172,6 @@
             { title: "The Key", paragraphs: ["I arrive home.", "I take out my key.", "I put it in the lock.", "I open the door."] },
             { title: "The Shower", paragraphs: ["I turn on the water.", "I check the temperature.", "I step inside.", "I wash my hair."] },
             { title: "The Exam", paragraphs: ["The teacher gives the paper.", "I read the questions.", "I write the answers.", "I give the paper back."] },
-
-            // Set 51-60
             { title: "The Picnic", paragraphs: ["We pack food.", "We drive to the park.", "We sit on the grass.", "We eat lunch."] },
             { title: "The Restaurant", paragraphs: ["We sit at a table.", "The waiter brings the menu.", "We order food.", "We eat dinner."] },
             { title: "The Dirty Car", paragraphs: ["My car is dirty.", "I get a bucket of water.", "I wash the car.", "Now it is shiny."] },
@@ -197,8 +182,6 @@
             { title: "The Trash", paragraphs: ["The bin is full.", "I take out the bag.", "I walk outside.", "I put it in the big bin."] },
             { title: "The Flight", paragraphs: ["I go to the airport.", "I check my bag.", "I go through security.", "I board the plane."] },
             { title: "The Meeting", paragraphs: ["I enter the room.", "I say hello to everyone.", "We sit down.", "We talk about business."] },
-
-            // Set 61-70
             { title: "The Spider", paragraphs: ["I see a spider.", "I am scared.", "I catch it in a cup.", "I put it outside."] },
             { title: "The Cold", paragraphs: ["I sneeze.", "I have a fever.", "I take medicine.", "I sleep in bed."] },
             { title: "The Game", paragraphs: ["I turn on the console.", "I choose a game.", "I play for an hour.", "I win the level."] },
@@ -209,8 +192,6 @@
             { title: "The Window", paragraphs: ["The room is hot.", "I walk to the window.", "I open it.", "Cool air comes in."] },
             { title: "The Glasses", paragraphs: ["I cannot see well.", "I look for my glasses.", "I put them on.", "Now I see clearly."] },
             { title: "The Candle", paragraphs: ["It is dark.", "I find a candle.", "I light a match.", "I light the candle."] },
-
-            // Set 71-80
             { title: "The Hat", paragraphs: ["It is sunny.", "I take my hat.", "I put it on my head.", "I go outside."] },
             { title: "The Soup", paragraphs: ["The soup is hot.", "I blow on it.", "I take a spoon.", "I taste it."] },
             { title: "The Drawing", paragraphs: ["I take a pencil.", "I draw a circle.", "I draw a face.", "It is a happy face."] },
@@ -221,8 +202,6 @@
             { title: "The Tree", paragraphs: ["I dig a hole.", "I put the tree in.", "I cover the roots.", "I water it."] },
             { title: "The Egg", paragraphs: ["I crack the egg.", "I put it in the pan.", "I fry it.", "I eat it with toast."] },
             { title: "The Butterfly", paragraphs: ["I see a caterpillar.", "It makes a cocoon.", "Wait some time.", "A butterfly comes out."] },
-
-            // Set 81-90
             { title: "The Chair", paragraphs: ["The chair is broken.", "I get some glue.", "I fix the leg.", "I sit carefully."] },
             { title: "The Hands", paragraphs: ["My hands are cold.", "I rub them together.", "I put on gloves.", "They feel warm."] },
             { title: "The Lemon", paragraphs: ["I cut a lemon.", "I taste it.", "It is very sour.", "I make a face."] },
@@ -233,8 +212,6 @@
             { title: "The Jacket", paragraphs: ["It is windy.", "I zip up my jacket.", "I put up the hood.", "I am warm."] },
             { title: "The Toast", paragraphs: ["I put bread in the toaster.", "I push the lever down.", "The toast pops up.", "I add butter."] },
             { title: "The Joke", paragraphs: ["My friend tells a joke.", "I listen.", "I understand it.", "I laugh loudly."] },
-
-            // Set 91-100
             { title: "The Pool", paragraphs: ["I walk to the pool.", "I jump in.", "The water is cool.", "I swim laps."] },
             { title: "The Taxi 2", paragraphs: ["I call a taxi.", "I wait outside.", "The taxi comes.", "I get in."] },
             { title: "The Market", paragraphs: ["I need vegetables.", "I go to the market.", "I choose fresh carrots.", "I pay the farmer."] },
@@ -253,7 +230,7 @@
         let xp = parseInt(localStorage.getItem('ffes_xp') || 0);
         document.getElementById('xp-val').innerText = xp;
 
-        // Shuffle inicial para não repetir ordem dos textos
+        // Embaralha todas as histórias no início
         function shuffleGlobal() {
             for (let i = stories.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -264,7 +241,6 @@
 
         function load() {
             if (currentIdx >= stories.length) { currentIdx = 0; shuffleGlobal(); }
-            
             const story = stories[currentIdx];
             document.getElementById('story-title').textContent = story.title;
             const source = document.getElementById('source');
@@ -273,12 +249,12 @@
             const nextBtn = document.getElementById('nextBtn');
 
             // Reset
-            source.innerHTML = '<div class="column-title">Fragmentos</div>';
-            target.innerHTML = '<div class="column-title">Sua Ordem</div>';
+            source.innerHTML = '<div class="column-title">Fragmentos (Bagunçados)</div>';
+            target.innerHTML = '<div class="column-title">Sua Ordem (Correta)</div>';
             feedback.innerHTML = "";
             nextBtn.style.display = "none";
             
-            // Fragmentos embaralhados
+            // Cria blocos embaralhados
             const scrambled = [...story.paragraphs].sort(() => Math.random() - 0.5);
             scrambled.forEach((text, i) => {
                 const div = document.createElement('div');
@@ -287,30 +263,41 @@
                 div.draggable = true;
                 div.id = 'p-' + i;
                 
-                // Eventos de Drag Desktop/Mobile
+                // === EVENTO DE ARRASTAR (PC) ===
                 div.addEventListener('dragstart', (e) => {
                     draggedItem = e.target;
                     e.target.style.opacity = '0.5';
                 });
-                div.addEventListener('dragend', (e) => {
-                    e.target.style.opacity = '1';
+                div.addEventListener('dragend', (e) => { e.target.style.opacity = '1'; });
+
+                // === EVENTO DE CLIQUE (MOBILE/PC HÍBRIDO) ===
+                // Isso resolve o bug do celular: Tocou, moveu.
+                div.addEventListener('click', function() {
+                    const parent = this.parentNode;
+                    if(parent.id === 'source') {
+                        document.getElementById('target').appendChild(this);
+                        playAudio('click');
+                    } else if(parent.id === 'target') {
+                        document.getElementById('source').appendChild(this);
+                        playAudio('click');
+                    }
                 });
-                
+
                 source.appendChild(div);
             });
         }
 
+        // === FUNÇÕES DE DROP (PC) ===
         function allowDrop(e) { e.preventDefault(); }
         
         function drop(e) {
             e.preventDefault();
             let targetZone = e.target;
-            
-            // Se soltar em cima de um texto, busca o pai (a coluna)
+            // Garante que o alvo é a zona (source/target), não o título ou outro bloco
             while(targetZone.className.indexOf('column-box') === -1 && targetZone !== document.body) {
                 targetZone = targetZone.parentNode;
             }
-
+            
             if(targetZone.id === 'source' || targetZone.id === 'target') {
                 targetZone.appendChild(draggedItem);
                 playAudio('click');
@@ -322,17 +309,17 @@
             const story = stories[currentIdx];
             const feedback = document.getElementById('feedback');
             
+            // Validação 1: Tem que usar todos os blocos
             if (targetBlocks.length !== story.paragraphs.length) {
-                feedback.innerHTML = "<span style='color: #fbbf24'>Arraste todos os fragmentos para a direita!</span>";
+                feedback.innerHTML = "<span style='color: #fbbf24'>Mova todos os blocos para a área correta!</span>";
                 playAudio('error');
                 return;
             }
 
+            // Validação 2: Ordem exata
             let correct = true;
             targetBlocks.forEach((block, i) => {
-                if(block.textContent !== story.paragraphs[i]) {
-                    correct = false;
-                }
+                if(block.textContent !== story.paragraphs[i]) correct = false;
             });
 
             if(correct) {
@@ -348,6 +335,15 @@
             } else {
                 feedback.innerHTML = "<span style='color: #f87171'>ORDEM INCORRETA. TENTE NOVAMENTE.</span>";
                 playAudio('error');
+                
+                // Animação de erro (tremida)
+                const container = document.getElementById('game-content');
+                container.animate([
+                    { transform: 'translateX(0)' },
+                    { transform: 'translateX(-5px)' },
+                    { transform: 'translateX(5px)' },
+                    { transform: 'translateX(0)' }
+                ], { duration: 300 });
             }
         }
 
@@ -356,7 +352,7 @@
             load();
         }
 
-        // === ENGINE DE ÁUDIO & EFEITOS (PADRÃO FFES) ===
+        // === ENGINE DE ÁUDIO & EFEITOS ===
         function playAudio(type) {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const t = audioCtx.currentTime;
@@ -401,6 +397,5 @@
     <footer class="glass-footer">
         © 2026 FFES - Sovereignty System v2.5
     </footer>
-
 </body>
 </html>
