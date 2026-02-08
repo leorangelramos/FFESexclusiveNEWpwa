@@ -3,173 +3,433 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FFES | Listening Station</title>
+    <title>FFES | Listening Station Master</title>
     <link rel="stylesheet" href="../style.css">
     <style>
-        .exercise-box {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-top: 20px;
+        /* === ESTILO LISTENING STATION (PADRÃO FFES) === */
+        .game-wrapper {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
+            margin: 0 auto;
+        }
+
+        .game-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 2px solid var(--accent-gold);
+            border-radius: 24px;
+            padding: 30px 20px;
             text-align: center;
+            box-shadow: var(--glass-shadow);
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
-        .audio-btn {
-            background: #b8860b;
-            color: #0A2342;
-            border: none;
-            padding: 20px 40px;
-            border-radius: 50px;
-            font-size: 1.5rem;
+
+        /* Botão de Áudio Principal */
+        .play-btn {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-gold) 0%, #b8860b 100%);
+            border: 4px solid rgba(255,255,255,0.2);
+            color: var(--primary-blue);
+            font-size: 3rem;
             cursor: pointer;
-            transition: 0.3s;
-            box-shadow: 0 0 20px rgba(184, 134, 11, 0.4);
-            margin-bottom: 30px;
+            box-shadow: 0 0 30px rgba(184, 134, 11, 0.4);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 20px;
         }
-        .audio-btn:hover {
-            transform: scale(1.05);
-            background: #d4a017;
+
+        .play-btn:hover { transform: scale(1.1); box-shadow: 0 0 50px rgba(184, 134, 11, 0.8); }
+        .play-btn:active { transform: scale(0.95); }
+
+        .play-btn.playing { animation: pulse-audio 1s infinite; }
+        @keyframes pulse-audio {
+            0% { box-shadow: 0 0 0 0 rgba(255, 184, 28, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(255, 184, 28, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 184, 28, 0); }
         }
-        .audio-btn:disabled {
-            background: #444;
-            box-shadow: none;
-            cursor: not-allowed;
-        }
+
+        /* Botões de Opção A/B */
         .options-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            grid-template-columns: 1fr 1fr;
             gap: 15px;
-            margin: 20px 0;
+            width: 100%;
         }
-        .opt-card {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 15px;
-            border-radius: 12px;
+
+        .btn-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-white);
+            padding: 20px 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 16px;
             cursor: pointer;
-            transition: 0.3s;
-            color: #fff;
-            font-weight: bold;
+            transition: all 0.2s ease;
+            backdrop-filter: var(--glass-blur);
+            min-height: 80px;
+            display: flex; align-items: center; justify-content: center;
+            text-align: center;
+            line-height: 1.2;
         }
-        .opt-card:hover {
-            background: rgba(184, 134, 11, 0.2);
-            border-color: #b8860b;
+
+        .btn-option:hover {
+            border-color: var(--accent-gold);
+            background: rgba(255, 184, 28, 0.1);
+            transform: translateY(-3px);
         }
-        .correct { background: rgba(74, 222, 128, 0.2) !important; border-color: #4ade80 !important; }
-        .wrong { background: rgba(248, 113, 113, 0.2) !important; border-color: #f87171 !important; }
+
+        .btn-option.correct { background: #00e676 !important; color: #000 !important; border-color: #00e676 !important; }
+        .btn-option.wrong { background: #ff1744 !important; opacity: 0.5; }
+
+        /* Elementos FFES */
+        .xp-pill {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--accent-gold);
+            padding: 5px 15px;
+            border-radius: 50px;
+            color: var(--accent-gold);
+            font-weight: 800;
+            display: inline-block;
+        }
+
+        .progress-track {
+            width: 100%; height: 5px;
+            background: rgba(255,255,255,0.1);
+            position: fixed; top: 0; left: 0; z-index: 1000;
+        }
+        .progress-fill {
+            height: 100%; background: var(--accent-gold);
+            width: 0%; transition: width 0.3s ease;
+        }
+
+        .casino-coin {
+            position: fixed; width: 25px; height: 25px;
+            background: var(--accent-gold); border-radius: 50%;
+            pointer-events: none; z-index: 9999;
+            top: 50%; left: 50%; border: 2px solid #fff;
+            box-shadow: 0 0 10px var(--accent-gold);
+        }
+        @keyframes coin-explosion {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(1.2) rotate(360deg); opacity: 0; }
+        }
+        
+        /* Instrução flutuante */
+        .instruction { color: #aaa; font-size: 0.9rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+
     </style>
 </head>
 <body class="dashboard-container">
 
-    <div class="background-glow glow-1"></div>
+    <div class="background-glow glow-2"></div>
+    <div class="progress-track"><div class="progress-fill" id="progress-bar"></div></div>
 
     <header class="glass-header">
         <h1>LISTENING <span class="text-gold">STATION</span></h1>
-        <p class="subtitle">Módulo 06 - Pares Mínimos e Fonemas</p>
+        <p class="subtitle">Módulo 06 - Compreensão Auditiva (A1/A2)</p>
+        <div class="xp-pill">XP: <span id="xp-val">0</span></div>
     </header>
 
-    <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
+    <main class="game-wrapper" style="padding: 20px;">
         
-        <div id="game-container" class="exercise-box">
-            <p style="color: #aaa; margin-bottom: 20px;">Clique no botão para ouvir e identifique a palavra:</p>
-            
-            <button id="listenBtn" onclick="playAudio()" class="audio-btn">▶️ OUVIR</button>
-            
-            <div id="options" class="options-grid"></div>
-            
-            <div id="feedback" style="margin-top: 20px; font-weight: bold; min-height: 24px;"></div>
+        <div id="feedback" style="text-align: center; height: 30px; font-weight: 900; letter-spacing: 2px; margin-bottom: 5px;"></div>
 
-            <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin: 20px auto 0;">PRÓXIMA ➡</button>
+        <div class="game-card" id="game-card-element">
+            <p class="instruction">Toque para ouvir</p>
+            <button class="play-btn" onclick="playSentence()">
+                🔊
+            </button>
+            <p id="listening-status" style="height: 20px; color: #fff; font-style: italic; opacity: 0.8;"></p>
         </div>
 
-        <div style="margin-top: 40px; text-align: center;">
-            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;">
-                <span>⬅ Voltar ao Início</span>
-            </a>
+        <div class="options-grid" id="options-container">
+            <button id="btn-a" class="btn-option" onclick="checkAnswer('A')">Opção A</button>
+            <button id="btn-b" class="btn-option" onclick="checkAnswer('B')">Opção B</button>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+             <a href="../index.html" style="color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.9rem;">⬅ Voltar ao Painel</a>
         </div>
     </main>
 
+    <footer class="glass-footer">
+        © 2026 FFES - Sovereignty System v2.5
+    </footer>
+
     <script>
-        const questions = [
-            { opts: ["ship", "sheep", "shop"], correct: 0 },
-            { opts: ["this", "these", "the"], correct: 0 },
-            { opts: ["bad", "bed", "bat"], correct: 0 },
-            { opts: ["walk", "work", "wake"], correct: 1 },
-            { opts: ["three", "tree", "through"], correct: 0 }
+        // === BANCO DE DADOS: 100 FRASES DE LISTENING (A1/A2) ===
+        // Estrutura: { text: "Frase Correta", distractor: "Frase Errada (Parecida)" }
+        const listeningDB = [
+            { text: "Good morning", distractor: "Good evening" },
+            { text: "Open the door", distractor: "Close the door" },
+            { text: "I like coffee", distractor: "I like toffee" },
+            { text: "She is happy", distractor: "She is hungry" },
+            { text: "Where is the bank?", distractor: "Where is the bag?" },
+            { text: "My name is John", distractor: "My name is Joan" },
+            { text: "It is raining", distractor: "It is training" },
+            { text: "I have a car", distractor: "I have a cat" },
+            { text: "See you later", distractor: "See you letter" },
+            { text: "Turn left", distractor: "Turn right" },
+            // 11-20
+            { text: "The sky is blue", distractor: "The sky is new" },
+            { text: "I eat bread", distractor: "I eat red" },
+            { text: "This is my house", distractor: "This is my mouse" },
+            { text: "He works hard", distractor: "He walks hard" },
+            { text: "I need water", distractor: "I need waiter" },
+            { text: "Time to sleep", distractor: "Time to slip" },
+            { text: "Wash your hands", distractor: "Watch your hands" },
+            { text: "The dog runs", distractor: "The dog funs" },
+            { text: "Read the book", distractor: "Red the book" },
+            { text: "Nice to meet you", distractor: "Ice to meet you" },
+            // 21-30
+            { text: "Call me later", distractor: "Call my letter" },
+            { text: "I play soccer", distractor: "I pay soccer" },
+            { text: "She cooks dinner", distractor: "She looks dinner" },
+            { text: "He is tall", distractor: "He is all" },
+            { text: "I love pizza", distractor: "I love peace" },
+            { text: "Don't stop now", distractor: "Don't shop now" },
+            { text: "Where are you?", distractor: "Who are you?" },
+            { text: "I am fine", distractor: "I am five" },
+            { text: "What time is it?", distractor: "What lime is it?" },
+            { text: "Close your eyes", distractor: "Close your ice" },
+            // 31-40
+            { text: "Buy some milk", distractor: "Bye some milk" },
+            { text: "The bus is here", distractor: "The boss is here" },
+            { text: "I want a pen", distractor: "I want a pan" },
+            { text: "Look at the moon", distractor: "Look at the noon" },
+            { text: "My phone is new", distractor: "My bone is new" },
+            { text: "Clean the room", distractor: "Clean the broom" },
+            { text: "I see a bird", distractor: "I see a beard" },
+            { text: "Wait for me", distractor: "Weight for me" },
+            { text: "I feel sick", distractor: "I fill sick" },
+            { text: "It is very hot", distractor: "It is very pot" },
+            // 41-50
+            { text: "Do you like it?", distractor: "Do you bike it?" },
+            { text: "She has a pen", distractor: "She has a pin" },
+            { text: "Sit down please", distractor: "Seat down please" },
+            { text: "Stand up now", distractor: "Sand up now" },
+            { text: "I run fast", distractor: "I run past" },
+            { text: "The cat is black", distractor: "The cat is back" },
+            { text: "Go to bed", distractor: "Go to bad" },
+            { text: "My tea is hot", distractor: "My tee is hot" },
+            { text: "I miss you", distractor: "I mess you" },
+            { text: "Keep it simple", distractor: "Keep it sample" },
+            // 51-60
+            { text: "Drive the car", distractor: "Dive the car" },
+            { text: "I walk to work", distractor: "I work to walk" },
+            { text: "The grass is green", distractor: "The glass is green" },
+            { text: "He is my son", distractor: "He is my sun" },
+            { text: "Look at the ship", distractor: "Look at the sheep" },
+            { text: "This is cheap", distractor: "This is sheep" },
+            { text: "I hurt my leg", distractor: "I hurt my egg" },
+            { text: "Bake a cake", distractor: "Take a cake" },
+            { text: "Light the fire", distractor: "Fight the fire" },
+            { text: "Pay the bill", distractor: "Play the bill" },
+            // 61-70
+            { text: "I need a job", distractor: "I need a jog" },
+            { text: "The road is long", distractor: "The load is long" },
+            { text: "Sing a song", distractor: "Sink a song" },
+            { text: "Where is the map?", distractor: "Where is the nap?" },
+            { text: "I have a hat", distractor: "I have a rat" },
+            { text: "Lock the door", distractor: "Rock the door" },
+            { text: "Kiss me", distractor: "Miss me" },
+            { text: "It is a fact", distractor: "It is a pact" },
+            { text: "Show me the way", distractor: "Show me the day" },
+            { text: "Night is dark", distractor: "Light is dark" },
+            // 71-80
+            { text: "I check the mail", distractor: "I check the male" },
+            { text: "See the sea", distractor: "See the see" },
+            { text: "Write it down", distractor: "Right it down" },
+            { text: "I know him", distractor: "I no him" },
+            { text: "Wear a coat", distractor: "Where a coat" },
+            { text: "Buy a flower", distractor: "Buy a flour" },
+            { text: "I am here", distractor: "I am hear" },
+            { text: "Meet my friend", distractor: "Meat my friend" },
+            { text: "Just one hour", distractor: "Just one our" },
+            { text: "It is for you", distractor: "It is four you" },
+            // 81-90
+            { text: "Don't lie to me", distractor: "Don't lay to me" },
+            { text: "The wind blows", distractor: "The win blows" },
+            { text: "Hold my hand", distractor: "Old my hand" },
+            { text: "Find the key", distractor: "Find the tea" },
+            { text: "I lost my bag", distractor: "I lost my back" },
+            { text: "He is rich", distractor: "He is reach" },
+            { text: "Fill the cup", distractor: "Feel the cup" },
+            { text: "It is full", distractor: "It is fool" },
+            { text: "Take a seat", distractor: "Take a sit" },
+            { text: "Leave me alone", distractor: "Live me alone" },
+            // 91-100
+            { text: "I hate this", distractor: "I ate this" },
+            { text: "The floor is wet", distractor: "The flour is wet" },
+            { text: "Cut the paper", distractor: "Cat the paper" },
+            { text: "Wash the dish", distractor: "Watch the dish" },
+            { text: "Go straight", distractor: "Go street" },
+            { text: "Turn around", distractor: "Turn a round" },
+            { text: "The boat sinks", distractor: "The boat thinks" },
+            { text: "Think about it", distractor: "Sink about it" },
+            { text: "Three trees", distractor: "Free trees" },
+            { text: "Thanks a lot", distractor: "Tanks a lot" }
         ];
 
-        let index = 0;
+        let state = { index: 0, currentQ: null, isCorrectA: false, canClick: true };
+        let xp = parseInt(localStorage.getItem('ffes_xp') || 0);
+        document.getElementById('xp-val').innerText = xp;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const synth = window.speechSynthesis;
 
-        function load() {
-            if (index >= questions.length) {
-                document.getElementById('game-container').innerHTML = `
-                    <h2 class="text-gold">Audição Calibrada!</h2>
-                    <p style="color:#fff; margin: 20px 0;">Sua latência de processamento auditivo diminuiu.</p>
-                    <button onclick="location.reload()" class="btn-gold" style="margin: 0 auto; display:block">RECOMEÇAR</button>
-                `;
-                return;
+        // Shuffle inicial
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
             }
+        }
+        shuffleArray(listeningDB);
 
-            const q = questions[index];
-            document.getElementById('feedback').textContent = "";
-            document.getElementById('nextBtn').style.display = "none";
-            document.getElementById('listenBtn').disabled = false;
-            
-            const optDiv = document.getElementById('options');
-            optDiv.innerHTML = "";
-
-            q.opts.forEach((opt, i) => {
-                const card = document.createElement('div');
-                card.className = 'opt-card';
-                card.textContent = opt;
-                card.onclick = () => check(i, card);
-                optDiv.appendChild(card);
+        function load() {
+            state.canClick = true;
+            document.getElementById('feedback').innerText = "";
+            document.querySelectorAll('.btn-option').forEach(b => {
+                b.className = 'btn-option';
+                b.style.opacity = '1';
             });
+            
+            if (state.index >= listeningDB.length) { state.index = 0; shuffleArray(listeningDB); }
+            
+            state.currentQ = listeningDB[state.index];
+            
+            // Randomiza se a resposta correta é A ou B
+            state.isCorrectA = Math.random() > 0.5;
+            
+            const btnA = document.getElementById('btn-a');
+            const btnB = document.getElementById('btn-b');
+            
+            if (state.isCorrectA) {
+                btnA.innerText = state.currentQ.text;
+                btnB.innerText = state.currentQ.distractor;
+            } else {
+                btnA.innerText = state.currentQ.distractor;
+                btnB.innerText = state.currentQ.text;
+            }
         }
 
-        function playAudio() {
-            const word = questions[index].opts[questions[index].correct];
-            const utterance = new SpeechSynthesisUtterance(word);
+        function playSentence() {
+            if (synth.speaking) synth.cancel();
+            
+            const btn = document.querySelector('.play-btn');
+            btn.classList.add('playing');
+            document.getElementById('listening-status').innerText = "Reproduzindo...";
+            
+            const utterance = new SpeechSynthesisUtterance(state.currentQ.text);
             utterance.lang = 'en-US';
-            utterance.rate = 0.8;
+            utterance.rate = 0.9; // Levemente mais lento para A1
+            utterance.pitch = 1;
+            
+            utterance.onend = () => {
+                btn.classList.remove('playing');
+                document.getElementById('listening-status').innerText = "";
+            };
+            
             synth.speak(utterance);
         }
 
-        function check(choice, el) {
-            const correct = questions[index].correct;
-            const btns = document.querySelectorAll('.opt-card');
+        function checkAnswer(choice) {
+            if (!state.canClick) return;
+            state.canClick = false;
+
+            const isCorrect = (choice === 'A' && state.isCorrectA) || (choice === 'B' && !state.isCorrectA);
+            const fb = document.getElementById('feedback');
+            const btnSelected = document.getElementById(choice === 'A' ? 'btn-a' : 'btn-b');
             
-            btns.forEach(b => b.onclick = null);
-            document.getElementById('listenBtn').disabled = true;
-
-            if (choice === correct) {
-                el.classList.add('correct');
-                document.getElementById('feedback').innerHTML = "<span style='color: #4ade80'>SINAL RECEBIDO: +20 XP</span>";
+            if (isCorrect) {
+                fb.innerHTML = "<span style='color: #4ade80'>OUVIDO AFIADO! +15 XP</span>";
+                btnSelected.classList.add('correct');
                 
-                let xp = localStorage.getItem('ffes_xp') || 0;
-                localStorage.setItem('ffes_xp', parseInt(xp) + 20);
+                xp += 15;
+                localStorage.setItem('ffes_xp', xp);
+                document.getElementById('xp-val').innerText = xp;
+                
+                playAudio('win');
+                triggerCasinoEffect(15);
+                
+                // Barra de progresso
+                let w = parseFloat(document.getElementById('progress-bar').style.width || 0);
+                document.getElementById('progress-bar').style.width = (w + 5) % 100 + '%';
+
+                setTimeout(() => {
+                    state.index++;
+                    load();
+                }, 1500);
             } else {
-                el.classList.add('wrong');
-                btns[correct].classList.add('correct');
-                document.getElementById('feedback').innerHTML = "<span style='color: #f87171'>ERRO DE FREQUÊNCIA</span>";
+                fb.innerHTML = "<span style='color: #f87171'>NÃO FOI DESSA VEZ</span>";
+                btnSelected.classList.add('wrong');
+                playAudio('error');
+                
+                // Shake effect
+                document.getElementById('game-card-element').animate([
+                    { transform: 'translateX(0)' },
+                    { transform: 'translateX(-10px)' },
+                    { transform: 'translateX(10px)' },
+                    { transform: 'translateX(0)' }
+                ], { duration: 400 });
+
+                setTimeout(() => {
+                    state.canClick = true;
+                    document.getElementById('feedback').innerText = "";
+                    btnSelected.classList.remove('wrong');
+                }, 1000);
             }
-
-            document.getElementById('nextBtn').style.display = "block";
         }
 
-        function nextQuestion() {
-            index++;
-            load();
+        // === ENGINE DE ÁUDIO & EFEITOS FFES ===
+        function playAudio(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+
+            if(type === 'win') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(600, t);
+                osc.frequency.exponentialRampToValueAtTime(1000, t + 0.1);
+                gain.gain.setValueAtTime(0.1, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            } else if(type === 'error') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, t);
+                osc.frequency.linearRampToValueAtTime(100, t + 0.2);
+                gain.gain.setValueAtTime(0.1, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            }
         }
 
-        load();
+        function triggerCasinoEffect(amount) {
+            for (let i = 0; i < amount; i++) {
+                const coin = document.createElement('div');
+                coin.className = 'casino-coin';
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 60 + Math.random() * 100;
+                coin.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+                coin.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+                coin.style.animation = `coin-explosion ${0.5 + Math.random()*0.3}s ease-out forwards`;
+                document.body.appendChild(coin);
+                setTimeout(() => coin.remove(), 800);
+            }
+        }
+
+        window.onload = load;
     </script>
-
-    <footer class="glass-footer">
-        <p>&copy; 2026 FFES - Sovereignty System v2.1</p>
-    </footer>
-
 </body>
 </html>

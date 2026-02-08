@@ -3,199 +3,411 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FFES | Caça-Palavras</title>
+    <title>FFES | Vocabulary Clash</title>
     <link rel="stylesheet" href="../style.css">
     <style>
-        :root {
-            --grid-size: 10;
+        /* === ESTILO VOCABULARY CLASH (PADRÃO FFES) === */
+        .game-wrapper {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
+            margin: 0 auto;
         }
-        .game-container {
+
+        .game-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 2px solid var(--accent-gold);
+            border-radius: 24px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: var(--glass-shadow);
+            min-height: 220px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            justify-content: center;
+            position: relative;
         }
-        #word-grid {
+
+        .question-text {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            line-height: 1.3;
+        }
+
+        .highlight-term {
+            color: var(--accent-gold);
+            text-decoration: underline;
+            text-decoration-color: rgba(184, 134, 11, 0.5);
+            text-underline-offset: 4px;
+        }
+
+        .label-instruction {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        /* Botões de Opção A/B */
+        .options-grid {
             display: grid;
-            grid-template-columns: repeat(var(--grid-size), 35px);
-            grid-template-rows: repeat(var(--grid-size), 35px);
-            gap: 5px;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            user-select: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
         }
-        .cell {
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            font-weight: bold;
-            border-radius: 5px;
+
+        .btn-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-white);
+            padding: 20px 10px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border-radius: 16px;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.2s ease;
+            backdrop-filter: var(--glass-blur);
+            min-height: 80px;
+            display: flex; align-items: center; justify-content: center;
+            text-align: center;
         }
-        .cell.selected {
-            background: rgba(184, 134, 11, 0.5);
-            color: #fff;
+
+        .btn-option:hover {
+            border-color: var(--accent-gold);
+            background: rgba(255, 184, 28, 0.1);
+            transform: translateY(-3px);
         }
-        .cell.found {
-            background: #4ade80;
-            color: #0A2342;
-        }
-        .word-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-            max-width: 400px;
-        }
-        .word-item {
+
+        .btn-option.correct { background: #00e676 !important; color: #000 !important; border-color: #00e676 !important; }
+        .btn-option.wrong { background: #ff1744 !important; opacity: 0.5; }
+
+        /* Elementos FFES */
+        .xp-pill {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--accent-gold);
             padding: 5px 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            color: #fff;
-            opacity: 0.6;
+            border-radius: 50px;
+            color: var(--accent-gold);
+            font-weight: 800;
+            display: inline-block;
         }
-        .word-item.found {
-            text-decoration: line-through;
-            opacity: 1;
-            color: #4ade80;
-            border-color: #4ade80;
+
+        .progress-track {
+            width: 100%; height: 5px;
+            background: rgba(255,255,255,0.1);
+            position: fixed; top: 0; left: 0; z-index: 1000;
         }
+        .progress-fill {
+            height: 100%; background: var(--accent-gold);
+            width: 0%; transition: width 0.3s ease;
+        }
+
+        .casino-coin {
+            position: fixed; width: 25px; height: 25px;
+            background: var(--accent-gold); border-radius: 50%;
+            pointer-events: none; z-index: 9999;
+            top: 50%; left: 50%; border: 2px solid #fff;
+            box-shadow: 0 0 10px var(--accent-gold);
+        }
+        @keyframes coin-explosion {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(1.2) rotate(360deg); opacity: 0; }
+        }
+
+        @media (max-width: 480px) {
+            .question-text { font-size: 1.3rem; }
+            .btn-option { font-size: 1.1rem; }
+        }
+
     </style>
 </head>
 <body class="dashboard-container">
 
-    <div class="background-glow glow-1"></div>
+    <div class="background-glow glow-2"></div>
+    <div class="progress-track"><div class="progress-fill" id="progress-bar"></div></div>
 
     <header class="glass-header">
-        <h1>WORD <span class="text-gold">SEARCH</span></h1>
-        <p class="subtitle">Módulo 11 - Reconhecimento de Padrões</p>
+        <h1>WORD <span class="text-gold">CLASH</span></h1>
+        <p class="subtitle">Módulo 11 - Vocabulário de Precisão (A1/A2)</p>
+        <div class="xp-pill">XP: <span id="xp-val">0</span></div>
     </header>
 
-    <main class="game-container">
+    <main class="game-wrapper" style="padding: 20px;">
         
-        <div class="word-list" id="word-list">
-            </div>
+        <div id="feedback" style="text-align: center; height: 30px; font-weight: 900; letter-spacing: 2px; margin-bottom: 5px;"></div>
 
-        <div id="word-grid">
-            </div>
+        <div class="game-card" id="game-card-element">
+            <span class="label-instruction">ESCOLHA A FORMA CORRETA:</span>
+            <div id="question-container" class="question-text">Carregando...</div>
+        </div>
 
-        <div id="feedback" style="font-weight: bold; min-height: 24px;"></div>
-
-        <div style="margin-top: 30px; text-align: center;">
-            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;">
-                <span>⬅ Voltar ao Painel Principal</span>
-            </a>
+        <div class="options-grid">
+            <button id="btn-a" class="btn-option" onclick="checkAnswer('A')">Opção A</button>
+            <button id="btn-b" class="btn-option" onclick="checkAnswer('B')">Opção B</button>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+             <a href="../index.html" style="color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.9rem;">⬅ Voltar ao Painel</a>
         </div>
     </main>
 
-    <script>
-        const wordsToFind = ["HELLO", "WORLD", "STUDY", "SMART", "LEVEL"];
-        const gridSize = 10;
-        let grid = [];
-        let foundWords = [];
-
-        function initGrid() {
-            const gridEl = document.getElementById('word-grid');
-            const listEl = document.getElementById('word-list');
-            
-            // Criar lista visual
-            wordsToFind.forEach(w => {
-                const item = document.createElement('div');
-                item.className = 'word-item';
-                item.id = 'word-' + w;
-                item.textContent = w;
-                listEl.appendChild(item);
-            });
-
-            // Gerar Grid Vazio
-            for(let i=0; i<gridSize; i++) {
-                grid[i] = [];
-                for(let j=0; j<gridSize; j++) {
-                    grid[i][j] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-                }
-            }
-
-            // Inserir Palavras (Simplificado: apenas horizontal)
-            wordsToFind.forEach((word, idx) => {
-                let row = idx * 2;
-                let col = Math.floor(Math.random() * (gridSize - word.length));
-                for(let i=0; i<word.length; i++) {
-                    grid[row][col+i] = word[i];
-                }
-            });
-
-            // Renderizar Grid
-            for(let i=0; i<gridSize; i++) {
-                for(let j=0; j<gridSize; j++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
-                    cell.textContent = grid[i][j];
-                    cell.dataset.row = i;
-                    cell.dataset.col = j;
-                    cell.onclick = () => toggleCell(cell);
-                    gridEl.appendChild(cell);
-                }
-            }
-        }
-
-        let currentSelection = "";
-        let selectedCells = [];
-
-        function toggleCell(cell) {
-            if (cell.classList.contains('found')) return;
-
-            cell.classList.toggle('selected');
-            
-            if (cell.classList.contains('selected')) {
-                currentSelection += cell.textContent;
-                selectedCells.push(cell);
-            } else {
-                currentSelection = ""; // Reset simples para este exemplo
-                selectedCells.forEach(c => c.classList.remove('selected'));
-                selectedCells = [];
-            }
-
-            checkWord();
-        }
-
-        function checkWord() {
-            if (wordsToFind.includes(currentSelection) && !foundWords.includes(currentSelection)) {
-                foundWords.push(currentSelection);
-                
-                selectedCells.forEach(c => {
-                    c.classList.remove('selected');
-                    c.classList.add('found');
-                });
-
-                document.getElementById('word-' + currentSelection).classList.add('found');
-                
-                // Sistema de XP (Sovereignty System)
-                let xp = localStorage.getItem('ffes_xp') || 0;
-                localStorage.setItem('ffes_xp', parseInt(xp) + 20);
-                
-                currentSelection = "";
-                selectedCells = [];
-
-                if (foundWords.length === wordsToFind.length) {
-                    document.getElementById('feedback').innerHTML = "<span class='text-gold'>Soberania Total! +100 XP</span>";
-                }
-            }
-        }
-
-        initGrid();
-    </script>
-
     <footer class="glass-footer">
-        <p>&copy; 2026 FFES - Sovereignty System v2.1</p>
+        © 2026 FFES - Sovereignty System v2.5
     </footer>
 
+    <script>
+        // === BANCO DE DADOS: 100 DUELOS DE VOCABULÁRIO ===
+        // q: Pergunta, correct: Certa, wrong: Errada
+        const database = [
+            { q: "Passado de GO?", correct: "Went", wrong: "Goed" },
+            { q: "Passado de SEE?", correct: "Saw", wrong: "Seed" },
+            { q: "Passado de BUY?", correct: "Bought", wrong: "Buyed" },
+            { q: "Passado de EAT?", correct: "Ate", wrong: "Eated" },
+            { q: "Passado de HAVE?", correct: "Had", wrong: "Haved" },
+            { q: "Passado de DO?", correct: "Did", wrong: "Dood" },
+            { q: "Passado de MAKE?", correct: "Made", wrong: "Maked" },
+            { q: "Passado de THINK?", correct: "Thought", wrong: "Thinked" },
+            { q: "Passado de TEACH?", correct: "Taught", wrong: "Teached" },
+            { q: "Passado de SPEAK?", correct: "Spoke", wrong: "Speaked" },
+            // 11-20 (Plurais Irregulares)
+            { q: "Plural de MAN?", correct: "Men", wrong: "Mans" },
+            { q: "Plural de WOMAN?", correct: "Women", wrong: "Womans" },
+            { q: "Plural de CHILD?", correct: "Children", wrong: "Childs" },
+            { q: "Plural de PERSON?", correct: "People", wrong: "Persons" },
+            { q: "Plural de FOOT?", correct: "Feet", wrong: "Foots" },
+            { q: "Plural de TOOTH?", correct: "Teeth", wrong: "Tooths" },
+            { q: "Plural de MOUSE?", correct: "Mice", wrong: "Mouses" },
+            { q: "Plural de FISH?", correct: "Fish", wrong: "Fishes" },
+            { q: "Plural de SHEEP?", correct: "Sheep", wrong: "Sheeps" },
+            { q: "Plural de BOX?", correct: "Boxes", wrong: "Boxs" },
+            // 21-30 (Confusing Words)
+            { q: "Como se diz SOL?", correct: "Sun", wrong: "Son" },
+            { q: "Como se diz FILHO?", correct: "Son", wrong: "Sun" },
+            { q: "Como se diz CARNE?", correct: "Meat", wrong: "Meet" },
+            { q: "Como se diz ENCONTRAR?", correct: "Meet", wrong: "Meat" },
+            { q: "Como se diz VERMELHO?", correct: "Red", wrong: "Read" },
+            { q: "Como se diz OITO?", correct: "Eight", wrong: "Ate" },
+            { q: "Como se diz NOITE?", correct: "Night", wrong: "Knight" },
+            { q: "Como se diz MAR?", correct: "Sea", wrong: "See" },
+            { q: "Como se diz VER?", correct: "See", wrong: "Sea" },
+            { q: "Como se diz ESCREVER?", correct: "Write", wrong: "Right" },
+            // 31-40 (Preposições Básicas)
+            { q: "_____ Monday", correct: "On", wrong: "In" },
+            { q: "_____ 2024", correct: "In", wrong: "On" },
+            { q: "_____ 9:00 PM", correct: "At", wrong: "In" },
+            { q: "_____ the morning", correct: "In", wrong: "At" },
+            { q: "_____ night", correct: "At", wrong: "In" },
+            { q: "Good _____ (Matemática)?", correct: "At", wrong: "In" },
+            { q: "Listen _____ me", correct: "To", wrong: "At" },
+            { q: "Look _____ the photo", correct: "At", wrong: "To" },
+            { q: "Wait _____ me", correct: "For", wrong: "To" },
+            { q: "Interested _____ music", correct: "In", wrong: "On" },
+            // 41-50 (Verbos Auxiliares)
+            { q: "_____ you like pizza?", correct: "Do", wrong: "Are" },
+            { q: "_____ she work here?", correct: "Does", wrong: "Do" },
+            { q: "He _____ play soccer.", correct: "Doesn't", wrong: "Don't" },
+            { q: "I _____ not know.", correct: "Do", wrong: "Am" },
+            { q: "She _____ happy.", correct: "Is", wrong: "Does" },
+            { q: "We _____ students.", correct: "Are", wrong: "Do" },
+            { q: "They _____ sleeping.", correct: "Are", wrong: "Is" },
+            { q: "_____ you busy?", correct: "Are", wrong: "Do" },
+            { q: "I _____ have money.", correct: "Don't", wrong: "No" },
+            { q: "_____ he a doctor?", correct: "Is", wrong: "Does" },
+            // 51-60 (Comparativos/Superlativos)
+            { q: "Big -> _____", correct: "Bigger", wrong: "More big" },
+            { q: "Good -> _____", correct: "Better", wrong: "Gooder" },
+            { q: "Bad -> _____", correct: "Worse", wrong: "Badder" },
+            { q: "Happy -> _____", correct: "Happier", wrong: "More happy" },
+            { q: "Beautiful -> _____", correct: "More beautiful", wrong: "Beautifuler" },
+            { q: "Small -> _____", correct: "Smaller", wrong: "More small" },
+            { q: "Fast -> _____", correct: "Faster", wrong: "More fast" },
+            { q: "The _____ (Bom)", correct: "Best", wrong: "Goodest" },
+            { q: "The _____ (Ruim)", correct: "Worst", wrong: "Baddest" },
+            { q: "Expensive -> _____", correct: "More expensive", wrong: "Expensiver" },
+            // 61-70 (Pronomes)
+            { q: "This is _____ (meu) book.", correct: "My", wrong: "Me" },
+            { q: "Give it to _____ (mim).", correct: "Me", wrong: "My" },
+            { q: "This book is _____ (meu).", correct: "Mine", wrong: "My" },
+            { q: "She likes _____ (ele).", correct: "Him", wrong: "He" },
+            { q: "He likes _____ (ela).", correct: "Her", wrong: "She" },
+            { q: "Tell _____ (nós).", correct: "Us", wrong: "We" },
+            { q: "This is _____ (nosso) car.", correct: "Our", wrong: "Us" },
+            { q: "Look at _____ (eles).", correct: "Them", wrong: "They" },
+            { q: "_____ (Eles) are here.", correct: "They", wrong: "Them" },
+            { q: "It is _____ (dela).", correct: "Hers", wrong: "Her" },
+            // 71-80 (Make vs Do)
+            { q: "_____ a cake", correct: "Make", wrong: "Do" },
+            { q: "_____ homework", correct: "Do", wrong: "Make" },
+            { q: "_____ a mistake", correct: "Make", wrong: "Do" },
+            { q: "_____ a favor", correct: "Do", wrong: "Make" },
+            { q: "_____ your best", correct: "Do", wrong: "Make" },
+            { q: "_____ money", correct: "Make", wrong: "Do" },
+            { q: "_____ friends", correct: "Make", wrong: "Do" },
+            { q: "_____ the dishes", correct: "Do", wrong: "Make" },
+            { q: "_____ a decision", correct: "Make", wrong: "Do" },
+            { q: "_____ business", correct: "Do", wrong: "Make" },
+            // 81-90 (Say vs Tell)
+            { q: "_____ me the truth", correct: "Tell", wrong: "Say" },
+            { q: "_____ hello", correct: "Say", wrong: "Tell" },
+            { q: "_____ a story", correct: "Tell", wrong: "Say" },
+            { q: "_____ sorry", correct: "Say", wrong: "Tell" },
+            { q: "_____ goodbye", correct: "Say", wrong: "Tell" },
+            { q: "_____ a joke", correct: "Tell", wrong: "Say" },
+            { q: "_____ something", correct: "Say", wrong: "Tell" },
+            { q: "_____ him to stop", correct: "Tell", wrong: "Say" },
+            { q: "He _____ yes", correct: "Said", wrong: "Told" },
+            { q: "He _____ me yes", correct: "Told", wrong: "Said" },
+            // 91-100 (Variados A1)
+            { q: "Como se diz ÁRVORE?", correct: "Tree", wrong: "Three" },
+            { q: "Como se diz TRÊS?", correct: "Three", wrong: "Tree" },
+            { q: "Como se diz PENSAR?", correct: "Think", wrong: "Sink" },
+            { q: "Como se diz AFUNDAR?", correct: "Sink", wrong: "Think" },
+            { q: "Como se diz LIVRE?", correct: "Free", wrong: "Three" },
+            { q: "Como se diz MUNDO?", correct: "World", wrong: "Word" },
+            { q: "Como se diz PALAVRA?", correct: "Word", wrong: "World" },
+            { q: "Como se diz ONDE?", correct: "Where", wrong: "Who" },
+            { q: "Como se diz QUEM?", correct: "Who", wrong: "Where" },
+            { q: "Como se diz QUANDO?", correct: "When", wrong: "Which" }
+        ];
+
+        let state = { index: 0, currentQ: null, isCorrectA: false, canClick: true };
+        let xp = parseInt(localStorage.getItem('ffes_xp') || 0);
+        document.getElementById('xp-val').innerText = xp;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Shuffle inicial
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+        shuffleArray(database);
+
+        function load() {
+            state.canClick = true;
+            document.getElementById('feedback').innerText = "";
+            document.querySelectorAll('.btn-option').forEach(b => {
+                b.className = 'btn-option';
+                b.style.opacity = '1';
+                b.style.transform = 'scale(1)';
+            });
+            
+            if (state.index >= database.length) { state.index = 0; shuffleArray(database); }
+            
+            state.currentQ = database[state.index];
+            
+            // Renderiza a pergunta com destaque se houver palavras em maiúsculo
+            let qText = state.currentQ.q.replace(/([A-ZÇÃÕÊÁÉÍÓÚ]{2,})/g, '<span class="highlight-term">$1</span>');
+            document.getElementById('question-container').innerHTML = qText;
+            
+            // Randomiza posição dos botões
+            state.isCorrectA = Math.random() > 0.5;
+            
+            const btnA = document.getElementById('btn-a');
+            const btnB = document.getElementById('btn-b');
+            
+            if (state.isCorrectA) {
+                btnA.innerText = state.currentQ.correct;
+                btnB.innerText = state.currentQ.wrong;
+            } else {
+                btnA.innerText = state.currentQ.wrong;
+                btnB.innerText = state.currentQ.correct;
+            }
+        }
+
+        function checkAnswer(choice) {
+            if (!state.canClick) return;
+            state.canClick = false;
+
+            const isCorrect = (choice === 'A' && state.isCorrectA) || (choice === 'B' && !state.isCorrectA);
+            const fb = document.getElementById('feedback');
+            const btnSelected = document.getElementById(choice === 'A' ? 'btn-a' : 'btn-b');
+            
+            if (isCorrect) {
+                fb.innerHTML = "<span style='color: #4ade80'>ACERTO CRÍTICO! +20 XP</span>";
+                btnSelected.classList.add('correct');
+                
+                xp += 20;
+                localStorage.setItem('ffes_xp', xp);
+                document.getElementById('xp-val').innerText = xp;
+                
+                playAudio('win');
+                triggerCasinoEffect(15);
+                
+                let w = parseFloat(document.getElementById('progress-bar').style.width || 0);
+                document.getElementById('progress-bar').style.width = (w + 5) % 100 + '%';
+
+                setTimeout(() => {
+                    state.index++;
+                    load();
+                }, 1000);
+            } else {
+                fb.innerHTML = "<span style='color: #f87171'>ERRO DE SISTEMA</span>";
+                btnSelected.classList.add('wrong');
+                playAudio('error');
+                
+                document.getElementById('game-card-element').animate([
+                    { transform: 'translateX(0)' },
+                    { transform: 'translateX(-10px)' },
+                    { transform: 'translateX(10px)' },
+                    { transform: 'translateX(0)' }
+                ], { duration: 400 });
+
+                setTimeout(() => {
+                    state.canClick = true;
+                    document.getElementById('feedback').innerText = "";
+                    btnSelected.classList.remove('wrong');
+                }, 800);
+            }
+        }
+
+        // === ENGINE DE ÁUDIO & EFEITOS FFES ===
+        function playAudio(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+
+            if(type === 'win') {
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(600, t);
+                osc.frequency.linearRampToValueAtTime(1200, t + 0.1);
+                gain.gain.setValueAtTime(0.1, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+                osc.start(t); osc.stop(t + 0.2);
+            } else if(type === 'error') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, t);
+                osc.frequency.linearRampToValueAtTime(80, t + 0.2);
+                gain.gain.setValueAtTime(0.1, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+                osc.start(t); osc.stop(t + 0.2);
+            }
+        }
+
+        function triggerCasinoEffect(amount) {
+            for (let i = 0; i < amount; i++) {
+                const coin = document.createElement('div');
+                coin.className = 'casino-coin';
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 60 + Math.random() * 100;
+                coin.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+                coin.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+                coin.style.animation = `coin-explosion ${0.5 + Math.random()*0.3}s ease-out forwards`;
+                document.body.appendChild(coin);
+                setTimeout(() => coin.remove(), 800);
+            }
+        }
+
+        window.onload = load;
+    </script>
 </body>
 </html>

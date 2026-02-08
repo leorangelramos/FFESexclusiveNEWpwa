@@ -3,166 +3,411 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FFES | Verbos Dinâmicos (Quiz)</title>
+    <title>FFES | Verb Arena Master</title>
     <link rel="stylesheet" href="../style.css">
     <style>
-        .exercise-box {
+        /* === ESTILO VERB ARENA (PADRÃO FFES) === */
+        .game-wrapper {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
+            margin: 0 auto;
+        }
+
+        .game-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 2px solid var(--accent-gold);
+            border-radius: 24px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: var(--glass-shadow);
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .question-text {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            line-height: 1.2;
+        }
+
+        .verb-highlight {
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .label-instruction {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        /* Botões de Opção A/B */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .btn-option {
             background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-top: 20px;
+            border: 1px solid var(--glass-border);
+            color: var(--text-white);
+            padding: 20px 10px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: var(--glass-blur);
+            min-height: 80px;
+            display: flex; align-items: center; justify-content: center;
             text-align: center;
         }
-        .mc-options {
-            display: grid;
-            gap: 12px;
-            margin: 25px 0;
+
+        .btn-option:hover {
+            border-color: var(--accent-gold);
+            background: rgba(255, 184, 28, 0.1);
+            transform: translateY(-3px);
         }
-        .mc-option {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 18px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: #fff;
-            font-weight: 500;
+
+        .btn-option.correct { background: #00e676 !important; color: #000 !important; border-color: #00e676 !important; }
+        .btn-option.wrong { background: #ff1744 !important; opacity: 0.5; }
+
+        /* Elementos FFES */
+        .xp-pill {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--accent-gold);
+            padding: 5px 15px;
+            border-radius: 50px;
+            color: var(--accent-gold);
+            font-weight: 800;
+            display: inline-block;
         }
-        .mc-option:hover {
-            background: rgba(184, 134, 11, 0.25);
-            border-color: #b8860b;
-            transform: translateY(-2px);
+
+        .progress-track {
+            width: 100%; height: 5px;
+            background: rgba(255,255,255,0.1);
+            position: fixed; top: 0; left: 0; z-index: 1000;
         }
-        .correct-answer {
-            background: rgba(74, 222, 128, 0.25) !important;
-            border-color: #4ade80 !important;
+        .progress-fill {
+            height: 100%; background: var(--accent-gold);
+            width: 0%; transition: width 0.3s ease;
         }
-        .wrong-answer {
-            background: rgba(248, 113, 113, 0.25) !important;
-            border-color: #f87171 !important;
+
+        .casino-coin {
+            position: fixed; width: 25px; height: 25px;
+            background: var(--accent-gold); border-radius: 50%;
+            pointer-events: none; z-index: 9999;
+            top: 50%; left: 50%; border: 2px solid #fff;
+            box-shadow: 0 0 10px var(--accent-gold);
         }
-        .placar-mini {
-            font-size: 0.9rem;
-            margin-bottom: 15px;
-            opacity: 0.8;
+        @keyframes coin-explosion {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(1.2) rotate(360deg); opacity: 0; }
         }
+
+        @media (max-width: 480px) {
+            .question-text { font-size: 1.5rem; }
+            .btn-option { font-size: 1.1rem; }
+        }
+
     </style>
 </head>
 <body class="dashboard-container">
 
-    <div class="background-glow glow-1"></div>
+    <div class="background-glow glow-2"></div>
+    <div class="progress-track"><div class="progress-fill" id="progress-bar"></div></div>
 
     <header class="glass-header">
-        <h1>VERBOS <span class="text-gold">DINÂMICOS</span></h1>
-        <p class="subtitle">Módulo 12 - Domínio de Tempos Verbais</p>
+        <h1>VERB <span class="text-gold">ARENA</span></h1>
+        <p class="subtitle">Módulo 12 - Domínio de Verbos (A1/A2)</p>
+        <div class="xp-pill">XP: <span id="xp-val">0</span></div>
     </header>
 
-    <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
+    <main class="game-wrapper" style="padding: 20px;">
         
-        <div id="quiz-container" class="exercise-box">
-            <div class="placar-mini">
-                Acertos: <span id="hits" class="text-gold">0</span> | 
-                Erros: <span id="misses" style="color: #f87171;">0</span>
-            </div>
+        <div id="feedback" style="text-align: center; height: 30px; font-weight: 900; letter-spacing: 2px; margin-bottom: 5px;"></div>
 
-            <h2 id="question" style="color: #fff; margin-bottom: 20px;">Carregando...</h2>
-            
-            <div id="options" class="mc-options"></div>
-            
-            <div id="feedback" style="margin-top: 15px; min-height: 24px; font-weight: bold;"></div>
-
-            <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin-top: 20px;">PRÓXIMA ➡</button>
+        <div class="game-card" id="game-card-element">
+            <span class="label-instruction">RESPONDA RÁPIDO:</span>
+            <div id="question-container" class="question-text">Carregando...</div>
         </div>
 
-        <div style="margin-top: 40px; text-align: center;">
-            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;">
-                <span>⬅ Painel de Controle</span>
-            </a>
+        <div class="options-grid">
+            <button id="btn-a" class="btn-option" onclick="checkAnswer('A')">Opção A</button>
+            <button id="btn-b" class="btn-option" onclick="checkAnswer('B')">Opção B</button>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+             <a href="../index.html" style="color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.9rem;">⬅ Voltar ao Painel</a>
         </div>
     </main>
 
-    <script>
-        const verbQuestions = [
-            { q: "Qual a forma correta do Past Simple de 'GO'?", opts: ["Went", "Gone", "Goes"], correct: 0 },
-            { q: "Complete: 'I ___ (work) here for five years.' (Present Perfect)", opts: ["have worked", "work", "worked"], correct: 0 },
-            { q: "Qual o particípio passado (PP) do verbo 'DO'?", opts: ["Did", "Done", "Does"], correct: 1 },
-            { q: "I ___ (see) that movie yesterday.", opts: ["saw", "seen", "have seen"], correct: 0 },
-            { q: "They ___ (play) soccer right now.", opts: ["are playing", "plays", "played"], correct: 0 }
-        ];
-
-        let index = 0;
-        let hits = 0;
-        let misses = 0;
-
-        function load() {
-            if (index >= verbQuestions.length) {
-                document.getElementById('quiz-container').innerHTML = `
-                    <h2 class="text-gold">Excelente Trabalho!</h2>
-                    <p style="color:#fff; margin: 20px 0;">Sua precisão verbal foi registrada no sistema.</p>
-                    <button onclick="location.reload()" class="btn-gold">REPETIR TREINO</button>
-                `;
-                return;
-            }
-
-            const current = verbQuestions[index];
-            document.getElementById('question').textContent = current.q;
-            document.getElementById('feedback').textContent = "";
-            document.getElementById('nextBtn').style.display = "none";
-            
-            const optDiv = document.getElementById('options');
-            optDiv.innerHTML = "";
-
-            current.opts.forEach((o, i) => {
-                const b = document.createElement('div');
-                b.className = 'mc-option';
-                b.textContent = o;
-                b.onclick = () => check(i, b);
-                optDiv.appendChild(b);
-            });
-        }
-
-        function check(choice, el) {
-            const correct = verbQuestions[index].correct;
-            const feedback = document.getElementById('feedback');
-            const btns = document.querySelectorAll('.mc-option');
-            
-            btns.forEach(b => b.onclick = null);
-
-            if (choice === correct) {
-                el.classList.add('correct-answer');
-                feedback.textContent = "SISTEMA OPERANTE: +10 XP";
-                feedback.style.color = "#4ade80";
-                hits++;
-                document.getElementById('hits').textContent = hits;
-                
-                // Salva XP localmente (Engenharia LMS Lite)
-                let xp = localStorage.getItem('ffes_xp') || 0;
-                localStorage.setItem('ffes_xp', parseInt(xp) + 10);
-            } else {
-                el.classList.add('wrong-answer');
-                btns[correct].classList.add('correct-answer');
-                feedback.textContent = "ERRO DE SINTAXE DETECTADO";
-                feedback.style.color = "#f87171";
-                misses++;
-                document.getElementById('misses').textContent = misses;
-            }
-
-            document.getElementById('nextBtn').style.display = "inline-block";
-        }
-
-        function nextQuestion() {
-            index++;
-            load();
-        }
-
-        load();
-    </script>
-
     <footer class="glass-footer">
-        <p>&copy; 2026 FFES - Sovereignty System v2.1</p>
+        © 2026 FFES - Sovereignty System v2.5
     </footer>
 
+    <script>
+        // === BANCO DE DADOS: 100 PERGUNTAS DE VERBOS (A1/A2) ===
+        // q: Pergunta, correct: Certa, wrong: Errada
+        const database = [
+            // Traduções (EN -> PT)
+            { q: "O que é GO?", correct: "Ir", wrong: "Vir" },
+            { q: "O que é COME?", correct: "Vir", wrong: "Ir" },
+            { q: "O que é EAT?", correct: "Comer", wrong: "Beber" },
+            { q: "O que é DRINK?", correct: "Beber", wrong: "Comer" },
+            { q: "O que é SLEEP?", correct: "Dormir", wrong: "Acordar" },
+            { q: "O que é WAKE?", correct: "Acordar", wrong: "Dormir" },
+            { q: "O que é WORK?", correct: "Trabalhar", wrong: "Jogar" },
+            { q: "O que é PLAY?", correct: "Jogar", wrong: "Trabalhar" },
+            { q: "O que é STUDY?", correct: "Estudar", wrong: "Ensinar" },
+            { q: "O que é TEACH?", correct: "Ensinar", wrong: "Estudar" },
+            // Passado Irregular
+            { q: "Passado de GO?", correct: "Went", wrong: "Goed" },
+            { q: "Passado de DO?", correct: "Did", wrong: "Doed" },
+            { q: "Passado de HAVE?", correct: "Had", wrong: "Haved" },
+            { q: "Passado de SEE?", correct: "Saw", wrong: "Seed" },
+            { q: "Passado de BUY?", correct: "Bought", wrong: "Buyed" },
+            { q: "Passado de THINK?", correct: "Thought", wrong: "Thinked" },
+            { q: "Passado de EAT?", correct: "Ate", wrong: "Eated" },
+            { q: "Passado de MAKE?", correct: "Made", wrong: "Maked" },
+            { q: "Passado de SPEAK?", correct: "Spoke", wrong: "Speaked" },
+            { q: "Passado de TAKE?", correct: "Took", wrong: "Taked" },
+            // Traduções (PT -> EN)
+            { q: "Como é AMAR?", correct: "Love", wrong: "Like" },
+            { q: "Como é GOSTAR?", correct: "Like", wrong: "Love" },
+            { q: "Como é CORRER?", correct: "Run", wrong: "Walk" },
+            { q: "Como é ANDAR?", correct: "Walk", wrong: "Run" },
+            { q: "Como é FALAR?", correct: "Speak", wrong: "Listen" },
+            { q: "Como é OUVIR?", correct: "Hear", wrong: "Speak" },
+            { q: "Como é VER?", correct: "See", wrong: "Say" },
+            { q: "Como é DIZER?", correct: "Say", wrong: "See" },
+            { q: "Como é LER?", correct: "Read", wrong: "Write" },
+            { q: "Como é ESCREVER?", correct: "Write", wrong: "Read" },
+            // Conjugação (He/She/It)
+            { q: "She _____ (work)", correct: "Works", wrong: "Work" },
+            { q: "He _____ (play)", correct: "Plays", wrong: "Play" },
+            { q: "It _____ (rain)", correct: "Rains", wrong: "Rain" },
+            { q: "She _____ (go)", correct: "Goes", wrong: "Gos" },
+            { q: "He _____ (do)", correct: "Does", wrong: "Dos" },
+            { q: "She _____ (have)", correct: "Has", wrong: "Have" },
+            { q: "He _____ (study)", correct: "Studies", wrong: "Studys" },
+            { q: "It _____ (fly)", correct: "Flies", wrong: "Flys" },
+            { q: "She _____ (watch)", correct: "Watches", wrong: "Watchs" },
+            { q: "He _____ (kiss)", correct: "Kisses", wrong: "Kisss" },
+            // Passado Regular
+            { q: "Passado de WORK?", correct: "Worked", wrong: "Work" },
+            { q: "Passado de PLAY?", correct: "Played", wrong: "Plaid" },
+            { q: "Passado de LIKE?", correct: "Liked", wrong: "Likeds" },
+            { q: "Passado de LOVE?", correct: "Loved", wrong: "Loveed" },
+            { q: "Passado de WATCH?", correct: "Watched", wrong: "Watchd" },
+            { q: "Passado de WASH?", correct: "Washed", wrong: "Washd" },
+            { q: "Passado de HELP?", correct: "Helped", wrong: "Help" },
+            { q: "Passado de COOK?", correct: "Cooked", wrong: "Cook" },
+            { q: "Passado de OPEN?", correct: "Opened", wrong: "Opend" },
+            { q: "Passado de CLOSE?", correct: "Closed", wrong: "Closeed" },
+            // Gerúndio (-ING)
+            { q: "Running", correct: "Correndo", wrong: "Correu" },
+            { q: "Eating", correct: "Comendo", wrong: "Comeu" },
+            { q: "Sleeping", correct: "Dormindo", wrong: "Dorme" },
+            { q: "Working", correct: "Trabalhando", wrong: "Trabalho" },
+            { q: "Studying", correct: "Estudando", wrong: "Estuda" },
+            { q: "Playing", correct: "Jogando", wrong: "Joga" },
+            { q: "Going", correct: "Indo", wrong: "Vai" },
+            { q: "Doing", correct: "Fazendo", wrong: "Faz" },
+            { q: "Making", correct: "Criando", wrong: "Cria" },
+            { q: "Reading", correct: "Lendo", wrong: "Ler" },
+            // Verbos Modais
+            { q: "CAN significa?", correct: "Poder", wrong: "Dever" },
+            { q: "SHOULD significa?", correct: "Deveria", wrong: "Pode" },
+            { q: "MUST significa?", correct: "Deve", wrong: "Pode" },
+            { q: "WILL indica?", correct: "Futuro", wrong: "Passado" },
+            { q: "WOULD indica?", correct: "Condição", wrong: "Presente" },
+            { q: "MAY significa?", correct: "Poder", wrong: "Querer" },
+            { q: "MIGHT indica?", correct: "Possibilidade", wrong: "Certeza" },
+            { q: "COULD é passado de?", correct: "Can", wrong: "Will" },
+            { q: "SHOULD é conselho?", correct: "Sim", wrong: "Não" },
+            { q: "MUST é obrigação?", correct: "Sim", wrong: "Não" },
+            // Make vs Do
+            { q: "_____ a cake", correct: "Make", wrong: "Do" },
+            { q: "_____ homework", correct: "Do", wrong: "Make" },
+            { q: "_____ money", correct: "Make", wrong: "Do" },
+            { q: "_____ a favor", correct: "Do", wrong: "Make" },
+            { q: "_____ friends", correct: "Make", wrong: "Do" },
+            { q: "_____ exercise", correct: "Do", wrong: "Make" },
+            { q: "_____ a mistake", correct: "Make", wrong: "Do" },
+            { q: "_____ business", correct: "Do", wrong: "Make" },
+            { q: "_____ coffee", correct: "Make", wrong: "Do" },
+            { q: "_____ your best", correct: "Do", wrong: "Make" },
+            // Say vs Tell
+            { q: "_____ me", correct: "Tell", wrong: "Say" },
+            { q: "_____ hello", correct: "Say", wrong: "Tell" },
+            { q: "_____ a story", correct: "Tell", wrong: "Say" },
+            { q: "_____ goodbye", correct: "Say", wrong: "Tell" },
+            { q: "_____ the truth", correct: "Tell", wrong: "Say" },
+            { q: "_____ something", correct: "Say", wrong: "Tell" },
+            { q: "_____ a lie", correct: "Tell", wrong: "Say" },
+            { q: "_____ yes", correct: "Say", wrong: "Tell" },
+            { q: "_____ him", correct: "Tell", wrong: "Say" },
+            { q: "_____ sorry", correct: "Say", wrong: "Tell" },
+            // Verbo To Be
+            { q: "I _____", correct: "Am", wrong: "Is" },
+            { q: "You _____", correct: "Are", wrong: "Is" },
+            { q: "He _____", correct: "Is", wrong: "Are" },
+            { q: "She _____", correct: "Is", wrong: "Am" },
+            { q: "It _____", correct: "Is", wrong: "Are" },
+            { q: "We _____", correct: "Are", wrong: "Is" },
+            { q: "They _____", correct: "Are", wrong: "Am" },
+            { q: "Passado de AM?", correct: "Was", wrong: "Were" },
+            { q: "Passado de IS?", correct: "Was", wrong: "Were" },
+            { q: "Passado de ARE?", correct: "Were", wrong: "Was" }
+        ];
+
+        let state = { index: 0, currentQ: null, isCorrectA: false, canClick: true };
+        let xp = parseInt(localStorage.getItem('ffes_xp') || 0);
+        document.getElementById('xp-val').innerText = xp;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Shuffle inicial
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+        shuffleArray(database);
+
+        function load() {
+            state.canClick = true;
+            document.getElementById('feedback').innerText = "";
+            document.querySelectorAll('.btn-option').forEach(b => {
+                b.className = 'btn-option';
+                b.style.opacity = '1';
+                b.style.transform = 'scale(1)';
+            });
+            
+            if (state.index >= database.length) { state.index = 0; shuffleArray(database); }
+            
+            state.currentQ = database[state.index];
+            
+            // Renderiza a pergunta com destaque se houver palavras em maiúsculo
+            let qText = state.currentQ.q.replace(/([A-ZÇÃÕÊÁÉÍÓÚ]{2,})/g, '<span class="verb-highlight">$1</span>');
+            document.getElementById('question-container').innerHTML = qText;
+            
+            // Randomiza posição dos botões
+            state.isCorrectA = Math.random() > 0.5;
+            
+            const btnA = document.getElementById('btn-a');
+            const btnB = document.getElementById('btn-b');
+            
+            if (state.isCorrectA) {
+                btnA.innerText = state.currentQ.correct;
+                btnB.innerText = state.currentQ.wrong;
+            } else {
+                btnA.innerText = state.currentQ.wrong;
+                btnB.innerText = state.currentQ.correct;
+            }
+        }
+
+        function checkAnswer(choice) {
+            if (!state.canClick) return;
+            state.canClick = false;
+
+            const isCorrect = (choice === 'A' && state.isCorrectA) || (choice === 'B' && !state.isCorrectA);
+            const fb = document.getElementById('feedback');
+            const btnSelected = document.getElementById(choice === 'A' ? 'btn-a' : 'btn-b');
+            
+            if (isCorrect) {
+                fb.innerHTML = "<span style='color: #4ade80'>AÇÃO CONFIRMADA! +15 XP</span>";
+                btnSelected.classList.add('correct');
+                
+                xp += 15;
+                localStorage.setItem('ffes_xp', xp);
+                document.getElementById('xp-val').innerText = xp;
+                
+                playAudio('win');
+                triggerCasinoEffect(15);
+                
+                let w = parseFloat(document.getElementById('progress-bar').style.width || 0);
+                document.getElementById('progress-bar').style.width = (w + 5) % 100 + '%';
+
+                setTimeout(() => {
+                    state.index++;
+                    load();
+                }, 1000);
+            } else {
+                fb.innerHTML = "<span style='color: #f87171'>CONJUGAÇÃO INVÁLIDA</span>";
+                btnSelected.classList.add('wrong');
+                playAudio('error');
+                
+                document.getElementById('game-card-element').animate([
+                    { transform: 'translateX(0)' },
+                    { transform: 'translateX(-10px)' },
+                    { transform: 'translateX(10px)' },
+                    { transform: 'translateX(0)' }
+                ], { duration: 400 });
+
+                setTimeout(() => {
+                    state.canClick = true;
+                    document.getElementById('feedback').innerText = "";
+                    btnSelected.classList.remove('wrong');
+                }, 800);
+            }
+        }
+
+        // === ENGINE DE ÁUDIO & EFEITOS FFES ===
+        function playAudio(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+
+            if(type === 'win') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(600, t);
+                osc.frequency.linearRampToValueAtTime(1200, t + 0.1);
+                gain.gain.setValueAtTime(0.1, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+                osc.start(t); osc.stop(t + 0.2);
+            } else if(type === 'error') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, t);
+                osc.frequency.linearRampToValueAtTime(80, t + 0.2);
+                gain.gain.setValueAtTime(0.1, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+                osc.start(t); osc.stop(t + 0.2);
+            }
+        }
+
+        function triggerCasinoEffect(amount) {
+            for (let i = 0; i < amount; i++) {
+                const coin = document.createElement('div');
+                coin.className = 'casino-coin';
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 60 + Math.random() * 100;
+                coin.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+                coin.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+                coin.style.animation = `coin-explosion ${0.5 + Math.random()*0.3}s ease-out forwards`;
+                document.body.appendChild(coin);
+                setTimeout(() => coin.remove(), 800);
+            }
+        }
+
+        window.onload = load;
+    </script>
 </body>
 </html>

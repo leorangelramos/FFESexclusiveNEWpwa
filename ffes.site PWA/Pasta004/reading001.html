@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FFES | Reading Zone (A1)</title>
+    <title>FFES | Reading Zone Master 100</title>
     <link rel="stylesheet" href="../style.css">
     <style>
+        /* === ESTILO ORIGINAL PRESERVADO === */
         .exercise-box {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
@@ -28,33 +29,28 @@
             padding: 15px;
             min-height: 300px;
             border: 1px dashed rgba(255, 255, 255, 0.1);
+            transition: border 0.3s;
         }
         .paragraph-block {
-            background: rgba(184, 134, 11, 0.1);
-            border: 1px solid rgba(184, 134, 11, 0.3);
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 8px;
+            background: rgba(184, 134, 11, 0.15);
+            border: 1px solid rgba(184, 134, 11, 0.4);
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 10px;
             cursor: grab;
             color: #fff;
-            font-size: 0.95rem;
+            font-size: 1rem;
             line-height: 1.4;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s, background 0.2s;
         }
-        .paragraph-block:active { cursor: grabbing; }
-        .paragraph-block.dragging { opacity: 0.4; }
-
+        .paragraph-block:active { cursor: grabbing; transform: scale(0.98); }
+        .paragraph-block:hover { background: rgba(184, 134, 11, 0.25); }
+        
         .drop-zone {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px dashed rgba(184, 134, 11, 0.2);
-            border-radius: 10px;
-            min-height: 60px;
-            margin-bottom: 10px;
-            transition: 0.3s;
+            min-height: 100%; /* Ocupa a altura toda para soltar em qualquer lugar */
         }
-        .drop-zone.hovered {
-            background: rgba(184, 134, 11, 0.15);
-            border-color: #b8860b;
-        }
+
         .column-title {
             text-align: center;
             font-size: 0.9rem;
@@ -62,6 +58,30 @@
             margin-bottom: 15px;
             text-transform: uppercase;
             letter-spacing: 1px;
+            font-weight: 800;
+        }
+
+        /* Elementos do Sistema FFES (Moedas e XP) */
+        .casino-coin {
+            position: fixed; width: 25px; height: 25px;
+            background: var(--accent-gold); border-radius: 50%;
+            pointer-events: none; z-index: 9999;
+            top: 50%; left: 50%; border: 2px solid #fff;
+            box-shadow: 0 0 10px var(--accent-gold);
+        }
+        @keyframes coin-explosion {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(1.2) rotate(360deg); opacity: 0; }
+        }
+        
+        .xp-pill {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--accent-gold);
+            padding: 5px 15px;
+            border-radius: 50px;
+            color: var(--accent-gold);
+            font-weight: 800;
+            display: inline-block;
         }
     </style>
 </head>
@@ -71,29 +91,29 @@
 
     <header class="glass-header">
         <h1>READING <span class="text-gold">ZONE</span></h1>
-        <p class="subtitle">Módulo 04 - Ordenação de Parágrafos (A1)</p>
+        <p class="subtitle">Módulo 04 - Lógica Sequencial (A1)</p>
+        <div class="xp-pill">XP: <span id="xp-val">0</span></div>
     </header>
 
     <main style="max-width: 900px; margin: 0 auto; padding: 20px;">
         
         <div id="game-content" class="exercise-box">
-            <h2 id="story-title" style="color: #fff; text-align: center; margin-bottom: 20px;">Carregando...</h2>
+            <h2 id="story-title" style="color: #fff; text-align: center; margin-bottom: 10px;">Carregando...</h2>
+            <p style="text-align: center; color: #aaa; font-size: 0.9rem; margin-bottom: 20px;">Arraste os blocos para a direita na ordem correta.</p>
             
             <div class="game-area">
-                <div id="source" class="column-box" ondragover="allowDrop(event)" ondrop="drop(event)">
-                    <div class="column-title">Fragmentos</div>
-                </div>
+                <div id="source" class="column-box drop-zone" ondragover="allowDrop(event)" ondrop="drop(event)">
+                    </div>
                 
-                <div id="target" class="column-box">
-                    <div class="column-title">Sua Ordem</div>
+                <div id="target" class="column-box drop-zone" ondragover="allowDrop(event)" ondrop="drop(event)">
                     </div>
             </div>
 
-            <div id="feedback" style="text-align:center; margin-top:20px; font-weight:bold; min-height:24px;"></div>
+            <div id="feedback" style="text-align:center; margin-top:20px; font-weight:900; min-height:30px; letter-spacing: 1px;"></div>
 
             <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
-                <button onclick="checkOrder()" class="btn-gold">VERIFICAR</button>
-                <button id="nextBtn" onclick="nextStory()" class="btn-gold" style="display:none; background: transparent; border: 1px solid #b8860b;">PRÓXIMA ➡</button>
+                <button onclick="checkOrder()" class="btn-gold">CONFIRMAR ORDEM</button>
+                <button id="nextBtn" onclick="nextStory()" class="btn-gold" style="display:none; background: transparent; border: 1px solid #b8860b; color: #fff;">PRÓXIMA ➡</button>
             </div>
         </div>
 
@@ -105,29 +125,158 @@
     </main>
 
     <script>
+        // === BANCO DE DADOS: 100 TEXTOS A1 (LÓGICA SEQUENCIAL) ===
         const stories = [
-            {
-                title: "My Cat, Leo",
-                paragraphs: [
-                    "I have a pet. He is a cat and his name is Leo.",
-                    "Leo is 3 years old. He is a small cat. His fur is black and white.",
-                    "He sleeps a lot. He also likes to play with a ball.",
-                    "Leo is part of my family. I love my cat."
-                ]
-            }
+            { title: "My Morning", paragraphs: ["I wake up at 7 AM.", "I brush my teeth.", "I eat breakfast.", "I go to work."] },
+            { title: "The Coffee", paragraphs: ["I boil some water.", "I put coffee in the cup.", "I pour the hot water.", "I drink the coffee."] },
+            { title: "My Cat Leo", paragraphs: ["I have a cat named Leo.", "He is hungry.", "I give him food.", "He sleeps on the sofa."] },
+            { title: "The Rain", paragraphs: ["The sun is shining.", "Dark clouds appear.", "It starts to rain.", "I open my umbrella."] },
+            { title: "Making a Sandwich", paragraphs: ["I take two slices of bread.", "I put cheese on the bread.", "I put ham on the cheese.", "I eat the sandwich."] },
+            { title: "Going to Sleep", paragraphs: ["I put on my pajamas.", "I turn off the light.", "I get into bed.", "I close my eyes."] },
+            { title: "The Bus", paragraphs: ["I walk to the bus stop.", "I wait for five minutes.", "The bus arrives.", "I get on the bus."] },
+            { title: "Shopping", paragraphs: ["I go to the supermarket.", "I take a shopping cart.", "I pick some apples.", "I pay for the food."] },
+            { title: "The Letter", paragraphs: ["I write a letter.", "I put it in an envelope.", "I put a stamp on it.", "I mail the letter."] },
+            { title: "Washing Hands", paragraphs: ["I turn on the water.", "I put soap on my hands.", "I wash them well.", "I dry my hands."] },
+            
+            // Set 11-20
+            { title: "The Flower", paragraphs: ["I plant a seed.", "I water the seed.", "The sun shines on it.", "A flower grows."] },
+            { title: "The Dog Walk", paragraphs: ["I call my dog, Rex.", "I put on his leash.", "We walk in the park.", "We go back home."] },
+            { title: "Watching TV", paragraphs: ["I sit on the sofa.", "I take the remote control.", "I turn on the TV.", "I watch a movie."] },
+            { title: "Orange Juice", paragraphs: ["I take three oranges.", "I cut the oranges.", "I squeeze the juice.", "I drink the juice."] },
+            { title: "The Phone Call", paragraphs: ["My phone rings.", "I look at the screen.", "I answer the call.", "I say hello."] },
+            { title: "Homework", paragraphs: ["I open my book.", "I read the question.", "I write the answer.", "I close the book."] },
+            { title: "Driving", paragraphs: ["I open the car door.", "I sit in the driver's seat.", "I start the engine.", "I drive away."] },
+            { title: "The Apple", paragraphs: ["I see a red apple.", "I wash the apple.", "I take a bite.", "It is sweet."] },
+            { title: "The Gift", paragraphs: ["I buy a gift.", "I wrap it in paper.", "I give it to my friend.", "She opens it."] },
+            { title: "Cleaning", paragraphs: ["The floor is dirty.", "I take the broom.", "I sweep the floor.", "Now it is clean."] },
+
+            // Set 21-30
+            { title: "The Pizza", paragraphs: ["I order a pizza.", "The delivery man arrives.", "I pay him.", "I eat the pizza."] },
+            { title: "The Shoes", paragraphs: ["My shoes are old.", "I go to the shoe store.", "I try on new shoes.", "I buy them."] },
+            { title: "The Movie", paragraphs: ["I buy a ticket.", "I buy popcorn.", "I sit in the cinema.", "The movie starts."] },
+            { title: "The Beach", paragraphs: ["I arrive at the beach.", "I put on sunscreen.", "I swim in the sea.", "I lie on the sand."] },
+            { title: "The Cake", paragraphs: ["I mix flour and sugar.", "I put the cake in the oven.", "I wait for 30 minutes.", "The cake is ready."] },
+            { title: "The Bird", paragraphs: ["A bird sits on the tree.", "It sings a song.", "It sees a cat.", "It flies away."] },
+            { title: "Soccer", paragraphs: ["We go to the field.", "We start the game.", "I kick the ball.", "I score a goal."] },
+            { title: "The Alarm", paragraphs: ["The alarm rings.", "I turn it off.", "I stretch my arms.", "I get out of bed."] },
+            { title: "Tea Time", paragraphs: ["I boil water.", "I put a tea bag in the cup.", "I add hot water.", "I add sugar."] },
+            { title: "The Library", paragraphs: ["I go to the library.", "I find a good book.", "I show my card.", "I take the book home."] },
+
+            // Set 31-40
+            { title: "The Taxi", paragraphs: ["I raise my hand.", "A taxi stops.", "I tell the driver the address.", "We arrive at the hotel."] },
+            { title: "The Computer", paragraphs: ["I press the power button.", "The screen turns on.", "I type my password.", "I open the internet."] },
+            { title: "Running", paragraphs: ["I put on my running shoes.", "I go to the park.", "I run for 20 minutes.", "I stop and drink water."] },
+            { title: "The Baby", paragraphs: ["The baby cries.", "The mother picks him up.", "She gives him milk.", "The baby sleeps."] },
+            { title: "The Photo", paragraphs: ["I see a beautiful view.", "I take my camera.", "I focus the lens.", "I take the photo."] },
+            { title: "The Ice Cream", paragraphs: ["I go to the shop.", "I choose chocolate flavor.", "I pay the man.", "I eat the ice cream."] },
+            { title: "The Door", paragraphs: ["I hear a knock.", "I walk to the door.", "I unlock the door.", "I open it."] },
+            { title: "The Train", paragraphs: ["I buy a ticket.", "I wait on the platform.", "The train arrives.", "I find a seat."] },
+            { title: "The Salad", paragraphs: ["I wash the lettuce.", "I cut the tomatoes.", "I add olive oil.", "I mix the salad."] },
+            { title: "The Lamp", paragraphs: ["The room is dark.", "I find the switch.", "I press it.", "The light turns on."] },
+
+            // Set 41-50
+            { title: "Fishing", paragraphs: ["I go to the lake.", "I put a worm on the hook.", "I wait quietly.", "I catch a fish."] },
+            { title: "The Toothache", paragraphs: ["My tooth hurts.", "I call the dentist.", "I go to the clinic.", "The dentist fixes it."] },
+            { title: "The Wallet", paragraphs: ["I look for my wallet.", "I check my pockets.", "I check the table.", "I find it under the bed."] },
+            { title: "The Bike", paragraphs: ["My bike has a flat tire.", "I take the pump.", "I pump air into the tire.", "I ride the bike."] },
+            { title: "The Painting", paragraphs: ["I take a brush.", "I dip it in paint.", "I paint on the canvas.", "It becomes a picture."] },
+            { title: "Winter", paragraphs: ["It is cold outside.", "I put on my coat.", "I put on my gloves.", "I walk in the snow."] },
+            { title: "Summer", paragraphs: ["It is very hot.", "I turn on the fan.", "I drink cold water.", "I feel better."] },
+            { title: "The Key", paragraphs: ["I arrive home.", "I take out my key.", "I put it in the lock.", "I open the door."] },
+            { title: "The Shower", paragraphs: ["I turn on the water.", "I check the temperature.", "I step inside.", "I wash my hair."] },
+            { title: "The Exam", paragraphs: ["The teacher gives the paper.", "I read the questions.", "I write the answers.", "I give the paper back."] },
+
+            // Set 51-60
+            { title: "The Picnic", paragraphs: ["We pack food.", "We drive to the park.", "We sit on the grass.", "We eat lunch."] },
+            { title: "The Restaurant", paragraphs: ["We sit at a table.", "The waiter brings the menu.", "We order food.", "We eat dinner."] },
+            { title: "The Dirty Car", paragraphs: ["My car is dirty.", "I get a bucket of water.", "I wash the car.", "Now it is shiny."] },
+            { title: "The Lost Dog", paragraphs: ["I see a dog alone.", "I look for a tag.", "I call the number.", "The owner comes."] },
+            { title: "The Elevator", paragraphs: ["I press the button.", "The doors open.", "I press floor 5.", "The elevator goes up."] },
+            { title: "The Plant", paragraphs: ["The plant is dry.", "I get water.", "I pour it on the soil.", "The plant looks green."] },
+            { title: "The New Shirt", paragraphs: ["I buy a new shirt.", "I wash it.", "I iron it.", "I wear it to work."] },
+            { title: "The Trash", paragraphs: ["The bin is full.", "I take out the bag.", "I walk outside.", "I put it in the big bin."] },
+            { title: "The Flight", paragraphs: ["I go to the airport.", "I check my bag.", "I go through security.", "I board the plane."] },
+            { title: "The Meeting", paragraphs: ["I enter the room.", "I say hello to everyone.", "We sit down.", "We talk about business."] },
+
+            // Set 61-70
+            { title: "The Spider", paragraphs: ["I see a spider.", "I am scared.", "I catch it in a cup.", "I put it outside."] },
+            { title: "The Cold", paragraphs: ["I sneeze.", "I have a fever.", "I take medicine.", "I sleep in bed."] },
+            { title: "The Game", paragraphs: ["I turn on the console.", "I choose a game.", "I play for an hour.", "I win the level."] },
+            { title: "The Radio", paragraphs: ["I turn on the radio.", "I change the station.", "I like this song.", "I sing along."] },
+            { title: "The Stairs", paragraphs: ["I stand at the bottom.", "I hold the rail.", "I step up.", "I reach the top."] },
+            { title: "The Wallet 2", paragraphs: ["I open my wallet.", "I count my money.", "I have ten dollars.", "I buy a snack."] },
+            { title: "The Message", paragraphs: ["I hear a beep.", "I check my phone.", "It is a text message.", "I write a reply."] },
+            { title: "The Window", paragraphs: ["The room is hot.", "I walk to the window.", "I open it.", "Cool air comes in."] },
+            { title: "The Glasses", paragraphs: ["I cannot see well.", "I look for my glasses.", "I put them on.", "Now I see clearly."] },
+            { title: "The Candle", paragraphs: ["It is dark.", "I find a candle.", "I light a match.", "I light the candle."] },
+
+            // Set 71-80
+            { title: "The Hat", paragraphs: ["It is sunny.", "I take my hat.", "I put it on my head.", "I go outside."] },
+            { title: "The Soup", paragraphs: ["The soup is hot.", "I blow on it.", "I take a spoon.", "I taste it."] },
+            { title: "The Drawing", paragraphs: ["I take a pencil.", "I draw a circle.", "I draw a face.", "It is a happy face."] },
+            { title: "The Music", paragraphs: ["I put on headphones.", "I press play.", "I close my eyes.", "I listen to music."] },
+            { title: "The Party", paragraphs: ["I dress up.", "I go to my friend's house.", "We dance.", "We eat cake."] },
+            { title: "The Clock", paragraphs: ["I look at the clock.", "It is 12 PM.", "It is lunch time.", "I go to eat."] },
+            { title: "The Ball", paragraphs: ["I hold the ball.", "I throw it.", "My friend catches it.", "He throws it back."] },
+            { title: "The Tree", paragraphs: ["I dig a hole.", "I put the tree in.", "I cover the roots.", "I water it."] },
+            { title: "The Egg", paragraphs: ["I crack the egg.", "I put it in the pan.", "I fry it.", "I eat it with toast."] },
+            { title: "The Butterfly", paragraphs: ["I see a caterpillar.", "It makes a cocoon.", "Wait some time.", "A butterfly comes out."] },
+
+            // Set 81-90
+            { title: "The Chair", paragraphs: ["The chair is broken.", "I get some glue.", "I fix the leg.", "I sit carefully."] },
+            { title: "The Hands", paragraphs: ["My hands are cold.", "I rub them together.", "I put on gloves.", "They feel warm."] },
+            { title: "The Lemon", paragraphs: ["I cut a lemon.", "I taste it.", "It is very sour.", "I make a face."] },
+            { title: "The Map", paragraphs: ["I am lost.", "I open the map.", "I find my street.", "I know where to go."] },
+            { title: "The Mirror", paragraphs: ["I stand in front of the mirror.", "I look at my hair.", "I comb my hair.", "It looks good."] },
+            { title: "The Pen", paragraphs: ["I want to write.", "I try the pen.", "No ink comes out.", "I get a new pen."] },
+            { title: "The Backpack", paragraphs: ["I open my bag.", "I put in my books.", "I zip it up.", "I put it on my back."] },
+            { title: "The Jacket", paragraphs: ["It is windy.", "I zip up my jacket.", "I put up the hood.", "I am warm."] },
+            { title: "The Toast", paragraphs: ["I put bread in the toaster.", "I push the lever down.", "The toast pops up.", "I add butter."] },
+            { title: "The Joke", paragraphs: ["My friend tells a joke.", "I listen.", "I understand it.", "I laugh loudly."] },
+
+            // Set 91-100
+            { title: "The Pool", paragraphs: ["I walk to the pool.", "I jump in.", "The water is cool.", "I swim laps."] },
+            { title: "The Taxi 2", paragraphs: ["I call a taxi.", "I wait outside.", "The taxi comes.", "I get in."] },
+            { title: "The Market", paragraphs: ["I need vegetables.", "I go to the market.", "I choose fresh carrots.", "I pay the farmer."] },
+            { title: "The Snowman", paragraphs: ["I roll a big snowball.", "I roll a small snowball.", "I put one on top.", "I add a carrot nose."] },
+            { title: "The Milk", paragraphs: ["I get a glass.", "I take the milk.", "I pour the milk.", "I drink it."] },
+            { title: "The Game 2", paragraphs: ["I start the game.", "I lose a life.", "I try again.", "I win."] },
+            { title: "The Friend", paragraphs: ["I see my friend.", "I wave my hand.", "He sees me.", "He smiles."] },
+            { title: "The Birthday", paragraphs: ["It is my birthday.", "I get a cake.", "I blow the candles.", "I make a wish."] },
+            { title: "The Road", paragraphs: ["I want to cross.", "I look left.", "I look right.", "I walk across."] },
+            { title: "The End", paragraphs: ["I finish the work.", "I clean my desk.", "I turn off the PC.", "I go home."] }
         ];
 
         let currentIdx = 0;
         let draggedItem = null;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let xp = parseInt(localStorage.getItem('ffes_xp') || 0);
+        document.getElementById('xp-val').innerText = xp;
+
+        // Shuffle inicial para não repetir ordem dos textos
+        function shuffleGlobal() {
+            for (let i = stories.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [stories[i], stories[j]] = [stories[j], stories[i]];
+            }
+        }
+        shuffleGlobal();
 
         function load() {
+            if (currentIdx >= stories.length) { currentIdx = 0; shuffleGlobal(); }
+            
             const story = stories[currentIdx];
             document.getElementById('story-title').textContent = story.title;
             const source = document.getElementById('source');
             const target = document.getElementById('target');
-            
+            const feedback = document.getElementById('feedback');
+            const nextBtn = document.getElementById('nextBtn');
+
+            // Reset
             source.innerHTML = '<div class="column-title">Fragmentos</div>';
             target.innerHTML = '<div class="column-title">Sua Ordem</div>';
+            feedback.innerHTML = "";
+            nextBtn.style.display = "none";
             
             // Fragmentos embaralhados
             const scrambled = [...story.paragraphs].sort(() => Math.random() - 0.5);
@@ -137,59 +286,120 @@
                 div.textContent = text;
                 div.draggable = true;
                 div.id = 'p-' + i;
-                div.addEventListener('dragstart', (e) => draggedItem = e.target);
-                source.appendChild(div);
-            });
-
-            // Criar zonas de drop
-            story.paragraphs.forEach((_, i) => {
-                const zone = document.createElement('div');
-                zone.className = 'drop-zone';
-                zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('hovered'); });
-                zone.addEventListener('dragleave', () => zone.classList.remove('hovered'));
-                zone.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    zone.classList.remove('hovered');
-                    if(zone.children.length === 0) zone.appendChild(draggedItem);
+                
+                // Eventos de Drag Desktop/Mobile
+                div.addEventListener('dragstart', (e) => {
+                    draggedItem = e.target;
+                    e.target.style.opacity = '0.5';
                 });
-                target.appendChild(zone);
+                div.addEventListener('dragend', (e) => {
+                    e.target.style.opacity = '1';
+                });
+                
+                source.appendChild(div);
             });
         }
 
         function allowDrop(e) { e.preventDefault(); }
+        
         function drop(e) {
             e.preventDefault();
-            if(e.target.id === 'source') e.target.appendChild(draggedItem);
+            let targetZone = e.target;
+            
+            // Se soltar em cima de um texto, busca o pai (a coluna)
+            while(targetZone.className.indexOf('column-box') === -1 && targetZone !== document.body) {
+                targetZone = targetZone.parentNode;
+            }
+
+            if(targetZone.id === 'source' || targetZone.id === 'target') {
+                targetZone.appendChild(draggedItem);
+                playAudio('click');
+            }
         }
 
         function checkOrder() {
-            const zones = document.querySelectorAll('.drop-zone');
+            const targetBlocks = document.querySelectorAll('#target .paragraph-block');
             const story = stories[currentIdx];
-            let correct = true;
+            const feedback = document.getElementById('feedback');
+            
+            if (targetBlocks.length !== story.paragraphs.length) {
+                feedback.innerHTML = "<span style='color: #fbbf24'>Arraste todos os fragmentos para a direita!</span>";
+                playAudio('error');
+                return;
+            }
 
-            zones.forEach((zone, i) => {
-                if(!zone.firstElementChild || zone.firstElementChild.textContent !== story.paragraphs[i]) {
+            let correct = true;
+            targetBlocks.forEach((block, i) => {
+                if(block.textContent !== story.paragraphs[i]) {
                     correct = false;
                 }
             });
 
-            const feedback = document.getElementById('feedback');
             if(correct) {
-                feedback.innerHTML = "<span style='color: #4ade80'>HISTÓRIA COESA: +30 XP</span>";
+                feedback.innerHTML = "<span style='color: #4ade80'>LÓGICA PERFEITA! +30 XP</span>";
                 document.getElementById('nextBtn').style.display = "block";
                 
-                let xp = localStorage.getItem('ffes_xp') || 0;
-                localStorage.setItem('ffes_xp', parseInt(xp) + 30);
+                xp += 30;
+                localStorage.setItem('ffes_xp', xp);
+                document.getElementById('xp-val').innerText = xp;
+                
+                playAudio('win');
+                triggerCasinoEffect(20);
             } else {
-                feedback.innerHTML = "<span style='color: #f87171'>ORDEM INCORRETA</span>";
+                feedback.innerHTML = "<span style='color: #f87171'>ORDEM INCORRETA. TENTE NOVAMENTE.</span>";
+                playAudio('error');
             }
         }
 
-        load();
+        function nextStory() {
+            currentIdx++;
+            load();
+        }
+
+        // === ENGINE DE ÁUDIO & EFEITOS (PADRÃO FFES) ===
+        function playAudio(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+
+            if(type === 'win') {
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(500, t);
+                osc.frequency.exponentialRampToValueAtTime(1000, t + 0.1);
+                gain.gain.setValueAtTime(0.1, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            } else if(type === 'error') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, t);
+                osc.frequency.linearRampToValueAtTime(100, t + 0.3);
+                gain.gain.setValueAtTime(0.1, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            } else if(type === 'click') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(800, t);
+                gain.gain.setValueAtTime(0.05, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
+                osc.start(t); osc.stop(t + 0.05);
+            }
+        }
+
+        function triggerCasinoEffect(amount) {
+            for (let i = 0; i < amount; i++) {
+                const coin = document.createElement('div');
+                coin.className = 'casino-coin';
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 60 + Math.random() * 100;
+                coin.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+                coin.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+                coin.style.animation = `coin-explosion ${0.5 + Math.random()*0.3}s ease-out forwards`;
+                document.body.appendChild(coin);
+                setTimeout(() => coin.remove(), 800);
+            }
+        }
+
+        window.onload = load;
     </script>
 
     <footer class="glass-footer">
-        <p>&copy; 2026 FFES - Sovereignty System v2.1</p>
+        © 2026 FFES - Sovereignty System v2.5
     </footer>
 
 </body>

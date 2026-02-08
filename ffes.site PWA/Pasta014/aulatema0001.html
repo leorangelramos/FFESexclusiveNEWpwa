@@ -3,125 +3,416 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FFES | Family Members (A1)</title>
+    <title>FFES | Family Vocabulary Master</title>
     <link rel="stylesheet" href="../style.css">
     <style>
-        .exercise-box {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-top: 20px;
-            text-align: center;
-        }
-        .input-gold {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid #b8860b;
-            color: #fff;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 1.2rem;
+        /* === ESTILO FAMILY MASTER (PADRÃO FFES) === */
+        .game-wrapper {
             width: 100%;
-            max-width: 300px;
-            margin: 10px 0;
-            outline: none;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
+            margin: 0 auto;
+        }
+
+        .game-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 2px solid var(--accent-gold);
+            border-radius: 24px;
+            padding: 30px 20px;
             text-align: center;
+            box-shadow: var(--glass-shadow);
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
-        .feedback {
-            margin-top: 15px;
-            font-weight: bold;
-            min-height: 24px;
+
+        .question-text {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            line-height: 1.2;
         }
-        .correct { color: #4ade80; }
-        .incorrect { color: #f87171; }
+
+        .family-highlight {
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+
+        .label-instruction {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        /* Botões de Opção A/B */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .btn-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-white);
+            padding: 20px 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: var(--glass-blur);
+            min-height: 80px;
+            display: flex; align-items: center; justify-content: center;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .btn-option:hover {
+            border-color: var(--accent-gold);
+            background: rgba(255, 184, 28, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .btn-option.correct { background: #00e676 !important; color: #000 !important; border-color: #00e676 !important; }
+        .btn-option.wrong { background: #ff1744 !important; opacity: 0.5; }
+
+        /* Elementos FFES */
+        .xp-pill {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--accent-gold);
+            padding: 5px 15px;
+            border-radius: 50px;
+            color: var(--accent-gold);
+            font-weight: 800;
+            display: inline-block;
+        }
+
+        .progress-track {
+            width: 100%; height: 5px;
+            background: rgba(255,255,255,0.1);
+            position: fixed; top: 0; left: 0; z-index: 1000;
+        }
+        .progress-fill {
+            height: 100%; background: var(--accent-gold);
+            width: 0%; transition: width 0.3s ease;
+        }
+
+        .casino-coin {
+            position: fixed; width: 25px; height: 25px;
+            background: var(--accent-gold); border-radius: 50%;
+            pointer-events: none; z-index: 9999;
+            top: 50%; left: 50%; border: 2px solid #fff;
+            box-shadow: 0 0 10px var(--accent-gold);
+        }
+        @keyframes coin-explosion {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(1.2) rotate(360deg); opacity: 0; }
+        }
+
+        @media (max-width: 480px) {
+            .question-text { font-size: 1.5rem; }
+            .btn-option { font-size: 1rem; }
+        }
+
     </style>
 </head>
 <body class="dashboard-container">
 
-    <div class="background-glow glow-1"></div>
+    <div class="background-glow glow-2"></div>
+    <div class="progress-track"><div class="progress-fill" id="progress-bar"></div></div>
 
     <header class="glass-header">
-        <h1>FAMILY <span class="text-gold">MEMBERS</span></h1>
-        <p class="subtitle">Vocabulary Training - Level A1</p>
+        <h1>FAMILY <span class="text-gold">MASTER</span></h1>
+        <p class="subtitle">Módulo 14 - Parentes e Família (A1/A2)</p>
+        <div class="xp-pill">XP: <span id="xp-val">0</span></div>
     </header>
 
-    <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
+    <main class="game-wrapper" style="padding: 20px;">
         
-        <div id="exercise-content" class="exercise-box">
-            <h2 id="question" style="color: #fff; margin-bottom: 20px;">Como se diz "Pai" em Inglês?</h2>
-            
-            <input type="text" id="answerInput" class="input-gold" placeholder="Sua resposta..." autocomplete="off">
-            
-            <div class="feedback" id="feedback"></div>
+        <div id="feedback" style="text-align: center; height: 30px; font-weight: 900; letter-spacing: 2px; margin-bottom: 5px;"></div>
 
-            <div style="margin-top: 30px; display: flex; gap: 10px; justify-content: center;">
-                <button onclick="checkAnswer()" class="btn-gold">VERIFICAR</button>
-                <button onclick="nextQuestion()" id="nextBtn" class="btn-gold" style="display:none; background: rgba(184, 134, 11, 0.2); border: 1px solid #b8860b;">PRÓXIMO ➡</button>
-            </div>
+        <div class="game-card" id="game-card-element">
+            <span class="label-instruction">IDENTIFIQUE O PARENTE:</span>
+            <div id="question-container" class="question-text">Carregando...</div>
         </div>
 
-        <div style="margin-top: 40px; text-align: center;">
-            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 10px 30px; text-decoration: none;">
-                <span>⬅ Voltar ao Painel Principal</span>
-            </a>
+        <div class="options-grid">
+            <button id="btn-a" class="btn-option" onclick="checkAnswer('A')">Opção A</button>
+            <button id="btn-b" class="btn-option" onclick="checkAnswer('B')">Opção B</button>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+             <a href="../index.html" style="color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.9rem;">⬅ Voltar ao Painel</a>
         </div>
     </main>
 
-    <script>
-        const questions = [
-            { q: "Como se diz 'Pai' em Inglês?", a: "father" },
-            { q: "Como se diz 'Mãe' em Inglês?", a: "mother" },
-            { q: "Como se diz 'Irmão' em Inglês?", a: "brother" },
-            { q: "Como se diz 'Irmã' em Inglês?", a: "sister" },
-            { q: "Como se diz 'Filho' em Inglês?", a: "son" }
-        ];
-
-        let currentQuestion = 0;
-
-        function checkAnswer() {
-            const userInput = document.getElementById('answerInput').value.toLowerCase().trim();
-            const feedback = document.getElementById('feedback');
-            const nextBtn = document.getElementById('nextBtn');
-
-            if (userInput === questions[currentQuestion].a) {
-                feedback.textContent = "CORRETO! +10 XP";
-                feedback.className = "feedback correct";
-                nextBtn.style.display = "inline-block";
-                
-                // Persistência de Gamificação (Destaque técnico do projeto)
-                let xp = localStorage.getItem('ffes_xp') || 0;
-                localStorage.setItem('ffes_xp', parseInt(xp) + 10); 
-            } else {
-                feedback.textContent = "TENTE NOVAMENTE!";
-                feedback.className = "feedback incorrect";
-            }
-        }
-
-        function nextQuestion() {
-            currentQuestion++;
-            if (currentQuestion < questions.length) {
-                document.getElementById('question').textContent = questions[currentQuestion].q;
-                document.getElementById('answerInput').value = "";
-                document.getElementById('feedback').textContent = "";
-                document.getElementById('nextBtn').style.display = "none";
-            } else {
-                document.getElementById('exercise-content').innerHTML = `
-                    <h2 class="text-gold">Módulo Concluído!</h2>
-                    <p style="color:#fff; margin: 20px 0;">Você dominou o vocabulário básico de família.</p>
-                    <button onclick="location.reload()" class="btn-gold">RECOMEÇAR</button>
-                `;
-            }
-        }
-
-        document.getElementById('answerInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') checkAnswer();
-        });
-    </script>
-
     <footer class="glass-footer">
-        <p>&copy; 2026 FFES - Sovereignty System v2.1</p>
+        © 2026 FFES - Sovereignty System v2.5
     </footer>
 
+    <script>
+        // === BANCO DE DADOS: 100 PERGUNTAS DE FAMÍLIA (A1/A2) ===
+        // q: Pergunta, correct: Certa, wrong: Errada
+        const database = [
+            // Traduções Básicas (PT -> EN)
+            { q: "O que é MÃE?", correct: "Mother", wrong: "Father" },
+            { q: "O que é PAI?", correct: "Father", wrong: "Mother" },
+            { q: "O que é IRMÃO?", correct: "Brother", wrong: "Sister" },
+            { q: "O que é IRMÃ?", correct: "Sister", wrong: "Brother" },
+            { q: "O que é FILHO?", correct: "Son", wrong: "Daughter" },
+            { q: "O que é FILHA?", correct: "Daughter", wrong: "Son" },
+            { q: "O que é AVÔ?", correct: "Grandfather", wrong: "Uncle" },
+            { q: "O que é AVÓ?", correct: "Grandmother", wrong: "Aunt" },
+            { q: "O que é TIO?", correct: "Uncle", wrong: "Cousin" },
+            { q: "O que é TIA?", correct: "Aunt", wrong: "Niece" },
+            // Traduções Básicas (EN -> PT)
+            { q: "O que é COUSIN?", correct: "Primo/Prima", wrong: "Irmão" },
+            { q: "O que é NEPHEW?", correct: "Sobrinho", wrong: "Neto" },
+            { q: "O que é NIECE?", correct: "Sobrinha", wrong: "Neta" },
+            { q: "O que é HUSBAND?", correct: "Marido", wrong: "Esposa" },
+            { q: "O que é WIFE?", correct: "Esposa", wrong: "Marido" },
+            { q: "O que é PARENTS?", correct: "Pais", wrong: "Parentes" },
+            { q: "O que é RELATIVES?", correct: "Parentes", wrong: "Pais" },
+            { q: "O que é CHILD?", correct: "Filho/Criança", wrong: "Irmão" },
+            { q: "O que é BABY?", correct: "Bebê", wrong: "Neto" },
+            { q: "O que é TWINS?", correct: "Gêmeos", wrong: "Primos" },
+            // In-Laws (Sogros/Cunhados) - PT -> EN
+            { q: "Quem é SOGRA?", correct: "Mother-in-law", wrong: "Stepmother" },
+            { q: "Quem é SOGRO?", correct: "Father-in-law", wrong: "Stepfather" },
+            { q: "Quem é GENRO?", correct: "Son-in-law", wrong: "Stepson" },
+            { q: "Quem é NORA?", correct: "Daughter-in-law", wrong: "Stepdaughter" },
+            { q: "Quem é CUNHADO?", correct: "Brother-in-law", wrong: "Stepbrother" },
+            { q: "Quem é CUNHADA?", correct: "Sister-in-law", wrong: "Stepsister" },
+            // Step-Family (Padrastos/Enteados)
+            { q: "Quem é PADRASTO?", correct: "Stepfather", wrong: "Father-in-law" },
+            { q: "Quem é MADRASTA?", correct: "Stepmother", wrong: "Mother-in-law" },
+            { q: "Quem é ENTEADO?", correct: "Stepson", wrong: "Son-in-law" },
+            { q: "Quem é ENTEADA?", correct: "Stepdaughter", wrong: "Daughter-in-law" },
+            { q: "Meio-irmão?", correct: "Stepbrother", wrong: "Brother-in-law" },
+            { q: "Meia-irmã?", correct: "Stepsister", wrong: "Sister-in-law" },
+            // Definições (Relationship Logic)
+            { q: "Mom's father?", correct: "Grandfather", wrong: "Uncle" },
+            { q: "Dad's mother?", correct: "Grandmother", wrong: "Aunt" },
+            { q: "Mom's sister?", correct: "Aunt", wrong: "Cousin" },
+            { q: "Dad's brother?", correct: "Uncle", wrong: "Nephew" },
+            { q: "Uncle's son?", correct: "Cousin", wrong: "Brother" },
+            { q: "Sister's son?", correct: "Nephew", wrong: "Niece" },
+            { q: "Brother's daughter?", correct: "Niece", wrong: "Nephew" },
+            { q: "Daughter's husband?", correct: "Son-in-law", wrong: "Brother-in-law" },
+            { q: "Son's wife?", correct: "Daughter-in-law", wrong: "Sister-in-law" },
+            { q: "Husband's mom?", correct: "Mother-in-law", wrong: "Stepmother" },
+            // Grand/Great Terms
+            { q: "O que é NETO?", correct: "Grandson", wrong: "Nephew" },
+            { q: "O que é NETA?", correct: "Granddaughter", wrong: "Niece" },
+            { q: "O que é BISAVÔ?", correct: "Great-grandfather", wrong: "Grandfather" },
+            { q: "O que é BISAVÓ?", correct: "Great-grandmother", wrong: "Grandmother" },
+            { q: "O que é BISNETO?", correct: "Great-grandson", wrong: "Grandson" },
+            { q: "Avós (casal)?", correct: "Grandparents", wrong: "Parents" },
+            { q: "Netos (plural)?", correct: "Grandchildren", wrong: "Children" },
+            // God-Family (Padrinhos)
+            { q: "O que é PADRINHO?", correct: "Godfather", wrong: "Grandfather" },
+            { q: "O que é MADRINHA?", correct: "Godmother", wrong: "Grandmother" },
+            { q: "O que é AFILHADO?", correct: "Godson", wrong: "Grandson" },
+            { q: "O que é AFILHADA?", correct: "Goddaughter", wrong: "Granddaughter" },
+            // Mix & Vocabulary Review
+            { q: "Your wife is...", correct: "She", wrong: "He" },
+            { q: "Your husband is...", correct: "He", wrong: "She" },
+            { q: "Siblings significa?", correct: "Irmãos", wrong: "Pais" },
+            { q: "Kids significa?", correct: "Filhos", wrong: "Primos" },
+            { q: "Spouse significa?", correct: "Cônjuge", wrong: "Pai" },
+            { q: "Couple significa?", correct: "Casal", wrong: "Irmãos" },
+            { q: "Single significa?", correct: "Solteiro", wrong: "Casado" },
+            { q: "Married significa?", correct: "Casado", wrong: "Solteiro" },
+            { q: "Divorced significa?", correct: "Divorciado", wrong: "Viúvo" },
+            { q: "Widow significa?", correct: "Viúva", wrong: "Esposa" },
+            // Definições Rápidas II
+            { q: "Wife's father?", correct: "Father-in-law", wrong: "Stepfather" },
+            { q: "Wife's brother?", correct: "Brother-in-law", wrong: "Stepbrother" },
+            { q: "Sister's husband?", correct: "Brother-in-law", wrong: "Son-in-law" },
+            { q: "New dad's wife?", correct: "Stepmother", wrong: "Mother-in-law" },
+            { q: "New mom's husband?", correct: "Stepfather", wrong: "Father-in-law" },
+            { q: "Dad's new son?", correct: "Stepbrother", wrong: "Brother-in-law" },
+            { q: "Mom's new daughter?", correct: "Stepsister", wrong: "Sister-in-law" },
+            // Identificação Visual/Lógica
+            { q: "I am a boy.", correct: "Son", wrong: "Daughter" },
+            { q: "I am a girl.", correct: "Daughter", wrong: "Son" },
+            { q: "My father's dad.", correct: "Grandpa", wrong: "Dad" },
+            { q: "My mother's mom.", correct: "Grandma", wrong: "Mom" },
+            { q: "My dad's sister.", correct: "Aunt", wrong: "Uncle" },
+            { q: "My mom's brother.", correct: "Uncle", wrong: "Aunt" },
+            { q: "My brother's son.", correct: "Nephew", wrong: "Cousin" },
+            { q: "My sister's girl.", correct: "Niece", wrong: "Nephew" },
+            { q: "Not married.", correct: "Single", wrong: "Husband" },
+            { q: "Has a wife.", correct: "Husband", wrong: "Single" },
+            // Final Batch - Common Terms
+            { q: "Family tree?", correct: "Árvore genealógica", wrong: "Festa de família" },
+            { q: "My folks?", correct: "Meus pais", wrong: "Meus amigos" },
+            { q: "Only child?", correct: "Filho único", wrong: "Primeiro filho" },
+            { q: "Eldest son?", correct: "Filho mais velho", wrong: "Filho caçula" },
+            { q: "Youngest son?", correct: "Filho caçula", wrong: "Filho do meio" },
+            { q: "Twin brother?", correct: "Irmão gêmeo", wrong: "Meio irmão" },
+            { q: "Adopted son?", correct: "Filho adotivo", wrong: "Enteado" },
+            { q: "Foster parents?", correct: "Pais adotivos", wrong: "Padrinhos" },
+            { q: "Generation?", correct: "Geração", wrong: "Parentes" },
+            { q: "Ancestors?", correct: "Ancestrais", wrong: "Netos" },
+            { q: "Descendants?", correct: "Descendentes", wrong: "Avós" },
+            { q: "My kin?", correct: "Minha família", wrong: "Meus vizinhos" },
+            { q: "Blood relative?", correct: "Parente de sangue", wrong: "Amigo próximo" },
+            { q: "Distant cousin?", correct: "Primo distante", wrong: "Primo irmão" },
+            { q: "Close relative?", correct: "Parente próximo", wrong: "Vizinho" },
+            { q: "Ex-husband?", correct: "Ex-marido", wrong: "Viúvo" },
+            { q: "Ex-wife?", correct: "Ex-esposa", wrong: "Viúva" },
+            { q: "Late husband?", correct: "Falecido marido", wrong: "Ex-marido" },
+            { q: "Engaged?", correct: "Noivo(a)", wrong: "Casado(a)" },
+            { q: "Fiancé?", correct: "Noivo", wrong: "Marido" }
+        ];
+
+        let state = { index: 0, currentQ: null, isCorrectA: false, canClick: true };
+        let xp = parseInt(localStorage.getItem('ffes_xp') || 0);
+        document.getElementById('xp-val').innerText = xp;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Shuffle inicial
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+        shuffleArray(database);
+
+        function load() {
+            state.canClick = true;
+            document.getElementById('feedback').innerText = "";
+            document.querySelectorAll('.btn-option').forEach(b => {
+                b.className = 'btn-option';
+                b.style.opacity = '1';
+                b.style.transform = 'scale(1)';
+            });
+            
+            if (state.index >= database.length) { state.index = 0; shuffleArray(database); }
+            
+            state.currentQ = database[state.index];
+            
+            // Destaque para o termo chave
+            // Procura a palavra chave em maiúsculo na pergunta para destacar
+            let qText = state.currentQ.q.replace(/([A-ZÇÃÕÊÁÉÍÓÚ-]{3,})/g, '<span class="family-highlight">$1</span>');
+            document.getElementById('question-container').innerHTML = qText;
+            
+            // Randomiza botões
+            state.isCorrectA = Math.random() > 0.5;
+            
+            const btnA = document.getElementById('btn-a');
+            const btnB = document.getElementById('btn-b');
+            
+            if (state.isCorrectA) {
+                btnA.innerText = state.currentQ.correct;
+                btnB.innerText = state.currentQ.wrong;
+            } else {
+                btnA.innerText = state.currentQ.wrong;
+                btnB.innerText = state.currentQ.correct;
+            }
+        }
+
+        function checkAnswer(choice) {
+            if (!state.canClick) return;
+            state.canClick = false;
+
+            const isCorrect = (choice === 'A' && state.isCorrectA) || (choice === 'B' && !state.isCorrectA);
+            const fb = document.getElementById('feedback');
+            const btnSelected = document.getElementById(choice === 'A' ? 'btn-a' : 'btn-b');
+            
+            if (isCorrect) {
+                fb.innerHTML = "<span style='color: #4ade80'>FAMÍLIA IDENTIFICADA! +15 XP</span>";
+                btnSelected.classList.add('correct');
+                
+                xp += 15;
+                localStorage.setItem('ffes_xp', xp);
+                document.getElementById('xp-val').innerText = xp;
+                
+                playAudio('win');
+                triggerCasinoEffect(15);
+                
+                let w = parseFloat(document.getElementById('progress-bar').style.width || 0);
+                document.getElementById('progress-bar').style.width = (w + 5) % 100 + '%';
+
+                setTimeout(() => {
+                    state.index++;
+                    load();
+                }, 1000);
+            } else {
+                fb.innerHTML = "<span style='color: #f87171'>PARENTESCO INCORRETO</span>";
+                btnSelected.classList.add('wrong');
+                playAudio('error');
+                
+                document.getElementById('game-card-element').animate([
+                    { transform: 'translateX(0)' },
+                    { transform: 'translateX(-10px)' },
+                    { transform: 'translateX(10px)' },
+                    { transform: 'translateX(0)' }
+                ], { duration: 400 });
+
+                setTimeout(() => {
+                    state.canClick = true;
+                    document.getElementById('feedback').innerText = "";
+                    btnSelected.classList.remove('wrong');
+                }, 800);
+            }
+        }
+
+        // === ENGINE DE ÁUDIO & EFEITOS FFES ===
+        function playAudio(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+
+            if(type === 'win') {
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(500, t);
+                osc.frequency.linearRampToValueAtTime(800, t + 0.1);
+                gain.gain.setValueAtTime(0.1, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+                osc.start(t); osc.stop(t + 0.2);
+            } else if(type === 'error') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, t);
+                osc.frequency.linearRampToValueAtTime(80, t + 0.2);
+                gain.gain.setValueAtTime(0.1, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+                osc.start(t); osc.stop(t + 0.2);
+            }
+        }
+
+        function triggerCasinoEffect(amount) {
+            for (let i = 0; i < amount; i++) {
+                const coin = document.createElement('div');
+                coin.className = 'casino-coin';
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 60 + Math.random() * 100;
+                coin.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+                coin.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+                coin.style.animation = `coin-explosion ${0.5 + Math.random()*0.3}s ease-out forwards`;
+                document.body.appendChild(coin);
+                setTimeout(() => coin.remove(), 800);
+            }
+        }
+
+        window.onload = load;
+    </script>
 </body>
 </html>

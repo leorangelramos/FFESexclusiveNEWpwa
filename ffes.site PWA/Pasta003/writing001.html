@@ -3,178 +3,536 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FFES | Writing Lab</title>
+    <title>FFES | Writing Lab Master 100</title>
     <link rel="stylesheet" href="../style.css">
     <style>
-        .exercise-box {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-top: 20px;
-            text-align: center;
+        /* === ESTILO UNIFICADO FFES (WRITING LAB) === */
+        .game-wrapper {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
+            margin: 0 auto;
         }
-        .word-pool {
+
+        .game-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 2px solid var(--accent-gold);
+            border-radius: 24px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: var(--glass-shadow);
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Área de Construção da Frase */
+        .answer-area {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-white);
+            min-height: 80px;
+            width: 100%;
+            border-bottom: 3px solid var(--accent-gold);
+            margin: 20px 0;
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             justify-content: center;
-            margin-bottom: 30px;
-            min-height: 50px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 12px;
+            align-items: center;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            padding: 10px;
         }
-        .word-pill {
-            background: rgba(184, 134, 11, 0.2);
-            border: 1px solid #b8860b;
-            color: #fff;
-            padding: 8px 18px;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: 0.3s;
-            font-weight: 500;
-        }
-        .word-pill:hover {
-            background: #b8860b;
-            color: #0A2342;
-        }
-        .answer-area {
-            font-size: 1.4rem;
-            color: #fff;
-            min-height: 60px;
-            border-bottom: 2px solid #b8860b;
-            margin-bottom: 30px;
+
+        /* Word Pool - Estilo Cassino */
+        .word-pool {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 12px;
             justify-content: center;
-            align-items: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .word-selected {
-            color: #b8860b;
-            font-weight: bold;
+
+        .word-pill {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid var(--glass-border);
+            color: var(--text-white);
+            padding: 10px 20px;
+            border-radius: 50px;
             cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-weight: 800;
+            text-transform: capitalize;
+            user-select: none;
+        }
+
+        .word-pill:hover {
+            border-color: var(--accent-gold);
+            transform: scale(1.1) translateY(-3px);
+            background: rgba(255, 184, 28, 0.1);
+        }
+
+        .word-pill:active {
+            transform: scale(0.95);
+        }
+
+        /* XP Pill & Progress */
+        .xp-pill {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--accent-gold);
+            padding: 5px 15px;
+            border-radius: 50px;
+            color: var(--accent-gold);
+            font-weight: 800;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        .progress-track {
+            width: 100%; height: 5px;
+            background: rgba(255,255,255,0.1);
+            position: fixed; top: 0; left: 0; z-index: 1000;
+        }
+        .progress-fill {
+            height: 100%; background: var(--accent-gold);
+            width: 0%; transition: width 0.3s ease;
+        }
+
+        /* Efeitos Visuais */
+        .casino-coin {
+            position: fixed; width: 25px; height: 25px;
+            background: var(--accent-gold); border-radius: 50%;
+            pointer-events: none; z-index: 9999;
+            top: 50%; left: 50%; border: 2px solid #fff;
+            box-shadow: 0 0 10px var(--accent-gold);
+        }
+
+        @keyframes coin-explosion {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(1.2) rotate(360deg); opacity: 0; }
+        }
+
+        /* Chuva de Moedas */
+        .rain-coin {
+            position: fixed; width: 30px; height: 30px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%23FFD700" stroke="%23B8860B" stroke-width="5"/><text x="50" y="65" font-size="40" text-anchor="middle" fill="%23B8860B" font-family="Arial">$</text></svg>') no-repeat center;
+            background-size: contain; pointer-events: none; z-index: 9999;
+            top: -50px; animation: coin-drop linear forwards;
+        }
+
+        @keyframes coin-drop {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0.8; }
+        }
+
+        .feedback-float {
+            position: absolute; top: -15px; right: -10px;
+            font-weight: 900; color: var(--accent-gold);
+            background: rgba(0,0,0,0.8); padding: 5px 12px;
+            border-radius: 20px; border: 1px solid var(--accent-gold);
+            opacity: 0; transition: 0.3s; pointer-events: none;
+        }
+        .feedback-float.show { opacity: 1; transform: translateY(0) rotate(5deg); }
+
+        /* Botões de Controle */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 480px) {
+            .word-pill { padding: 8px 15px; font-size: 0.9rem; }
+            .answer-area { font-size: 1.2rem; }
         }
     </style>
 </head>
-<body class="dashboard-container">
-
+<body>
     <div class="background-glow glow-1"></div>
+    <div class="progress-track"><div class="progress-fill" id="progress-bar"></div></div>
 
     <header class="glass-header">
         <h1>WRITING <span class="text-gold">LAB</span></h1>
-        <p class="subtitle">Módulo 03 - Sintaxe e Estrutura de Frases</p>
+        <p class="subtitle">Módulo 03: Engenharia de Frases</p>
+        <div class="xp-pill">XP: <span id="xp-val">0</span></div>
     </header>
 
-    <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
-        
-        <div id="game-container" class="exercise-box">
-            <p style="color: #aaa; margin-bottom: 10px;">Clique nas palavras para formar a frase:</p>
-            
-            <div id="word-pool" class="word-pool"></div>
-            
-            <div id="answer-area" class="answer-area"></div>
-            
-            <div id="feedback" style="margin-top: 20px; font-weight: bold; min-height: 24px;"></div>
+    <main class="game-wrapper" style="padding: 20px;">
+        <div id="feedback" style="text-align: center; height: 30px; font-weight: 900; letter-spacing: 2px; margin-bottom: 5px;"></div>
 
-            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
-                <button onclick="checkAnswer()" class="btn-gold">VALIDAR</button>
-                <button onclick="resetCurrent()" class="btn-gold" style="background: transparent; border: 1px solid #b8860b;">LIMPAR</button>
-            </div>
-            
-            <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin: 20px auto 0;">PRÓXIMA ➡</button>
+        <div class="game-card" id="game-card-element">
+            <div id="combo-feedback" class="feedback-float">COMBO x2</div>
+            <div id="answer-area" class="answer-area">Toque nas palavras abaixo...</div>
+            <div id="speed-feedback" style="font-size: 0.7rem; color: #00e676; font-weight: 800; margin-top: 10px; height: 15px;"></div>
         </div>
 
-        <div style="margin-top: 40px; text-align: center;">
-            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;">
-                <span>⬅ Voltar ao Painel Principal</span>
-            </a>
+        <div id="word-pool" class="word-pool"></div>
+
+        <div class="controls-grid">
+            <button onclick="checkSentence()" class="btn-gold" style="width: 100%;">VALIDAR</button>
+            <button onclick="resetCurrent()" class="btn-gold" style="width: 100%; background: transparent; border: 1px solid var(--accent-gold); color: var(--text-white);">LIMPAR</button>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+             <a href="../index.html" style="color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.9rem;">⬅ Voltar ao Painel</a>
         </div>
     </main>
 
+    <footer class="glass-footer">
+        © 2026 FFES - Sovereignty System v2.5
+    </footer>
+
     <script>
+        // === BANCO DE DADOS: 100 FRASES DE ALTA FREQUÊNCIA ===
         const sentences = [
+            // BÁSICAS (Present Simple / To Be)
             { full: "I am a student", words: ["I", "am", "a", "student"] },
-            { full: "She likes to drink coffee", words: ["She", "likes", "to", "drink", "coffee"] },
-            { full: "We go to the park", words: ["We", "go", "to", "the", "park"] }
+            { full: "She is my best friend", words: ["She", "is", "my", "best", "friend"] },
+            { full: "They are at home now", words: ["They", "are", "at", "home", "now"] },
+            { full: "We love pizza very much", words: ["We", "love", "pizza", "very", "much"] },
+            { full: "He works in a big office", words: ["He", "works", "in", "a", "big", "office"] },
+            { full: "The sky is blue today", words: ["The", "sky", "is", "blue", "today"] },
+            { full: "I do not like coffee", words: ["I", "do", "not", "like", "coffee"] },
+            { full: "Do you play soccer?", words: ["Do", "you", "play", "soccer?"] },
+            { full: "Where do you live?", words: ["Where", "do", "you", "live?"] },
+            { full: "My brother has a car", words: ["My", "brother", "has", "a", "car"] },
+            
+            // PRESENT CONTINUOUS
+            { full: "I am reading a book", words: ["I", "am", "reading", "a", "book"] },
+            { full: "She is sleeping right now", words: ["She", "is", "sleeping", "right", "now"] },
+            { full: "They are playing video games", words: ["They", "are", "playing", "video", "games"] },
+            { full: "We are learning English fast", words: ["We", "are", "learning", "English", "fast"] },
+            { full: "He is cooking dinner for us", words: ["He", "is", "cooking", "dinner", "for", "us"] },
+            { full: "Are you listening to me?", words: ["Are", "you", "listening", "to", "me?"] },
+            { full: "It is raining outside today", words: ["It", "is", "raining", "outside", "today"] },
+            { full: "Why are you crying?", words: ["Why", "are", "you", "crying?"] },
+            { full: "I am not feeling well", words: ["I", "am", "not", "feeling", "well"] },
+            { full: "She is waiting for the bus", words: ["She", "is", "waiting", "for", "the", "bus"] },
+
+            // PAST SIMPLE
+            { full: "I went to the park yesterday", words: ["I", "went", "to", "the", "park", "yesterday"] },
+            { full: "She bought a new dress", words: ["She", "bought", "a", "new", "dress"] },
+            { full: "They saw a movie last night", words: ["They", "saw", "a", "movie", "last", "night"] },
+            { full: "We finished our homework early", words: ["We", "finished", "our", "homework", "early"] },
+            { full: "He did not call me back", words: ["He", "did", "not", "call", "me", "back"] },
+            { full: "Did you enjoy the party?", words: ["Did", "you", "enjoy", "the", "party?"] },
+            { full: "I was tired last week", words: ["I", "was", "tired", "last", "week"] },
+            { full: "Where did you go yesterday?", words: ["Where", "did", "you", "go", "yesterday?"] },
+            { full: "The cat broke the vase", words: ["The", "cat", "broke", "the", "vase"] },
+            { full: "I ate pizza for lunch", words: ["I", "ate", "pizza", "for", "lunch"] },
+
+            // FUTURE (Will / Going to)
+            { full: "I will call you tomorrow", words: ["I", "will", "call", "you", "tomorrow"] },
+            { full: "She is going to travel soon", words: ["She", "is", "going", "to", "travel", "soon"] },
+            { full: "They will win the game", words: ["They", "will", "win", "the", "game"] },
+            { full: "It is going to rain later", words: ["It", "is", "going", "to", "rain", "later"] },
+            { full: "We will meet at the cafe", words: ["We", "will", "meet", "at", "the", "cafe"] },
+            { full: "I am going to buy a house", words: ["I", "am", "going", "to", "buy", "a", "house"] },
+            { full: "Will you help me please?", words: ["Will", "you", "help", "me", "please?"] },
+            { full: "He is not going to come", words: ["He", "is", "not", "going", "to", "come"] },
+            { full: "I think it will snow", words: ["I", "think", "it", "will", "snow"] },
+            { full: "Are you going to eat that?", words: ["Are", "you", "going", "to", "eat", "that?"] },
+
+            // PRESENT PERFECT
+            { full: "I have seen that movie", words: ["I", "have", "seen", "that", "movie"] },
+            { full: "She has lived here for years", words: ["She", "has", "lived", "here", "for", "years"] },
+            { full: "They have already finished work", words: ["They", "have", "already", "finished", "work"] },
+            { full: "We have never been to Paris", words: ["We", "have", "never", "been", "to", "Paris"] },
+            { full: "He has lost his keys again", words: ["He", "has", "lost", "his", "keys", "again"] },
+            { full: "Have you ever eaten sushi?", words: ["Have", "you", "ever", "eaten", "sushi?"] },
+            { full: "I have just arrived home", words: ["I", "have", "just", "arrived", "home"] },
+            { full: "She has not called yet", words: ["She", "has", "not", "called", "yet"] },
+            { full: "They have gone to the beach", words: ["They", "have", "gone", "to", "the", "beach"] },
+            { full: "Have you done your homework?", words: ["Have", "you", "done", "your", "homework?"] },
+
+            // MODALS (Can, Should, Must)
+            { full: "I can speak three languages", words: ["I", "can", "speak", "three", "languages"] },
+            { full: "You should see a doctor", words: ["You", "should", "see", "a", "doctor"] },
+            { full: "We must stop at the light", words: ["We", "must", "stop", "at", "the", "light"] },
+            { full: "He can run very fast", words: ["He", "can", "run", "very", "fast"] },
+            { full: "They should study more often", words: ["They", "should", "study", "more", "often"] },
+            { full: "Can you open the door?", words: ["Can", "you", "open", "the", "door?"] },
+            { full: "I cannot understand this problem", words: ["I", "cannot", "understand", "this", "problem"] },
+            { full: "You must not smoke here", words: ["You", "must", "not", "smoke", "here"] },
+            { full: "Should I buy this shirt?", words: ["Should", "I", "buy", "this", "shirt?"] },
+            { full: "It might rain this evening", words: ["It", "might", "rain", "this", "evening"] },
+
+            // MIXED & COMPLEX
+            { full: "I want to go home now", words: ["I", "want", "to", "go", "home", "now"] },
+            { full: "She likes reading and writing", words: ["She", "likes", "reading", "and", "writing"] },
+            { full: "Do you know the answer?", words: ["Do", "you", "know", "the", "answer?"] },
+            { full: "He told me a funny story", words: ["He", "told", "me", "a", "funny", "story"] },
+            { full: "We need to buy some milk", words: ["We", "need", "to", "buy", "some", "milk"] },
+            { full: "There is a cat on the roof", words: ["There", "is", "a", "cat", "on", "the", "roof"] },
+            { full: "These books are very interesting", words: ["These", "books", "are", "very", "interesting"] },
+            { full: "My father is a tall man", words: ["My", "father", "is", "a", "tall", "man"] },
+            { full: "This is the best day ever", words: ["This", "is", "the", "best", "day", "ever"] },
+            { full: "I would like a cup of tea", words: ["I", "would", "like", "a", "cup", "of", "tea"] },
+            
+            // QUESTIONS & NEGATIVES
+            { full: "Why did you do that?", words: ["Why", "did", "you", "do", "that?"] },
+            { full: "I do not know his name", words: ["I", "do", "not", "know", "his", "name"] },
+            { full: "Are they coming to the party?", words: ["Are", "they", "coming", "to", "the", "party?"] },
+            { full: "She does not eat meat", words: ["She", "does", "not", "eat", "meat"] },
+            { full: "Who is that girl over there?", words: ["Who", "is", "that", "girl", "over", "there?"] },
+            { full: "I did not see anything", words: ["I", "did", "not", "see", "anything"] },
+            { full: "When does the movie start?", words: ["When", "does", "the", "movie", "start?"] },
+            { full: "Is this your phone?", words: ["Is", "this", "your", "phone?"] },
+            { full: "They were not happy about it", words: ["They", "were", "not", "happy", "about", "it"] },
+            { full: "How much is this jacket?", words: ["How", "much", "is", "this", "jacket?"] },
+
+            // ADVANCED STRUCTURES
+            { full: "If it rains I will stay", words: ["If", "it", "rains", "I", "will", "stay"] },
+            { full: "The book was written by him", words: ["The", "book", "was", "written", "by", "him"] },
+            { full: "I enjoy walking in the rain", words: ["I", "enjoy", "walking", "in", "the", "rain"] },
+            { full: "She is better than me", words: ["She", "is", "better", "than", "me"] },
+            { full: "This car is too expensive", words: ["This", "car", "is", "too", "expensive"] },
+            { full: "I have been waiting for hours", words: ["I", "have", "been", "waiting", "for", "hours"] },
+            { full: "He used to play the guitar", words: ["He", "used", "to", "play", "the", "guitar"] },
+            { full: "Do you mind if I sit?", words: ["Do", "you", "mind", "if", "I", "sit?"] },
+            { full: "It is important to study hard", words: ["It", "is", "important", "to", "study", "hard"] },
+            { full: "Let us go for a walk", words: ["Let", "us", "go", "for", "a", "walk"] },
+
+            // FINAL BATCH
+            { full: "The water is very cold", words: ["The", "water", "is", "very", "cold"] },
+            { full: "I made a big mistake", words: ["I", "made", "a", "big", "mistake"] },
+            { full: "She sings beautifully in the choir", words: ["She", "sings", "beautifully", "in", "the", "choir"] },
+            { full: "We walked for three miles", words: ["We", "walked", "for", "three", "miles"] },
+            { full: "He is the smartest boy here", words: ["He", "is", "the", "smartest", "boy", "here"] },
+            { full: "Please turn off the lights", words: ["Please", "turn", "off", "the", "lights"] },
+            { full: "I need some more time", words: ["I", "need", "some", "more", "time"] },
+            { full: "They built a new bridge", words: ["They", "built", "a", "new", "bridge"] },
+            { full: "The dog is under the table", words: ["The", "dog", "is", "under", "the", "table"] },
+            { full: "Everything will be alright soon", words: ["Everything", "will", "be", "alright", "soon"] }
         ];
 
-        let index = 0;
-        let selectedWords = [];
+        let state = { index: 0, selected: [], combo: 0, startTime: 0, history: [] };
+        let xp = parseInt(localStorage.getItem('ffes_xp') || 0);
+        document.getElementById('xp-val').innerText = xp;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Embaralha array de frases na inicialização para não repetir ordem
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+        // Shuffle inicial das 100 frases
+        shuffleArray(sentences);
 
         function load() {
-            if (index >= sentences.length) {
-                document.getElementById('game-container').innerHTML = `
-                    <h2 class="text-gold">Laboratório Concluído!</h2>
-                    <p style="color:#fff; margin: 20px 0;">Sua estrutura gramatical está sólida.</p>
-                    <button onclick="location.reload()" class="btn-gold" style="margin: 0 auto; display:block">RECOMEÇAR</button>
-                `;
-                return;
+            if (state.index >= sentences.length) {
+                state.index = 0; 
+                shuffleArray(sentences); // Reshuffle se acabar
             }
 
-            const q = sentences[index];
-            selectedWords = [];
-            document.getElementById('feedback').textContent = "";
-            document.getElementById('nextBtn').style.display = "none";
-            document.getElementById('answer-area').innerHTML = "";
+            state.selected = [];
+            state.startTime = Date.now();
+            document.getElementById('answer-area').innerText = "Toque nas palavras para montar...";
+            document.getElementById('answer-area').style.opacity = "0.5";
+            document.getElementById('feedback').innerText = "";
+            document.getElementById('speed-feedback').innerText = "";
             
             const pool = document.getElementById('word-pool');
             pool.innerHTML = "";
             
-            // Embaralhar palavras
-            [...q.words].sort(() => Math.random() - 0.5).forEach(word => {
+            const q = sentences[state.index];
+            
+            // Cria cópia das palavras e embaralha para exibição
+            let wordsToDisplay = [...q.words].sort(() => Math.random() - 0.5);
+
+            wordsToDisplay.forEach(word => {
                 const pill = document.createElement('div');
                 pill.className = 'word-pill';
                 pill.textContent = word;
-                pill.onclick = () => selectWord(word, pill);
+                pill.onclick = () => {
+                    if (pill.style.opacity === "0.3") return; // Evita duplo clique
+                    
+                    if (state.selected.length === 0) {
+                        document.getElementById('answer-area').innerText = ""; // Limpa o placeholder
+                        document.getElementById('answer-area').style.opacity = "1";
+                    }
+
+                    pill.style.opacity = "0.3";
+                    pill.style.transform = "scale(0.9)";
+                    state.selected.push(word);
+                    document.getElementById('answer-area').innerText = state.selected.join(" ");
+                    playAudio('click');
+                };
                 pool.appendChild(pill);
             });
         }
 
-        function selectWord(word, el) {
-            if (el.style.display === "none") return;
-            el.style.display = "none";
-            selectedWords.push(word);
-            renderAnswer();
-        }
+        function checkSentence() {
+            if (state.selected.length === 0) return;
 
-        function renderAnswer() {
-            const area = document.getElementById('answer-area');
-            area.innerHTML = selectedWords.join(" ");
-        }
+            const currentAnswer = state.selected.join(" ");
+            const target = sentences[state.index].full;
+            const fb = document.getElementById('feedback');
+            const timeDelta = Date.now() - state.startTime;
+            const isSpeed = timeDelta < 6000; // 6s para frases completas
 
-        function resetCurrent() {
-            load();
-        }
+            // Normaliza strings para evitar erros de pontuação simples
+            if (currentAnswer.trim() === target.trim()) {
+                state.combo++;
+                let gain = 25 + (state.combo * 5);
+                if(isSpeed) gain += 15;
+                addXP(gain);
 
-        function checkAnswer() {
-            const currentAnswer = selectedWords.join(" ");
-            const feedback = document.getElementById('feedback');
-            
-            if (currentAnswer === sentences[index].full) {
-                feedback.innerHTML = "<span style='color: #4ade80'>SINTAXE PERFEITA: +25 XP</span>";
-                document.getElementById('nextBtn').style.display = "block";
+                fb.innerText = "SINTAXE PERFEITA!"; fb.style.color = "#00e676";
+                triggerCasinoEffect(15);
                 
-                let xp = localStorage.getItem('ffes_xp') || 0;
-                localStorage.setItem('ffes_xp', parseInt(xp) + 25);
+                // Chuva de moedas a cada 5 acertos seguidos
+                if (state.combo % 5 === 0) { 
+                    playAudio('milestone'); 
+                    triggerCoinRain(40); 
+                } else { 
+                    playAudio('win'); 
+                }
+
+                const comboEl = document.getElementById('combo-feedback');
+                comboEl.innerText = `COMBO x${state.combo}`;
+                comboEl.classList.add('show');
+                
+                if(isSpeed) document.getElementById('speed-feedback').innerText = "⚡ HACKER SPEED (+15XP)";
+
+                // Barra de progresso visual
+                let w = parseFloat(document.getElementById('progress-bar').style.width || 0);
+                document.getElementById('progress-bar').style.width = (w + 10) % 100 + '%';
+
+                setTimeout(() => {
+                    comboEl.classList.remove('show');
+                    state.index++;
+                    load();
+                }, 1500);
             } else {
-                feedback.innerHTML = "<span style='color: #f87171'>ORDEM INCORRETA</span>";
+                state.combo = 0;
+                addXP(-10);
+                fb.innerText = "ORDEM INCORRETA!"; fb.style.color = "#ff1744";
+                playAudio('error');
+                
+                // Shake Effect
+                const card = document.getElementById('game-card-element');
+                card.animate([
+                    { transform: 'translateX(0)' },
+                    { transform: 'translateX(-10px)' },
+                    { transform: 'translateX(10px)' },
+                    { transform: 'translateX(0)' }
+                ], { duration: 400 });
+
+                document.getElementById('speed-feedback').innerText = "";
+                // Não reseta imediatamente para permitir ver o erro, usuário clica em Limpar
             }
         }
 
-        function nextQuestion() {
-            index++;
-            load();
+        function addXP(v) {
+            xp = Math.max(0, xp + v);
+            localStorage.setItem('ffes_xp', xp);
+            document.getElementById('xp-val').innerText = xp;
         }
 
-        load();
+        function resetCurrent() { 
+            state.selected = [];
+            // Reabilita pílulas visuais
+            const pills = document.querySelectorAll('.word-pill');
+            pills.forEach(p => {
+                p.style.opacity = "1";
+                p.style.transform = "scale(1)";
+            });
+            document.getElementById('answer-area').innerText = "Toque nas palavras...";
+            document.getElementById('answer-area').style.opacity = "0.5";
+            document.getElementById('feedback').innerText = "";
+            playAudio('click');
+        }
+
+        // === AUDIO ENGINE FFES (SINTETIZADOR) ===
+        function playAudio(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+
+            if(type === 'win') {
+                // Som de vitória (High pitch pleasant)
+                osc.type = 'sine'; 
+                osc.frequency.setValueAtTime(500, t);
+                osc.frequency.exponentialRampToValueAtTime(1000, t + 0.1);
+                gain.gain.setValueAtTime(0.1, t); 
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            } else if(type === 'milestone') {
+                // Arpejo Mágico
+                const notes = [440, 554, 659, 880];
+                notes.forEach((f, i) => {
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.type = 'triangle';
+                    o.frequency.value = f;
+                    o.connect(g); g.connect(audioCtx.destination);
+                    g.gain.setValueAtTime(0.05, t + i*0.1);
+                    g.gain.exponentialRampToValueAtTime(0.001, t + i*0.1 + 0.3);
+                    o.start(t + i*0.1); o.stop(t + i*0.1 + 0.3);
+                });
+            } else if(type === 'error') {
+                // Som de erro (Low buzz)
+                osc.type = 'sawtooth'; 
+                osc.frequency.setValueAtTime(150, t);
+                osc.frequency.linearRampToValueAtTime(100, t + 0.3);
+                gain.gain.setValueAtTime(0.1, t); 
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            } else if(type === 'click') {
+                // Clique suave
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(800, t);
+                gain.gain.setValueAtTime(0.02, t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+                osc.start(t); osc.stop(t + 0.05);
+            }
+        }
+
+        // === PARTICLES SYSTEM ===
+        function triggerCasinoEffect(amount) {
+            for (let i = 0; i < amount; i++) {
+                const coin = document.createElement('div');
+                coin.className = 'casino-coin';
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 60 + Math.random() * 100;
+                coin.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+                coin.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+                coin.style.animation = `coin-explosion ${0.5 + Math.random()*0.3}s cubic-bezier(0,0.9,0.57,1) forwards`;
+                document.body.appendChild(coin);
+                setTimeout(() => coin.remove(), 800);
+            }
+        }
+
+        function triggerCoinRain(amount) {
+            for (let i = 0; i < amount; i++) {
+                const coin = document.createElement('div');
+                coin.className = 'rain-coin';
+                coin.style.left = Math.random() * 95 + 'vw';
+                coin.style.animationDuration = (1.5 + Math.random()) + 's';
+                coin.style.animationDelay = Math.random() * 0.5 + 's';
+                document.body.appendChild(coin);
+                setTimeout(() => coin.remove(), 2500);
+            }
+        }
+
+        window.onload = load;
     </script>
-
-    <footer class="glass-footer">
-        <p>&copy; 2026 FFES - Sovereignty System v2.1</p>
-    </footer>
-
 </body>
 </html>

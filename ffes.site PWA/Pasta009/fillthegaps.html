@@ -3,13 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FFES PWA - Preencher Lacunas</title>
+    <title>FFES | Fill The Gaps Master</title>
     <link rel="stylesheet" href="../style.css">
-
     <style>
-        /* === ESTILO UNIFICADO (PADRÃO PWA) === */
-        
-        /* Layout Principal */
+        /* === ESTILO FILL THE GAPS (PADRÃO FFES) === */
         .game-wrapper {
             width: 100%;
             max-width: 600px;
@@ -20,7 +17,6 @@
             margin: 0 auto;
         }
 
-        /* Card do Jogo (Glassmorphism) */
         .game-card {
             background: var(--glass-bg);
             backdrop-filter: var(--glass-blur);
@@ -30,49 +26,40 @@
             padding: 30px 20px;
             text-align: center;
             box-shadow: var(--glass-shadow);
-            min-height: 180px;
+            min-height: 220px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            position: relative; /* Importante para efeitos */
-            overflow: hidden;   /* Importante para efeitos */
+            position: relative;
         }
 
-        /* Tipografia do Display */
-        #display, #display-sentence {
-            font-size: 1.8rem;
-            font-weight: 700;
-            line-height: 1.4;
-            color: var(--text-white);
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            z-index: 2;
-        }
-
-        /* Lacunas */
-        .gap { 
-            color: var(--accent-gold); 
-            border-bottom: 3px solid var(--accent-gold); 
-            padding: 0 8px; 
-            display: inline-block; 
-            min-width: 60px; 
-        }
-
-        /* Feedback Visual */
-        #feedback {
-            height: 30px;
-            text-align: center;
+        .sentence-display {
+            font-size: 2rem;
             font-weight: 800;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            transition: all 0.2s;
-            opacity: 0;
-            margin-bottom: 10px;
+            color: #fff;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            line-height: 1.3;
         }
-        #feedback.visible { opacity: 1; transform: translateY(-5px); }
 
-        /* Controles e Botões */
-        .game-controls {
+        .gap-highlight {
+            color: var(--accent-gold);
+            text-decoration: underline;
+            text-underline-offset: 5px;
+            letter-spacing: 2px;
+        }
+
+        .label-instruction {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        /* Botões de Opção A/B */
+        .options-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
@@ -83,14 +70,16 @@
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--glass-border);
             color: var(--text-white);
-            padding: 20px;
-            font-size: 1.3rem;
-            font-weight: 800;
+            padding: 20px 10px;
+            font-size: 1.4rem;
+            font-weight: 700;
             border-radius: 16px;
             cursor: pointer;
             transition: all 0.2s ease;
             backdrop-filter: var(--glass-blur);
-            text-transform: capitalize;
+            min-height: 80px;
+            display: flex; align-items: center; justify-content: center;
+            text-align: center;
         }
 
         .btn-option:hover {
@@ -99,18 +88,10 @@
             transform: translateY(-3px);
         }
 
-        .btn-option.correct {
-            background: #00e676 !important;
-            color: #000 !important;
-            border-color: #00e676 !important;
-        }
+        .btn-option.correct { background: #00e676 !important; color: #000 !important; border-color: #00e676 !important; }
+        .btn-option.wrong { background: #ff1744 !important; opacity: 0.5; }
 
-        .btn-option.wrong {
-            background: #ff1744 !important;
-            opacity: 0.5;
-        }
-
-        /* XP Pill */
+        /* Elementos FFES */
         .xp-pill {
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid var(--accent-gold);
@@ -118,335 +99,318 @@
             border-radius: 50px;
             color: var(--accent-gold);
             font-weight: 800;
-            font-size: 1.1rem;
-            margin-top: 10px;
             display: inline-block;
         }
 
-        /* === Elementos Específicos (Teoria e Scramble) === */
-        .theory-section { 
-            background: rgba(255, 255, 255, 0.05); 
-            backdrop-filter: blur(10px); 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-            border-radius: 20px; 
-            padding: 2rem; 
-            margin-bottom: 30px; 
-            color: var(--text-white); 
+        .progress-track {
+            width: 100%; height: 5px;
+            background: rgba(255,255,255,0.1);
+            position: fixed; top: 0; left: 0; z-index: 1000;
         }
-        
-        .formula-box { 
-            background: rgba(184, 134, 11, 0.1); 
-            border-left: 4px solid var(--accent-gold); 
-            padding: 15px; 
-            margin: 20px 0; 
-            border-radius: 0 10px 10px 0; 
-            font-weight: bold; 
+        .progress-fill {
+            height: 100%; background: var(--accent-gold);
+            width: 0%; transition: width 0.3s ease;
         }
 
-        .mode-selector { 
-            display: grid; 
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 10px; 
-            margin-bottom: 30px; 
-        }
-        
-        .mode-btn { 
-            background: rgba(255, 255, 255, 0.07); 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-            padding: 15px; 
-            border-radius: 12px; 
-            color: var(--text-white); 
-            cursor: pointer; 
-            font-weight: bold; 
-            transition: 0.3s; 
-        }
-        
-        .mode-btn:hover, .mode-btn.active { 
-            background: rgba(184, 134, 11, 0.3); 
-            border-color: var(--accent-gold); 
-        }
-
-        .word-pill { 
-            display: inline-block; 
-            padding: 10px 15px; 
-            margin: 5px; 
-            background: rgba(0,0,0,0.3); 
-            border: 1px solid var(--accent-gold); 
-            border-radius: 20px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            color: var(--accent-gold); 
-        }
-        
-        #scramble-answer { 
-            min-height: 40px; 
-            border-bottom: 2px solid var(--accent-gold); 
-            margin: 20px 0; 
-            font-size: 1.4rem; 
-            color: var(--text-white); 
-            width: 100%; 
-        }
-        
-        .text-gold { color: var(--accent-gold); }
-
-        /* === NOVA ANIMAÇÃO CASSINO (Moedas) === */
         .casino-coin {
-            position: fixed;
-            width: 25px;
-            height: 25px;
-            background: var(--accent-gold);
-            border-radius: 50%;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.9), inset 0 0 5px rgba(255, 255, 255, 0.5);
-            pointer-events: none;
-            z-index: 9999;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            position: fixed; width: 25px; height: 25px;
+            background: var(--accent-gold); border-radius: 50%;
+            pointer-events: none; z-index: 9999;
+            top: 50%; left: 50%; border: 2px solid #fff;
+            box-shadow: 0 0 10px var(--accent-gold);
+        }
+        @keyframes coin-explosion {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(1.2) rotate(360deg); opacity: 0; }
         }
 
-        @keyframes coin-explosion {
-            0% {
-                transform: translate(-50%, -50%) scale(0.5) rotate(0deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translate(var(--tx), var(--ty)) scale(1) rotate(720deg);
-                opacity: 0;
-            }
+        @media (max-width: 480px) {
+            .sentence-display { font-size: 1.5rem; }
+            .btn-option { font-size: 1.2rem; }
         }
+
     </style>
-    
 </head>
-<body>
+<body class="dashboard-container">
 
     <div class="background-glow glow-1"></div>
-    <div class="background-glow glow-2"></div>
+    <div class="progress-track"><div class="progress-fill" id="progress-bar"></div></div>
 
     <header class="glass-header">
-  
-        
-        <h1 class="clean-link">Preencher Lacunas</h1>
-        <p class="subtitle">Módulo 09 - Fill the gaps</p>
-        
+        <h1>FILL THE <span class="text-gold">GAPS</span></h1>
+        <p class="subtitle">Módulo 09 - Complete a Frase (A1/A2)</p>
         <div class="xp-pill">XP: <span id="xp-val">0</span></div>
     </header>
 
-    <main class="dashboard-container">
-        <div class="game-wrapper">
-            
-            <div id="feedback"></div>
+    <main class="game-wrapper" style="padding: 20px;">
+        
+        <div id="feedback" style="text-align: center; height: 30px; font-weight: 900; letter-spacing: 2px; margin-bottom: 5px;"></div>
 
-            <div class="game-card">
-                <div id="display">Loading...</div>
-            </div>
+        <div class="game-card" id="game-card-element">
+            <span class="label-instruction">COMPLETE A LACUNA:</span>
+            <div id="sentence-container" class="sentence-display">Carregando...</div>
+        </div>
 
-            <div class="game-controls">
-                <button id="btn1" class="btn-option" onclick="check(1)">A</button>
-                <button id="btn2" class="btn-option" onclick="check(2)">B</button>
-            </div>
-
+        <div class="options-grid">
+            <button id="btn-a" class="btn-option" onclick="checkAnswer('A')">Opção A</button>
+            <button id="btn-b" class="btn-option" onclick="checkAnswer('B')">Opção B</button>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+             <a href="../index.html" style="color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.9rem;">⬅ Voltar ao Painel</a>
         </div>
     </main>
 
     <footer class="glass-footer">
-        © 2026 FFES - Sovereignty System v2.1
+        © 2026 FFES - Sovereignty System v2.5
     </footer>
 
     <script>
-        // === 0. SISTEMA DE ÁUDIO & ANIMAÇÃO (DOPAMINA CASSINO) ===
+        // === BANCO DE DADOS: 100 FRASES COM LACUNAS (A1/A2) ===
+        // sentence: Frase com '_____', correct: Resposta certa, wrong: Distrator
+        const database = [
+            { sentence: "I _____ happy today.", correct: "am", wrong: "is" },
+            { sentence: "She _____ pizza.", correct: "likes", wrong: "like" },
+            { sentence: "_____ you ready?", correct: "Are", wrong: "Is" },
+            { sentence: "They _____ at home.", correct: "are", wrong: "am" },
+            { sentence: "He _____ a car.", correct: "has", wrong: "have" },
+            { sentence: "We _____ to school.", correct: "go", wrong: "goes" },
+            { sentence: "It _____ raining.", correct: "is", wrong: "are" },
+            { sentence: "I _____ not know.", correct: "do", wrong: "does" },
+            { sentence: "_____ is your name?", correct: "What", wrong: "Who" },
+            { sentence: "See you _____.", correct: "later", wrong: "latter" },
+            // 11-20
+            { sentence: "The book is _____.", correct: "good", wrong: "god" },
+            { sentence: "Open _____ door.", correct: "the", wrong: "a" },
+            { sentence: "I live _____ Brazil.", correct: "in", wrong: "on" },
+            { sentence: "She _____ tennis.", correct: "plays", wrong: "play" },
+            { sentence: "_____ old are you?", correct: "How", wrong: "Who" },
+            { sentence: "This is _____ pen.", correct: "my", wrong: "me" },
+            { sentence: "Can you _____ me?", correct: "help", wrong: "helps" },
+            { sentence: "I want _____ sleep.", correct: "to", wrong: "for" },
+            { sentence: "The cat is _____.", correct: "black", wrong: "back" },
+            { sentence: "_____ up, please.", correct: "Stand", wrong: "Stay" },
+            // 21-30
+            { sentence: "My name _____ Leo.", correct: "is", wrong: "are" },
+            { sentence: "They _____ happy.", correct: "look", wrong: "looks" },
+            { sentence: "I _____ breakfast.", correct: "eat", wrong: "eats" },
+            { sentence: "Do not _____.", correct: "smoke", wrong: "smokes" },
+            { sentence: "Where _____ you?", correct: "are", wrong: "is" },
+            { sentence: "I am _____ student.", correct: "a", wrong: "an" },
+            { sentence: "It is _____ apple.", correct: "an", wrong: "a" },
+            { sentence: "He _____ hard.", correct: "works", wrong: "work" },
+            { sentence: "We _____ time.", correct: "have", wrong: "has" },
+            { sentence: "_____ time is it?", correct: "What", wrong: "Which" },
+            // 31-40
+            { sentence: "Come _____.", correct: "here", wrong: "hear" },
+            { sentence: "Listen _____ me.", correct: "to", wrong: "at" },
+            { sentence: "Look _____ the sky.", correct: "at", wrong: "to" },
+            { sentence: "I _____ coffee.", correct: "drink", wrong: "drinks" },
+            { sentence: "She _____ well.", correct: "sings", wrong: "sing" },
+            { sentence: "Don't _____ that.", correct: "do", wrong: "does" },
+            { sentence: "I _____ you.", correct: "love", wrong: "loves" },
+            { sentence: "_____ down.", correct: "Sit", wrong: "Seat" },
+            { sentence: "Turn _____.", correct: "left", wrong: "lift" },
+            { sentence: "Go _____ ahead.", correct: "straight", wrong: "street" },
+            // 41-50
+            { sentence: "I _____ understand.", correct: "don't", wrong: "no" },
+            { sentence: "She _____ speak English.", correct: "doesn't", wrong: "don't" },
+            { sentence: "_____ me the way.", correct: "Show", wrong: "See" },
+            { sentence: "The sun _____.", correct: "shines", wrong: "shine" },
+            { sentence: "I _____ a bike.", correct: "ride", wrong: "drive" },
+            { sentence: "He _____ a car.", correct: "drives", wrong: "rides" },
+            { sentence: "Today is _____.", correct: "Monday", wrong: "Moon" },
+            { sentence: "I _____ tired.", correct: "am", wrong: "is" },
+            { sentence: "Are you _____?", correct: "okay", wrong: "okey" },
+            { sentence: "_____ morning.", correct: "Good", wrong: "God" },
+            // 51-60
+            { sentence: "Thank _____.", correct: "you", wrong: "u" },
+            { sentence: "You are _____.", correct: "welcome", wrong: "welcom" },
+            { sentence: "Excuse _____.", correct: "me", wrong: "my" },
+            { sentence: "I am _____.", correct: "sorry", wrong: "sory" },
+            { sentence: "_____ bless you.", correct: "God", wrong: "Good" },
+            { sentence: "Let's _____.", correct: "go", wrong: "goes" },
+            { sentence: "Wait _____ me.", correct: "for", wrong: "to" },
+            { sentence: "I _____ think so.", correct: "don't", wrong: "not" },
+            { sentence: "That is _____.", correct: "nice", wrong: "nise" },
+            { sentence: "Be _____.", correct: "careful", wrong: "care" },
+            // 61-70
+            { sentence: "I _____ hungry.", correct: "am", wrong: "have" },
+            { sentence: "I _____ thirsty.", correct: "am", wrong: "have" },
+            { sentence: "He is _____.", correct: "tall", wrong: "high" },
+            { sentence: "The building is _____.", correct: "high", wrong: "tall" },
+            { sentence: "I _____ money.", correct: "need", wrong: "needs" },
+            { sentence: "She _____ water.", correct: "wants", wrong: "want" },
+            { sentence: "_____ is he?", correct: "Who", wrong: "Which" },
+            { sentence: "It is _____.", correct: "hot", wrong: "hat" },
+            { sentence: "It is _____.", correct: "cold", wrong: "gold" },
+            { sentence: "My _____ hurts.", correct: "head", wrong: "hand" },
+            // 71-80
+            { sentence: "Wash your _____.", correct: "hands", wrong: "ends" },
+            { sentence: "Brush your _____.", correct: "teeth", wrong: "tooth" },
+            { sentence: "Go to _____.", correct: "bed", wrong: "bad" },
+            { sentence: "Wake _____.", correct: "up", wrong: "on" },
+            { sentence: "Get _____.", correct: "dressed", wrong: "dress" },
+            { sentence: "_____ a shower.", correct: "Take", wrong: "Make" },
+            { sentence: "_____ breakfast.", correct: "Have", wrong: "Take" },
+            { sentence: "Watch _____.", correct: "TV", wrong: "ti vi" },
+            { sentence: "Read a _____.", correct: "book", wrong: "bok" },
+            { sentence: "Write a _____.", correct: "letter", wrong: "later" },
+            // 81-90
+            { sentence: "Send an _____.", correct: "email", wrong: "mail" },
+            { sentence: "Call _____.", correct: "me", wrong: "to me" },
+            { sentence: "Answer the _____.", correct: "phone", wrong: "fune" },
+            { sentence: "Open the _____.", correct: "window", wrong: "wind" },
+            { sentence: "Turn _____ the light.", correct: "on", wrong: "in" },
+            { sentence: "Turn _____ the light.", correct: "off", wrong: "out" },
+            { sentence: "Plug _____.", correct: "in", wrong: "on" },
+            { sentence: "Log _____.", correct: "in", wrong: "on" },
+            { sentence: "Sign _____.", correct: "up", wrong: "on" },
+            { sentence: "Click _____.", correct: "here", wrong: "hear" },
+            // 91-100
+            { sentence: "Press _____.", correct: "enter", wrong: "in" },
+            { sentence: "Game _____.", correct: "over", wrong: "end" },
+            { sentence: "Level _____.", correct: "up", wrong: "on" },
+            { sentence: "Try _____.", correct: "again", wrong: "agen" },
+            { sentence: "New _____.", correct: "game", wrong: "gama" },
+            { sentence: "High _____.", correct: "score", wrong: "point" },
+            { sentence: "You _____.", correct: "win", wrong: "winn" },
+            { sentence: "You _____.", correct: "lose", wrong: "loose" },
+            { sentence: "Good _____.", correct: "luck", wrong: "look" },
+            { sentence: "Have _____.", correct: "fun", wrong: "fan" }
+        ];
+
+        let state = { index: 0, currentQ: null, isCorrectA: false, canClick: true };
+        let xp = parseInt(localStorage.getItem('ffes_xp') || 0);
+        document.getElementById('xp-val').innerText = xp;
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        function playWinSound() {
-            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(1200, audioCtx.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(2000, audioCtx.currentTime + 0.1);
-            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.3);
-        }
-
-        // Função que cria a explosão de moedas
-        function triggerCasinoEffect() {
-            const numCoins = 20; // Quantidade de moedas
-            for (let i = 0; i < numCoins; i++) {
-                const coin = document.createElement('div');
-                coin.classList.add('casino-coin');
-                
-                // Calcula direção aleatória para explosão
-                const angle = Math.random() * Math.PI * 2;
-                const distance = 150 + Math.random() * 200; // Raio da explosão
-                const tx = Math.cos(angle) * distance + 'px';
-                const ty = Math.sin(angle) * distance + 'px';
-                
-                // Define as variáveis CSS para a trajetória única desta moeda
-                coin.style.setProperty('--tx', tx);
-                coin.style.setProperty('--ty', ty);
-                
-                // Duração e tempo aleatórios para parecer natural
-                coin.style.animation = `coin-explosion ${0.8 + Math.random() * 0.5}s ease-out forwards`;
-                
-                document.body.appendChild(coin);
-                
-                // Limpa o elemento do DOM após a animação
-                setTimeout(() => { coin.remove(); }, 1500);
+        // Shuffle inicial
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
             }
         }
+        shuffleArray(database);
 
-        // === 1. SUJEITOS ===
-        const subjects = [
-            { t: "I", type: "pl" }, { t: "You", type: "pl" }, { t: "We", type: "pl" }, { t: "They", type: "pl" },
-            { t: "He", type: "3s" }, { t: "She", type: "3s" }, 
-            { t: "The boy", type: "3s" }, { t: "The girl", type: "3s" },
-            { t: "My mom", type: "3s" }, { t: "The teacher", type: "3s" }
-        ];
-        const objects = {
-            cookable: ["pizza", "bread", "meat", "pasta", "cake"],
-            fruit: ["fruit", "an apple"],
-            liquid: ["water", "coffee", "beer", "juice", "milk", "tea"],
-            gadget: ["the phone", "the computer", "the camera"],
-            app: ["the app", "the game"],
-            info: ["the email", "the book", "the news", "the message"],
-            bedding: ["the bed"], seat: ["the chair"], fixture: ["the door", "the window"], 
-            home: ["the house"], place: ["the park", "school", "the bank"], 
-            car: ["the car"], transport: ["the bus"],
-            language: ["English", "Portuguese"], sport: ["soccer", "tennis"]
-        };
-        const verbs = [
-            { root: "eat", cats: ["cookable", "fruit"], conn: "", allowModal: true },
-            { root: "drink", cats: ["liquid"], conn: "", allowModal: true },
-            { root: "cook", cats: ["cookable"], conn: "", allowModal: true },
-            { root: "buy", cats: ["cookable", "fruit", "liquid", "gadget", "car"], conn: "", allowModal: true },
-            { root: "want", cats: ["cookable", "fruit", "gadget", "car", "home"], conn: "", allowModal: false }, 
-            { root: "have", cats: ["gadget", "car", "home"], conn: "", allowModal: true },
-            { root: "go", cats: ["place", "home"], conn: "to", allowModal: true },
-            { root: "come", cats: ["place", "home"], conn: "to", allowModal: true },
-            { root: "drive", cats: ["place", "home"], conn: "to", allowModal: true }, 
-            { root: "drive", cats: ["car", "transport"], conn: "", allowModal: true }, 
-            { root: "take", cats: ["transport"], conn: "", allowModal: true },
-            { root: "live", cats: ["home"], conn: "in", allowModal: true }, 
-            { root: "sleep", cats: ["home", "bedding"], conn: "in", allowModal: true }, 
-            { root: "sit", cats: ["seat"], conn: "on", allowModal: true }, 
-            { root: "work", cats: ["place"], conn: "at", allowModal: true }, 
-            { root: "speak", cats: ["language"], conn: "", allowModal: true }, 
-            { root: "study", cats: ["language"], conn: "", allowModal: true }, 
-            { root: "read", cats: ["info"], conn: "", allowModal: true },
-            { root: "write", cats: ["info"], conn: "", allowModal: true },
-            { root: "play", cats: ["sport", "app"], conn: "", allowModal: true }, 
-            { root: "use", cats: ["gadget", "app"], conn: "", allowModal: true }, 
-            { root: "open", cats: ["fixture", "home", "app"], conn: "", allowModal: true }, 
-            { root: "close", cats: ["fixture", "home", "app"], conn: "", allowModal: true },
-            { root: "like", cats: ["cookable", "fruit", "sport", "gadget"], conn: "", allowModal: false }
-        ];
-        const modals = ["can", "will", "must", "should"];
-        const wildcards = ["to", "for", "in", "on", "at", "the", "a", "an"];
-
-        // === ENGINE ===
-        let xp = 0;
-        let correctTxt = "";
-        let correctIdx = 0;
-
-        function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
-        function conjugate(verb, subjType) {
-            if (subjType === "3s") {
-                if (verb === "go") return "goes";
-                if (verb === "do") return "does";
-                if (verb === "study") return "studies";
-                if (verb === "have") return "has";
-                return verb + "s";
-            }
-            return verb;
-        }
-
-        function generate() {
-            const roll = Math.random();
-            if (roll < 0.60) generateVerbRound();      
-            else if (roll < 0.85) generateModalRound(); 
-            else generateAuxRound();                    
-        }
-
-        function generateVerbRound() {
-            const s = rand(subjects);
-            const vData = rand(verbs);
-            const cat = rand(vData.cats);
-            const obj = rand(objects[cat]);
-            const correctV = conjugate(vData.root, s.type);
-            let wrongV = "";
-            if (Math.random() > 0.4) {
-                let randomV = rand(verbs);
-                while ((randomV.cats.includes(cat) || randomV.root === vData.root)) { randomV = rand(verbs); }
-                wrongV = conjugate(randomV.root, s.type);
-            } else { wrongV = rand(wildcards); }
-            correctTxt = correctV;
-            const conn = vData.conn ? vData.conn + " " : "";
-            render(`${s.t} <span class="gap">_____</span> ${conn}${obj}.`, correctV, wrongV);
-        }
-
-        function generateModalRound() {
-            const s = rand(subjects);
-            let vData = rand(verbs);
-            while (vData.allowModal === false) { vData = rand(verbs); }
-            const cat = rand(vData.cats);
-            const obj = rand(objects[cat]);
-            const modal = rand(modals);
-            correctTxt = modal;
-            const wrong = Math.random() > 0.5 ? rand(wildcards) : conjugate(vData.root, "3s"); 
-            const conn = vData.conn ? vData.conn + " " : "";
-            render(`${s.t} <span class="gap">_____</span> ${vData.root} ${conn}${obj}.`, modal, wrong);
-        }
-
-        function generateAuxRound() {
-            const s = rand(subjects);
-            const vData = rand(verbs);
-            const cat = rand(vData.cats);
-            const obj = rand(objects[cat]);
-            const correctAux = s.type === "3s" ? "Does" : "Do";
-            const wrongAux = s.type === "3s" ? "Do" : "Does";
-            correctTxt = correctAux;
-            const conn = vData.conn ? vData.conn + " " : "";
-            render(`<span class="gap">_____</span> ${s.t.toLowerCase()} ${vData.root} ${conn}${obj}?`, correctAux, wrongAux);
-        }
-
-        function render(html, correct, wrong) {
-            document.getElementById('display').innerHTML = html;
-            const fb = document.getElementById('feedback');
-            fb.className = ''; fb.innerText = '';
-            document.getElementById('btn1').className = 'btn-option';
-            document.getElementById('btn2').className = 'btn-option';
-            correctIdx = Math.random() > 0.5 ? 1 : 2;
-            document.getElementById(`btn${correctIdx}`).innerText = correct;
-            document.getElementById(`btn${correctIdx === 1 ? 2 : 1}`).innerText = wrong;
-        }
-
-        function check(idx) {
-            const fb = document.getElementById('feedback');
-            const btn = document.getElementById(`btn${idx}`);
-            if (idx === correctIdx) {
-                xp += 15;
-                fb.innerText = "PERFEITO!"; fb.style.color = "#00e676";
-                fb.className = "visible"; btn.classList.add('correct');
-                document.querySelector('.gap').innerText = correctTxt;
-                playWinSound(); // Som
-                triggerCasinoEffect(); // Animação de moedas
-                setTimeout(generate, 1500); // Aumentei o tempo para apreciar a animação
+        function load() {
+            state.canClick = true;
+            document.getElementById('feedback').innerText = "";
+            document.querySelectorAll('.btn-option').forEach(b => {
+                b.className = 'btn-option';
+                b.style.opacity = '1';
+            });
+            
+            if (state.index >= database.length) { state.index = 0; shuffleArray(database); }
+            
+            state.currentQ = database[state.index];
+            
+            // Formata a frase para destacar a lacuna
+            const formattedSentence = state.currentQ.sentence.replace('_____', '<span class="gap-highlight">_____</span>');
+            document.getElementById('sentence-container').innerHTML = formattedSentence;
+            
+            // Randomiza posição dos botões
+            state.isCorrectA = Math.random() > 0.5;
+            
+            const btnA = document.getElementById('btn-a');
+            const btnB = document.getElementById('btn-b');
+            
+            if (state.isCorrectA) {
+                btnA.innerText = state.currentQ.correct;
+                btnB.innerText = state.currentQ.wrong;
             } else {
-                xp = Math.max(0, xp - 5);
-                fb.innerText = "OPS! TENTE NOVAMENTE"; fb.style.color = "#ff1744";
-                fb.className = "visible"; btn.classList.add('wrong');
+                btnA.innerText = state.currentQ.wrong;
+                btnB.innerText = state.currentQ.correct;
             }
-            document.getElementById('xp-val').innerText = xp;
         }
 
-        generate();
+        function checkAnswer(choice) {
+            if (!state.canClick) return;
+            state.canClick = false;
+
+            const isCorrect = (choice === 'A' && state.isCorrectA) || (choice === 'B' && !state.isCorrectA);
+            const fb = document.getElementById('feedback');
+            const btnSelected = document.getElementById(choice === 'A' ? 'btn-a' : 'btn-b');
+            
+            if (isCorrect) {
+                // Preenche a lacuna visualmente com a resposta certa
+                const completedSentence = state.currentQ.sentence.replace('_____', `<span style="color:#4ade80; text-decoration:underline;">${state.currentQ.correct}</span>`);
+                document.getElementById('sentence-container').innerHTML = completedSentence;
+
+                fb.innerHTML = "<span style='color: #4ade80'>GAP PREENCHIDO! +15 XP</span>";
+                btnSelected.classList.add('correct');
+                
+                xp += 15;
+                localStorage.setItem('ffes_xp', xp);
+                document.getElementById('xp-val').innerText = xp;
+                
+                playAudio('win');
+                triggerCasinoEffect(15);
+                
+                let w = parseFloat(document.getElementById('progress-bar').style.width || 0);
+                document.getElementById('progress-bar').style.width = (w + 5) % 100 + '%';
+
+                setTimeout(() => {
+                    state.index++;
+                    load();
+                }, 1200);
+            } else {
+                fb.innerHTML = "<span style='color: #f87171'>PALAVRA INCORRETA</span>";
+                btnSelected.classList.add('wrong');
+                playAudio('error');
+                
+                document.getElementById('game-card-element').animate([
+                    { transform: 'translateX(0)' },
+                    { transform: 'translateX(-10px)' },
+                    { transform: 'translateX(10px)' },
+                    { transform: 'translateX(0)' }
+                ], { duration: 400 });
+
+                setTimeout(() => {
+                    state.canClick = true;
+                    document.getElementById('feedback').innerText = "";
+                    btnSelected.classList.remove('wrong');
+                }, 1000);
+            }
+        }
+
+        // === ENGINE DE ÁUDIO & EFEITOS FFES ===
+        function playAudio(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+
+            if(type === 'win') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(500, t);
+                osc.frequency.linearRampToValueAtTime(800, t + 0.1);
+                gain.gain.setValueAtTime(0.1, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            } else if(type === 'error') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, t);
+                osc.frequency.linearRampToValueAtTime(100, t + 0.2);
+                gain.gain.setValueAtTime(0.1, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            }
+        }
+
+        function triggerCasinoEffect(amount) {
+            for (let i = 0; i < amount; i++) {
+                const coin = document.createElement('div');
+                coin.className = 'casino-coin';
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 60 + Math.random() * 100;
+                coin.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+                coin.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+                coin.style.animation = `coin-explosion ${0.5 + Math.random()*0.3}s ease-out forwards`;
+                document.body.appendChild(coin);
+                setTimeout(() => coin.remove(), 800);
+            }
+        }
+
+        window.onload = load;
     </script>
-
-
-
 </body>
 </html>

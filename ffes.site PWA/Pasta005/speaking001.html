@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FFES | Speaking Studio</title>
+    <title>FFES | Speaking Studio Master</title>
     <link rel="stylesheet" href="../style.css">
     <style>
+        /* === ESTILO SPEAKING STUDIO (PADRÃO FFES) === */
         .exercise-box {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
@@ -14,43 +15,92 @@
             padding: 2.5rem;
             margin-top: 20px;
             text-align: center;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
+        
         .sentence-display {
-            font-size: 1.8rem;
+            font-size: 2rem;
             color: #fff;
             margin: 30px 0;
-            padding: 20px;
+            padding: 25px;
             background: rgba(184, 134, 11, 0.1);
             border-radius: 15px;
-            border-left: 5px solid #b8860b;
-            font-weight: 600;
+            border-left: 5px solid var(--accent-gold);
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
         }
+
         .mic-btn {
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
-            border: none;
-            background: #b8860b;
-            color: #0A2342;
-            font-size: 2rem;
+            border: 3px solid rgba(255,255,255,0.1);
+            background: var(--accent-gold);
+            color: var(--primary-dark);
+            font-size: 2.5rem;
             cursor: pointer;
-            transition: 0.3s;
-            box-shadow: 0 0 20px rgba(184, 134, 11, 0.4);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 25px rgba(184, 134, 11, 0.4);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto;
         }
+        
+        .mic-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 35px rgba(184, 134, 11, 0.6);
+        }
+
         .mic-btn.recording {
             background: #f87171;
+            border-color: #f87171;
+            color: #fff;
             animation: pulse-red 1.5s infinite;
         }
+
         @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.7); }
+            0% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.7); transform: scale(1); }
+            50% { transform: scale(1.05); }
             70% { box-shadow: 0 0 0 20px rgba(248, 113, 113, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0); transform: scale(1); }
         }
+
         #status {
-            margin-top: 15px;
+            margin-top: 20px;
             font-style: italic;
-            color: rgba(255,255,255,0.6);
+            color: rgba(255,255,255,0.7);
             height: 20px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        /* Elementos FFES */
+        .xp-pill {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--accent-gold);
+            padding: 5px 15px;
+            border-radius: 50px;
+            color: var(--accent-gold);
+            font-weight: 800;
+            display: inline-block;
+        }
+
+        .casino-coin {
+            position: fixed; width: 25px; height: 25px;
+            background: var(--accent-gold); border-radius: 50%;
+            pointer-events: none; z-index: 9999;
+            top: 50%; left: 50%; border: 2px solid #fff;
+            box-shadow: 0 0 10px var(--accent-gold);
+        }
+        @keyframes coin-explosion {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(1.2) rotate(360deg); opacity: 0; }
+        }
+
+        /* Responsividade */
+        @media (max-width: 600px) {
+            .sentence-display { font-size: 1.5rem; padding: 15px; }
+            .mic-btn { width: 70px; height: 70px; font-size: 2rem; }
         }
     </style>
 </head>
@@ -60,107 +110,180 @@
 
     <header class="glass-header">
         <h1>SPEAKING <span class="text-gold">STUDIO</span></h1>
-        <p class="subtitle">Módulo 05 - Reconhecimento de Voz em Tempo Real</p>
+        <p class="subtitle">Módulo 05 - Voice Recognition (A1/A2)</p>
+        <div class="xp-pill">XP: <span id="xp-val">0</span></div>
     </header>
 
     <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
         
         <div id="game-container" class="exercise-box">
-            <p style="color: #aaa;">Leia a frase abaixo em voz alta:</p>
+            <p style="color: #aaa; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Pressione o microfone e leia:</p>
             
             <div id="sentence" class="sentence-display">Carregando...</div>
             
-            <button id="micBtn" onclick="startRecording()" class="mic-btn">🎙️</button>
+            <button id="micBtn" onclick="toggleRecording()" class="mic-btn">🎙️</button>
             
-            <p id="status"></p>
+            <p id="status">Toque para falar</p>
             
-            <div id="feedback" style="margin-top: 20px; font-weight: bold; min-height: 24px;"></div>
+            <div id="feedback" style="margin-top: 25px; font-weight: 900; min-height: 40px; font-size: 1.1rem;"></div>
 
             <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin: 25px auto 0;">PRÓXIMA FRASE ➡</button>
         </div>
 
         <div style="margin-top: 40px; text-align: center;">
             <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;">
-                <span>⬅ Voltar ao Painel Principal</span>
+                <span>⬅ Voltar ao Painel</span>
             </a>
         </div>
     </main>
 
     <script>
+        // === BANCO DE DADOS: 100 FRASES (A1/A2 - 2 a 6 Palavras) ===
         const sentences = [
-            "Hello, how are you?",
-            "My name is Leo Ramos.",
-            "I want to learn English.",
-            "The sky is blue today.",
-            "I love programming in JavaScript."
+            "Good morning", "How are you?", "I am fine", "What is your name?", "My name is John",
+            "Nice to meet you", "Where are you from?", "I am from Brazil", "How old are you?", "I am twenty years old",
+            "Do you speak English?", "I speak a little English", "Please help me", "Thank you very much", "You are welcome",
+            "Excuse me", "I am sorry", "I don't understand", "Can you repeat please?", "Speak slowly please",
+            "What time is it?", "It is two o'clock", "I am hungry", "I am thirsty", "I want water",
+            "I like pizza", "Do you like coffee?", "Yes I do", "No I don't", "Where is the bathroom?",
+            "Go straight ahead", "Turn left", "Turn right", "Stop here", "How much is this?",
+            "It is cheap", "It is expensive", "I want to buy this", "Can I pay by card?", "Have a nice day",
+            "See you later", "Good night", "I love my family", "This is my friend", "She is beautiful",
+            "He is handsome", "The dog is cute", "The cat is sleeping", "I have a car", "I drive to work",
+            "I take the bus", "The sky is blue", "It is raining", "It is cold today", "It is hot today",
+            "I am happy", "I am sad", "I am tired", "I am busy", "Let's go home",
+            "Open the door", "Close the window", "Turn on the light", "Turn off the TV", "I like music",
+            "I watch movies", "I play soccer", "I read books", "I study English", "I work every day",
+            "What do you do?", "I am a student", "I am a teacher", "Where do you live?", "I live in a house",
+            "I live in an apartment", "This is delicious", "I need help", "Call the police", "I am lost",
+            "What is this?", "Who is that?", "When is your birthday?", "Today is Monday", "Tomorrow is Sunday",
+            "I wake up early", "I go to bed late", "I brush my teeth", "I take a shower", "I get dressed",
+            "I eat breakfast", "I eat lunch", "I eat dinner", "Do you have brothers?", "I have one sister",
+            "Let's go to the park", "I like to travel", "My phone is new", "The computer is old", "English is easy"
         ];
 
         let index = 0;
         let recognition;
+        let isRecording = false;
+        let xp = parseInt(localStorage.getItem('ffes_xp') || 0);
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        document.getElementById('xp-val').innerText = xp;
 
-        // Inicialização da API de Reconhecimento de Fala
+        // Shuffle inicial
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+        shuffleArray(sentences);
+
+        // Inicialização da API de Voz
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new SpeechRecognition();
             recognition.lang = 'en-US';
             recognition.interimResults = false;
+            recognition.continuous = false;
+
+            recognition.onstart = () => {
+                isRecording = true;
+                updateUIState('recording');
+            };
 
             recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript.toLowerCase().replace(/[.,?!]/g, "");
-                const target = sentences[index].toLowerCase().replace(/[.,?!]/g, "");
-                
+                const transcript = event.results[0][0].transcript;
+                const target = sentences[index];
                 check(transcript, target);
             };
 
-            recognition.onerror = () => {
-                document.getElementById('status').textContent = "Erro no microfone. Tente novamente.";
-                stopUI();
+            recognition.onerror = (event) => {
+                document.getElementById('status').textContent = "Erro: " + event.error;
+                updateUIState('idle');
+                playAudio('error');
             };
 
-            recognition.onend = () => stopUI();
+            recognition.onend = () => {
+                isRecording = false;
+                if(!document.getElementById('nextBtn').style.display === 'block') {
+                    updateUIState('idle');
+                }
+            };
         } else {
-            alert("Seu navegador não suporta reconhecimento de voz.");
+            alert("Navegador incompatível. Use Chrome ou Edge.");
         }
 
         function load() {
-            if (index >= sentences.length) {
-                document.getElementById('game-container').innerHTML = `
-                    <h2 class="text-gold">Pronúncia Validada!</h2>
-                    <p style="color:#fff; margin: 20px 0;">Seu hardware de fala está operante.</p>
-                    <button onclick="location.reload()" class="btn-gold" style="margin: 0 auto; display:block">RECOMEÇAR TREINO</button>
-                `;
-                return;
-            }
+            if (index >= sentences.length) { index = 0; shuffleArray(sentences); }
+            
             document.getElementById('sentence').textContent = sentences[index];
+            document.getElementById('sentence').style.borderColor = "var(--accent-gold)";
+            document.getElementById('sentence').style.background = "rgba(184, 134, 11, 0.1)";
+            
             document.getElementById('feedback').textContent = "";
-            document.getElementById('status').textContent = "Aguardando gravação...";
+            updateUIState('idle');
             document.getElementById('nextBtn').style.display = "none";
         }
 
-        function startRecording() {
-            const btn = document.getElementById('micBtn');
-            btn.classList.add('recording');
-            document.getElementById('status').textContent = "Ouvindo... fale agora!";
-            recognition.start();
-        }
-
-        function stopUI() {
-            document.getElementById('micBtn').classList.remove('recording');
-        }
-
-        function check(said, target) {
-            const feedback = document.getElementById('feedback');
-            
-            if (said === target) {
-                feedback.innerHTML = `<span style="color: #4ade80">SINAL LIMPO: +50 XP</span><br><small style="color:rgba(255,255,255,0.5)">Você disse: "${said}"</small>`;
-                
-                // Sistema de XP (Sovereignty System)
-                let xp = localStorage.getItem('ffes_xp') || 0;
-                localStorage.setItem('ffes_xp', parseInt(xp) + 50);
+        function toggleRecording() {
+            if (!recognition) return;
+            if (isRecording) {
+                recognition.stop();
             } else {
-                feedback.innerHTML = `<span style="color: #f87171">RUÍDO DETECTADO</span><br><small style="color:rgba(255,255,255,0.5)">Você disse: "${said}"</small>`;
+                // Resume AudioContext on user gesture
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                recognition.start();
             }
-            document.getElementById('nextBtn').style.display = "block";
+        }
+
+        function updateUIState(state) {
+            const btn = document.getElementById('micBtn');
+            const status = document.getElementById('status');
+            
+            if (state === 'recording') {
+                btn.classList.add('recording');
+                status.textContent = "Ouvindo... Fale agora!";
+                status.style.color = "#f87171";
+            } else {
+                btn.classList.remove('recording');
+                status.textContent = "Toque para falar";
+                status.style.color = "rgba(255,255,255,0.7)";
+            }
+        }
+
+        // Função de Normalização para Comparação Flexível
+        function normalize(str) {
+            return str.toLowerCase()
+                      .replace(/[.,?!]/g, "") // Remove pontuação
+                      .replace(/\s+/g, " ")   // Remove espaços extras
+                      .trim();
+        }
+
+        function check(saidRaw, targetRaw) {
+            const said = normalize(saidRaw);
+            const target = normalize(targetRaw);
+            const feedback = document.getElementById('feedback');
+            const box = document.getElementById('sentence');
+            
+            updateUIState('idle');
+
+            if (said === target) {
+                feedback.innerHTML = `<span style="color: #4ade80">SINAL LIMPO: +50 XP</span>`;
+                box.style.borderColor = "#4ade80";
+                box.style.background = "rgba(74, 222, 128, 0.1)";
+                
+                xp += 50;
+                localStorage.setItem('ffes_xp', xp);
+                document.getElementById('xp-val').innerText = xp;
+                
+                playAudio('win');
+                triggerCasinoEffect(20);
+                document.getElementById('nextBtn').style.display = "block";
+            } else {
+                feedback.innerHTML = `<span style="color: #f87171">NÃO ENTENDI</span><br><small style="color:#aaa; font-weight:normal;">Ouvi: "${saidRaw}"</small>`;
+                box.style.borderColor = "#f87171";
+                playAudio('error');
+            }
         }
 
         function nextQuestion() {
@@ -168,11 +291,48 @@
             load();
         }
 
-        load();
+        // === ENGINE DE ÁUDIO & EFEITOS FFES ===
+        function playAudio(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+
+            if(type === 'win') {
+                // Som de Sucesso (High Ping)
+                osc.type = 'sine'; osc.frequency.setValueAtTime(600, t);
+                osc.frequency.exponentialRampToValueAtTime(1200, t + 0.1);
+                gain.gain.setValueAtTime(0.1, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            } else if(type === 'error') {
+                // Som de Erro (Low Buzz)
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, t);
+                osc.frequency.linearRampToValueAtTime(100, t + 0.2);
+                gain.gain.setValueAtTime(0.1, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            }
+        }
+
+        function triggerCasinoEffect(amount) {
+            for (let i = 0; i < amount; i++) {
+                const coin = document.createElement('div');
+                coin.className = 'casino-coin';
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 60 + Math.random() * 100;
+                coin.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+                coin.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+                coin.style.animation = `coin-explosion ${0.5 + Math.random()*0.3}s ease-out forwards`;
+                document.body.appendChild(coin);
+                setTimeout(() => coin.remove(), 800);
+            }
+        }
+
+        window.onload = load;
     </script>
 
     <footer class="glass-footer">
-        <p>&copy; 2026 FFES - Sovereignty System v2.1</p>
+        © 2026 FFES - Sovereignty System v2.5
     </footer>
 
 </body>

@@ -3,102 +3,369 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FFES | Verdadeiro ou Falso</title>
+    <title>FFES | Quiz True or False Master</title>
     <link rel="stylesheet" href="../style.css">
     <style>
-        .exercise-box {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-top: 20px;
-            text-align: center;
-        }
-        .tf-grid {
+        /* === ESTILO QUIZ TRUE/FALSE (PADRÃO FFES) === */
+        .game-wrapper {
+            width: 100%;
+            max-width: 600px;
             display: flex;
+            flex-direction: column;
             gap: 20px;
-            justify-content: center;
-            margin: 30px 0;
+            z-index: 10;
+            margin: 0 auto;
         }
+
+        .game-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 2px solid var(--accent-gold);
+            border-radius: 24px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: var(--glass-shadow);
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .statement-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            line-height: 1.3;
+        }
+
+        .question-label {
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+
+        /* Botões Verdadeiro / Falso */
+        .tf-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
         .btn-tf {
-            padding: 20px 40px;
-            border-radius: 15px;
-            font-weight: bold;
+            padding: 25px 10px;
+            border-radius: 20px;
+            font-weight: 900;
             cursor: pointer;
-            transition: 0.3s;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             border: 2px solid rgba(255,255,255,0.1);
             color: #fff;
             font-size: 1.2rem;
+            text-transform: uppercase;
+            backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        .btn-true { background: rgba(74, 222, 128, 0.1); }
-        .btn-true:hover { background: rgba(74, 222, 128, 0.3); border-color: #4ade80; }
-        .btn-false { background: rgba(248, 113, 113, 0.1); }
-        .btn-false:hover { background: rgba(248, 113, 113, 0.3); border-color: #f87171; }
+
+        .btn-true { background: rgba(74, 222, 128, 0.15); border-color: rgba(74, 222, 128, 0.3); }
+        .btn-true:hover { background: rgba(74, 222, 128, 0.3); border-color: #4ade80; transform: translateY(-5px); }
+        
+        .btn-false { background: rgba(248, 113, 113, 0.15); border-color: rgba(248, 113, 113, 0.3); }
+        .btn-false:hover { background: rgba(248, 113, 113, 0.3); border-color: #f87171; transform: translateY(-5px); }
+
+        /* Elementos FFES */
+        .xp-pill {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--accent-gold);
+            padding: 5px 15px;
+            border-radius: 50px;
+            color: var(--accent-gold);
+            font-weight: 800;
+            display: inline-block;
+        }
+
+        .progress-track {
+            width: 100%; height: 5px;
+            background: rgba(255,255,255,0.1);
+            position: fixed; top: 0; left: 0; z-index: 1000;
+        }
+        .progress-fill {
+            height: 100%; background: var(--accent-gold);
+            width: 0%; transition: width 0.3s ease;
+        }
+
+        .casino-coin {
+            position: fixed; width: 25px; height: 25px;
+            background: var(--accent-gold); border-radius: 50%;
+            pointer-events: none; z-index: 9999;
+            top: 50%; left: 50%; border: 2px solid #fff;
+            box-shadow: 0 0 10px var(--accent-gold);
+        }
+        @keyframes coin-explosion {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(1.2) rotate(360deg); opacity: 0; }
+        }
+
     </style>
 </head>
 <body class="dashboard-container">
 
-    <div class="background-glow glow-2"></div>
+    <div class="background-glow glow-1"></div>
+    <div class="progress-track"><div class="progress-fill" id="progress-bar"></div></div>
 
     <header class="glass-header">
         <h1>VERDADEIRO OU <span class="text-gold">FALSO</span></h1>
-        <p class="subtitle">Módulo 07 - Validação de Sentenças</p>
+        <p class="subtitle">Módulo 07 - Validação de Sentenças (A1/A2)</p>
+        <div class="xp-pill">XP: <span id="xp-val">0</span></div>
     </header>
 
-    <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
-        <div id="game-container" class="exercise-box">
-            <h2 id="statement" style="color: #fff; margin-bottom: 20px; font-size: 1.4rem;">"She play soccer every day" está gramaticalmente correto?</h2>
-            
-            <div class="tf-grid">
-                <div class="btn-tf btn-true" onclick="check(true)">VERDADEIRO</div>
-                <div class="btn-tf btn-false" onclick="check(false)">FALSO</div>
-            </div>
+    <main class="game-wrapper" style="padding: 20px;">
+        
+        <div id="feedback" style="text-align: center; height: 30px; font-weight: 900; letter-spacing: 2px; margin-bottom: 5px;"></div>
 
-            <div id="feedback" style="margin-top: 20px; font-weight: bold; min-height: 24px;"></div>
-            <button id="nextBtn" onclick="nextQuestion()" class="btn-gold" style="display:none; margin: 20px auto 0;">PRÓXIMA ➡</button>
+        <div class="game-card" id="game-card-element">
+            <span class="question-label">A frase abaixo está correta?</span>
+            <div id="statement" class="statement-text">Carregando...</div>
         </div>
 
-        <div style="margin-top: 40px; text-align: center;">
-            <a href="../index.html" class="card-glass" style="display: inline-block; padding: 12px 35px; text-decoration: none;">
-                <span>⬅ Voltar ao Painel Principal</span>
-            </a>
+        <div class="tf-grid">
+            <div id="btn-true" class="btn-tf btn-true" onclick="check(true)">VERDADEIRO</div>
+            <div id="btn-false" class="btn-tf btn-false" onclick="check(false)">FALSO</div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+             <a href="../index.html" style="color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.9rem;">⬅ Voltar ao Painel</a>
         </div>
     </main>
 
+    <footer class="glass-footer">
+        © 2026 FFES - Sovereignty System v2.5
+    </footer>
+
     <script>
-        const facts = [
-            { s: "'She play soccer' está correto?", a: false },
-            { s: "'Did you go?' é uma pergunta no passado?", a: true },
-            { s: "'I am eat' é uma estrutura correta?", a: false }
+        // === BANCO DE DADOS: 100 FRASES (50 TRUE / 50 FALSE) ===
+        // s: Sentence, a: Answer (true=Correct, false=Incorrect)
+        const database = [
+            // CORRECT (TRUE)
+            { s: "She plays soccer.", a: true },
+            { s: "I am happy.", a: true },
+            { s: "They work here.", a: true },
+            { s: "He loves pizza.", a: true },
+            { s: "We go to school.", a: true },
+            { s: "The sky is blue.", a: true },
+            { s: "You are my friend.", a: true },
+            { s: "It is raining.", a: true },
+            { s: "I have a car.", a: true },
+            { s: "She has a dog.", a: true },
+            { s: "Do you like coffee?", a: true },
+            { s: "Where are you?", a: true },
+            { s: "I don't know.", a: true },
+            { s: "She doesn't eat meat.", a: true },
+            { s: "We are students.", a: true },
+            { s: "They live in Brazil.", a: true },
+            { s: "He can swim.", a: true },
+            { s: "I must go.", a: true },
+            { s: "Open the door.", a: true },
+            { s: "Close the window.", a: true },
+            { s: "My name is Leo.", a: true },
+            { s: "This is my book.", a: true },
+            { s: "That is your pen.", a: true },
+            { s: "I am reading.", a: true },
+            { s: "She is sleeping.", a: true },
+            { s: "We were tired.", a: true },
+            { s: "They went home.", a: true },
+            { s: "I saw a movie.", a: true },
+            { s: "Did you sleep?", a: true },
+            { s: "Will you come?", a: true },
+            { s: "I have finished.", a: true },
+            { s: "She has gone.", a: true },
+            { s: "The car is red.", a: true },
+            { s: "Birds can fly.", a: true },
+            { s: "Fish can swim.", a: true },
+            { s: "I drink water.", a: true },
+            { s: "She cooks well.", a: true },
+            { s: "He drives fast.", a: true },
+            { s: "We study English.", a: true },
+            { s: "They play games.", a: true },
+            { s: "Is it cold?", a: true },
+            { s: "Are you ready?", a: true },
+            { s: "Stop the car.", a: true },
+            { s: "Please help me.", a: true },
+            { s: "Thank you.", a: true },
+            { s: "Good morning.", a: true },
+            { s: "See you later.", a: true },
+            { s: "I need money.", a: true },
+            { s: "She wants food.", a: true },
+            { s: "He feels sick.", a: true },
+
+            // INCORRECT (FALSE) - Common Errors
+            { s: "She play soccer.", a: false }, // Missing 's'
+            { s: "I is happy.", a: false }, // Wrong verb to be
+            { s: "They works here.", a: false }, // Extra 's'
+            { s: "He love pizza.", a: false }, // Missing 's'
+            { s: "We goes to school.", a: false }, // Wrong conjugation
+            { s: "The sky are blue.", a: false }, // Wrong verb to be
+            { s: "You is my friend.", a: false }, // Wrong verb to be
+            { s: "It are raining.", a: false }, // Wrong verb to be
+            { s: "I has a car.", a: false }, // Wrong have/has
+            { s: "She have a dog.", a: false }, // Wrong have/has
+            { s: "Does you like coffee?", a: false }, // Wrong aux
+            { s: "Where is you?", a: false }, // Wrong verb to be
+            { s: "I doesn't know.", a: false }, // Wrong aux
+            { s: "She don't eat meat.", a: false }, // Wrong aux
+            { s: "We is students.", a: false }, // Wrong verb to be
+            { s: "They lives in Brazil.", a: false }, // Extra 's'
+            { s: "He can swims.", a: false }, // Modal + s
+            { s: "I must goes.", a: false }, // Modal + s
+            { s: "Open door.", a: false }, // Missing article
+            { s: "Close window.", a: false }, // Missing article
+            { s: "My name are Leo.", a: false }, // Wrong verb to be
+            { s: "This are my book.", a: false }, // Wrong verb to be
+            { s: "That are your pen.", a: false }, // Wrong verb to be
+            { s: "I am read.", a: false }, // Missing -ing
+            { s: "She is sleep.", a: false }, // Missing -ing
+            { s: "We was tired.", a: false }, // Wrong past to be
+            { s: "They goed home.", a: false }, // Wrong irregular
+            { s: "I seed a movie.", a: false }, // Wrong irregular
+            { s: "Do you slept?", a: false }, // Double past
+            { s: "Will you came?", a: false }, // Will + past
+            { s: "I have finish.", a: false }, // Missing participle
+            { s: "She has go.", a: false }, // Missing participle
+            { s: "The car are red.", a: false }, // Wrong verb to be
+            { s: "Birds can flies.", a: false }, // Modal + plural
+            { s: "Fish can swims.", a: false }, // Modal + s
+            { s: "I drinks water.", a: false }, // Extra 's'
+            { s: "She cook well.", a: false }, // Missing 's'
+            { s: "He drive fast.", a: false }, // Missing 's'
+            { s: "We studies English.", a: false }, // Wrong conjugation
+            { s: "They plays games.", a: false }, // Extra 's'
+            { s: "Is it colds?", a: false }, // Adj plural
+            { s: "Is you ready?", a: false }, // Wrong verb to be
+            { s: "Stops the car.", a: false }, // Imperative + s
+            { s: "Please helps me.", a: false }, // Imperative + s
+            { s: "Thanks you.", a: false }, // Wrong expression
+            { s: "Good mornings.", a: false }, // Wrong expression
+            { s: "See you laters.", a: false }, // Wrong expression
+            { s: "I needs money.", a: false }, // Extra 's'
+            { s: "She want food.", a: false }, // Missing 's'
+            { s: "He feel sick.", a: false } // Missing 's'
         ];
 
-        let currentIdx = 0;
+        let state = { index: 0, currentQ: null, canClick: true };
+        let xp = parseInt(localStorage.getItem('ffes_xp') || 0);
+        document.getElementById('xp-val').innerText = xp;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Shuffle
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+        shuffleArray(database);
 
         function load() {
-            if (currentIdx >= facts.length) {
-                document.getElementById('game-container').innerHTML = `<h2 class="text-gold">Validação Concluída!</h2><button onclick="location.reload()" class="btn-gold" style="margin-top:20px">RECOMEÇAR</button>`;
-                return;
-            }
-            document.getElementById('statement').textContent = facts[currentIdx].s;
-            document.getElementById('feedback').textContent = "";
-            document.getElementById('nextBtn').style.display = "none";
+            state.canClick = true;
+            document.getElementById('feedback').innerText = "";
+            document.getElementById('btn-true').style.opacity = '1';
+            document.getElementById('btn-false').style.opacity = '1';
+            document.getElementById('btn-true').style.transform = 'scale(1)';
+            document.getElementById('btn-false').style.transform = 'scale(1)';
+
+            if (state.index >= database.length) { state.index = 0; shuffleArray(database); }
+            
+            state.currentQ = database[state.index];
+            document.getElementById('statement').innerText = `"${state.currentQ.s}"`;
         }
 
         function check(userAns) {
-            const correct = facts[currentIdx].a;
-            if (userAns === correct) {
-                document.getElementById('feedback').innerHTML = "<span style='color: #4ade80'>CORRETO! +20 XP</span>";
-                let xp = localStorage.getItem('ffes_xp') || 0;
-                localStorage.setItem('ffes_xp', parseInt(xp) + 20);
+            if (!state.canClick) return;
+            state.canClick = false;
+
+            const isCorrect = (userAns === state.currentQ.a);
+            const fb = document.getElementById('feedback');
+            
+            if (isCorrect) {
+                fb.innerHTML = "<span style='color: #4ade80'>JULGAMENTO PRECISO! +20 XP</span>";
+                
+                xp += 20;
+                localStorage.setItem('ffes_xp', xp);
+                document.getElementById('xp-val').innerText = xp;
+                
+                playAudio('win');
+                triggerCasinoEffect(15);
+                
+                let w = parseFloat(document.getElementById('progress-bar').style.width || 0);
+                document.getElementById('progress-bar').style.width = (w + 5) % 100 + '%';
+
+                setTimeout(() => {
+                    state.index++;
+                    load();
+                }, 1200);
             } else {
-                document.getElementById('feedback').innerHTML = "<span style='color: #f87171'>INCORRETO</span>";
+                fb.innerHTML = "<span style='color: #f87171'>ANÁLISE INCORRETA</span>";
+                playAudio('error');
+                
+                document.getElementById('game-card-element').animate([
+                    { transform: 'translateX(0)' },
+                    { transform: 'translateX(-10px)' },
+                    { transform: 'translateX(10px)' },
+                    { transform: 'translateX(0)' }
+                ], { duration: 400 });
+
+                setTimeout(() => {
+                    state.canClick = true;
+                    document.getElementById('feedback').innerText = "";
+                }, 1000);
             }
-            document.getElementById('nextBtn').style.display = "block";
         }
 
-        function nextQuestion() { currentIdx++; load(); }
-        load();
+        // === ENGINE DE ÁUDIO & EFEITOS FFES ===
+        function playAudio(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+
+            if(type === 'win') {
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(600, t);
+                osc.frequency.exponentialRampToValueAtTime(1000, t + 0.1);
+                gain.gain.setValueAtTime(0.1, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            } else if(type === 'error') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, t);
+                osc.frequency.linearRampToValueAtTime(100, t + 0.2);
+                gain.gain.setValueAtTime(0.1, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            }
+        }
+
+        function triggerCasinoEffect(amount) {
+            for (let i = 0; i < amount; i++) {
+                const coin = document.createElement('div');
+                coin.className = 'casino-coin';
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 60 + Math.random() * 100;
+                coin.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+                coin.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+                coin.style.animation = `coin-explosion ${0.5 + Math.random()*0.3}s ease-out forwards`;
+                document.body.appendChild(coin);
+                setTimeout(() => coin.remove(), 800);
+            }
+        }
+
+        window.onload = load;
     </script>
 </body>
 </html>

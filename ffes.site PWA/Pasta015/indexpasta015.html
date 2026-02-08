@@ -3,47 +3,405 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FFES | Ranking & XP</title>
+    <title>FFES | Ranking</title>
     <link rel="stylesheet" href="../style.css">
+    <style>
+        /* === ESTILOS ESPECÍFICOS DA PASTA 15 === */
+        .ranking-wrapper {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Card do Usuário (Topo) */
+        .user-stats-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 184, 28, 0.05) 100%);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--accent-gold);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(184, 134, 11, 0.2);
+        }
+
+        .user-name-display {
+            font-size: 1.2rem;
+            color: #fff;
+            font-weight: 700;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .user-level {
+            font-size: 0.9rem;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            font-weight: 800;
+        }
+
+        .user-xp-display {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            line-height: 1;
+        }
+
+        .xp-label { font-size: 1rem; color: rgba(255,255,255,0.6); }
+
+        /* Lista de Ranking */
+        .ranking-list {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-height: 200px;
+        }
+
+        .ranking-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid transparent;
+            transition: 0.2s;
+        }
+
+        .ranking-item:last-child { margin-bottom: 0; }
+
+        /* Destaque para o Usuário na Lista */
+        .ranking-item.is-user {
+            background: rgba(184, 134, 11, 0.2);
+            border-color: var(--accent-gold);
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 2;
+        }
+
+        .rank-pos {
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: rgba(255,255,255,0.5);
+            width: 40px;
+            text-align: center;
+        }
+        .rank-name {
+            flex-grow: 1;
+            font-weight: 700;
+            color: #fff;
+            text-align: left;
+            padding-left: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .rank-xp {
+            font-weight: 800;
+            color: var(--accent-gold);
+            min-width: 80px;
+            text-align: right;
+        }
+
+        /* Medalhas do Top 3 */
+        .rank-1 .rank-pos { color: #FFD700; text-shadow: 0 0 10px #FFD700; font-size: 1.4rem; }
+        .rank-2 .rank-pos { color: #C0C0C0; font-size: 1.4rem; }
+        .rank-3 .rank-pos { color: #CD7F32; font-size: 1.4rem; }
+
+        /* Botão de Reset */
+        .danger-zone {
+            margin-top: 30px;
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn-reset {
+            background: rgba(255, 23, 68, 0.1);
+            border: 1px solid #ff1744;
+            color: #ff1744;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.8rem;
+        }
+
+        .btn-reset:hover {
+            background: #ff1744;
+            color: #fff;
+            box-shadow: 0 0 15px #ff1744;
+        }
+
+        .reset-info {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.4);
+            margin-top: 10px;
+            font-style: italic;
+        }
+        
+        .edit-name-btn {
+            background: transparent; border: none; color: rgba(255,255,255,0.3);
+            font-size: 0.8rem; cursor: pointer; margin-left: 5px;
+        }
+        .edit-name-btn:hover { color: #fff; }
+
+    </style>
 </head>
 <body class="dashboard-container">
 
+    <div class="background-glow glow-1"></div>
+
     <header class="glass-header">
-        <h1>RANKING <span class="text-gold">& XP</span></h1>
-        <p class="subtitle">Módulo 15 - Sistema de Soberania v2.1</p>
+        <h1>RANKING</h1>
+        <p class="subtitle"> XP e pontuação</p>
     </header>
 
-    <main>
-        <div class="grid-comandos" style="display: flex; flex-direction: column; gap: 10px; max-width: 600px; margin: 0 auto;">
-            
-            <a href="#perfil" class="card-glass">
-                <span>Meu Perfil e Nível Atual</span>
-            </a>
-
-            <a href="#ranking-global" class="card-glass destaque-gold-card">
-                <div class="icon-glow gold-pulse" style="display:inline-block; margin-right:5px;">🏆</div>
-                <span>Ver Ranking Global</span>
-            </a>
-
-            <a href="#conquistas" class="card-glass">
-                <span>Minhas Medalhas e Conquistas</span>
-            </a>
-
-            <a href="#historico" class="card-glass">
-                <span>Histórico de Atividade</span>
-            </a>
-
-            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
-
-            <a href="../index.html" class="card-glass" style="text-align: center; border-color: var(--text-gold);">
-                <span>⬅ Voltar ao Painel Principal</span>
-            </a>
+    <main class="ranking-wrapper" style="padding: 20px;">
+        
+        <div class="user-stats-card">
+            <div class="user-name-display">
+                <span id="display-name">Carregando...</span>
+                <button onclick="askName()" class="edit-name-btn">✎</button>
+            </div>
+            <div id="user-patente" class="user-level">Recruta</div>
+            <div class="user-xp-display"><span id="total-xp">0</span></div>
+            <div class="xp-label">PONTOS DE SOBERANIA (XP)</div>
+            <div style="margin-top: 15px; height: 6px; background: rgba(0,0,0,0.3); border-radius: 10px; overflow: hidden;">
+                <div id="level-bar" style="height: 100%; width: 0%; background: var(--accent-gold); transition: width 1s ease;"></div>
+            </div>
+            <div id="next-level-info" style="font-size: 0.7rem; margin-top: 5px; opacity: 0.7;">Próxima patente: 500 XP</div>
+            <div id="my-rank-pos" style="margin-top: 10px; color: #4ade80; font-weight: bold; font-size: 0.9rem;"></div>
         </div>
+
+        <h3 style="color: #fff; margin: 20px 0 10px; font-size: 1rem; border-left: 3px solid var(--accent-gold); padding-left: 10px;">TOP 10 ELITE (SEMANAL)</h3>
+        <div id="ranking-container" class="ranking-list">
+            <div style="text-align: center; color: #aaa; padding: 20px;">Sincronizando banco de dados...</div>
+        </div>
+
+        <div class="danger-zone">
+            <button onclick="confirmReset()" class="btn-reset">ZERAR MINHA PONTUAÇÃO</button>
+            <p class="reset-info">
+                *O sistema reinicia automaticamente todo dia 1º do mês.<br>
+                Reiniciar agora apagará todo seu progresso atual.
+            </p>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+             <a href="../index.html" style="color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.9rem;">⬅ Voltar ao Painel</a>
+        </div>
+
     </main>
 
     <footer class="glass-footer">
-        <p>&copy; 2026 FFES - Teacher Leo Ramos | Sovereignty System</p>
+        © 2026 FFES - Sovereignty System v2.5
     </footer>
 
+    <script>
+        // === SISTEMA DE RANKING E XP FFES v2.2 ===
+
+        let userXP = parseInt(localStorage.getItem('ffes_xp') || 0);
+        let userName = localStorage.getItem('ffes_username') || "Soldado Anônimo";
+
+        // === 1. IDENTIDADE DO USUÁRIO ===
+        function checkUserName() {
+            if (!localStorage.getItem('ffes_username')) {
+                // Pequeno delay para garantir carregamento da UI antes do prompt
+                setTimeout(askName, 500);
+            } else {
+                document.getElementById('display-name').innerText = userName;
+            }
+        }
+
+        function askName() {
+            let name = prompt("IDENTIFICAÇÃO NECESSÁRIA:\nDigite seu nome de guerra para o Ranking:", userName);
+            if (name && name.trim() !== "") {
+                userName = name.trim().substring(0, 15); // Limita tamanho
+                localStorage.setItem('ffes_username', userName);
+                document.getElementById('display-name').innerText = userName;
+                generateRanking(); // Regenera com nome novo
+            }
+        }
+
+        // === 2. RESET MENSAL AUTOMÁTICO ===
+        function checkMonthlyReset() {
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const lastReset = localStorage.getItem('ffes_last_reset_month');
+
+            if (lastReset === null || parseInt(lastReset) !== currentMonth) {
+                localStorage.setItem('ffes_xp', 0);
+                localStorage.setItem('ffes_last_reset_month', currentMonth);
+                userXP = 0;
+                alert("📅 NOVO MÊS INICIADO!\nSua pontuação foi reiniciada para a nova temporada.");
+            }
+        }
+
+        // === 3. PATENTES ===
+        function updateLevelDisplay() {
+            const levels = [
+                { name: "CIVIL", min: 0 },
+                { name: "RECRUTA", min: 500 },
+                { name: "SOLDADO", min: 1500 },
+                { name: "CABO", min: 3000 },
+                { name: "SARGENTO", min: 5000 },
+                { name: "TENENTE", min: 8000 },
+                { name: "CAPITÃO", min: 12000 },
+                { name: "MAJOR", min: 18000 },
+                { name: "CORONEL", min: 25000 },
+                { name: "GENERAL", min: 35000 },
+                { name: "SOBERANO", min: 50000 }
+            ];
+
+            let currentRank = levels[0];
+            let nextRank = levels[1];
+
+            for (let i = 0; i < levels.length; i++) {
+                if (userXP >= levels[i].min) {
+                    currentRank = levels[i];
+                    nextRank = levels[i+1] || { name: "LENDÁRIO", min: userXP * 1.5 };
+                }
+            }
+
+            document.getElementById('total-xp').innerText = userXP;
+            document.getElementById('user-patente').innerText = currentRank.name;
+            
+            const range = nextRank.min - currentRank.min;
+            const progress = userXP - currentRank.min;
+            const percentage = Math.min(100, Math.max(0, (progress / range) * 100));
+            
+            document.getElementById('level-bar').style.width = percentage + "%";
+            
+            if(nextRank.name !== "LENDÁRIO") {
+                document.getElementById('next-level-info').innerText = `Próxima patente (${nextRank.name}): ${nextRank.min} XP`;
+            } else {
+                document.getElementById('next-level-info').innerText = "Nível Máximo Atingido.";
+            }
+        }
+
+        // === 4. DINÂMICA SEMANAL (GHOST DATA - 100 NOMES) ===
+        function getWeekNumber() {
+            const d = new Date();
+            d.setHours(0, 0, 0, 0);
+            d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+            const yearStart = new Date(d.getFullYear(), 0, 1);
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+
+        function getGhostData() {
+            const currentWeek = getWeekNumber();
+            const storedWeek = localStorage.getItem('ffes_ranking_week');
+            let ghostPlayers = [];
+
+            // Banco de 100 Nomes para Realismo
+            const baseNames = [
+                "Miguel", "Arthur", "Gael", "Heitor", "Helena", "Alice", "Laura", "Sophia", "Manuela", "Bernardo",
+                "Samuel", "Enzo", "Theo", "Lorenzo", "Gabriel", "Pedro", "Benjamin", "Matheus", "Isaac", "Lucca",
+                "Estevão", "Anthony", "Joaquim", "Pietro", "Rafael", "Davi", "Daniel", "Valentina", "Heloísa", "Mariana",
+                "Lívia", "Lorena", "Ayla", "Amanda", "Beatriz", "Eduarda", "Larissa", "Camila", "Letícia", "Júlia",
+                "Vitória", "Isadora", "Cláudia", "Priscila", "Bruna", "Luana", "Jéssica", "Bianca", "Fernanda", "Renan",
+                "Alexandre", "Bárbara", "Caio", "Diego", "Emanuel", "Fábio", "Giovanni", "Hugo", "Igor", "Jonathan",
+                "Kaique", "Leandro", "Marcelo", "Nathan", "Otávio", "Paulo", "Quentin", "Ricardo", "Sandro", "Thiago",
+                "Ulisses", "Vinícius", "William", "Xavier", "Yago", "Zack", "André", "Bruno", "Caleb", "Danilo",
+                "Elias", "Felipe", "Gustavo", "Henrique", "Ítalo", "João", "Kevin", "Leonardo", "Murilo", "Nicolas",
+                "Oliver", "Patrick", "Ryan", "Saulo", "Tomás", "Uriel", "Vitor", "Wesley", "Yuri", "Zion"
+            ];
+
+            // Se for uma nova semana ou não tiver dados salvos, gera novos
+            if (!storedWeek || parseInt(storedWeek) !== currentWeek || !localStorage.getItem('ffes_ghost_data')) {
+                console.log("Gerando novos dados para a Semana " + currentWeek);
+                
+                ghostPlayers = baseNames.map(name => {
+                    // Base XP aleatório entre 100 e 40000 para espalhar bem pelo ranking
+                    return { name: name, xp: Math.floor(Math.random() * 39900) + 100 };
+                });
+
+                localStorage.setItem('ffes_ranking_week', currentWeek);
+                localStorage.setItem('ffes_ghost_data', JSON.stringify(ghostPlayers));
+            } else {
+                // Carrega dados existentes da semana
+                ghostPlayers = JSON.parse(localStorage.getItem('ffes_ghost_data'));
+            }
+
+            return ghostPlayers;
+        }
+
+        function generateRanking() {
+            let players = getGhostData();
+
+            // Adiciona Usuário
+            players.push({ name: userName, xp: userXP, isUser: true });
+
+            // Ordena
+            players.sort((a, b) => b.xp - a.xp);
+
+            // Renderiza TOP 10
+            const container = document.getElementById('ranking-container');
+            container.innerHTML = "";
+            let userPosition = -1;
+
+            // Encontra posição do usuário
+            players.forEach((p, i) => { if(p.isUser) userPosition = i + 1; });
+
+            // Mostra posição no card pessoal
+            const posEl = document.getElementById('my-rank-pos');
+            if(userPosition <= 10) {
+                posEl.innerText = `Você está no TOP 10! (#${userPosition})`;
+                posEl.style.color = "#FFD700";
+                posEl.style.textShadow = "0 0 10px rgba(255, 215, 0, 0.5)";
+            } else {
+                posEl.innerText = `Sua Posição Global: #${userPosition} de ${players.length}`;
+                posEl.style.color = "#aaa";
+                posEl.style.textShadow = "none";
+            }
+
+            // Loop de renderização (apenas os 10 primeiros)
+            players.slice(0, 10).forEach((player, index) => {
+                const rank = index + 1;
+                const isUserClass = player.isUser ? "is-user" : "";
+                
+                let rankDisplay = rank;
+                let rowClass = "";
+                if (rank === 1) { rankDisplay = "🥇"; rowClass = "rank-1"; }
+                if (rank === 2) { rankDisplay = "🥈"; rowClass = "rank-2"; }
+                if (rank === 3) { rankDisplay = "🥉"; rowClass = "rank-3"; }
+
+                const html = `
+                    <div class="ranking-item ${isUserClass} ${rowClass}">
+                        <div class="rank-pos">${rankDisplay}</div>
+                        <div class="rank-name">${player.name}</div>
+                        <div class="rank-xp">${player.xp} XP</div>
+                    </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
+
+        window.confirmReset = function() {
+            if (confirm("CONFIRMAÇÃO DE PROTOCOLO:\nIsso limpará seu histórico.\nDeseja prosseguir?")) {
+                localStorage.setItem('ffes_xp', 0);
+                location.reload();
+            }
+        }
+
+        window.onload = function() {
+            checkUserName(); // Pede nome se não tiver
+            checkMonthlyReset();
+            updateLevelDisplay();
+            generateRanking();
+        };
+
+    </script>
 </body>
 </html>
