@@ -1,87 +1,202 @@
 <!DOCTYPE html>
-<html lang="pt-BR" itemscope itemtype="http://schema.org/WebSite">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    
-    <title>FFES Exclusive | Plataforma de Aceleração em Inglês - Teacher Leo Ramos</title>
-    <meta name="description" content="Plataforma exclusiva de treinamento de inglês FFES. Acesse exercícios táticos de listening, speaking, leitura e gramática focados em eficiência e resultados rápidos.">
-    <meta name="keywords" content="Inglês, FFES, Teacher Leo Ramos, Curso de Inglês, Plataforma de Estudos, Speaking, Listening, Gramática Tática">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>FFES | Inglês de Alta Performance</title>
+    <meta name="title" content="FFES | Inglês de Alta Performance">
+    <meta name="description" content="Domine a estrutura do inglês em tempo recorde com o método FFES. Treinamento de elite focado em lógica, gramática estrutural e fluência acelerada. Pare de perder tempo.">
+    <meta name="keywords" content="inglês, curso de inglês, teacher leo ramos, ffes, gramática, fluência, inglês rápido, estrutura do inglês, soberania system, pwa english">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Portuguese">
+    <meta name="revisit-after" content="7 days">
     <meta name="author" content="Teacher Leo Ramos">
-    <link rel="canonical" href="https://ffes.site/">
+
+    <link rel="icon" href="logo novo grande.webp" type="image/png">
+    <link rel="apple-touch-icon" href="logo novo grande.webp">
 
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://ffes.site/">
-    <meta property="og:title" content="FFES Exclusive | Plataforma de Aceleração">
-    <meta property="og:description" content="Acesse seu painel de controle para domínio do inglês. Treinamento tático e direto ao ponto com Teacher Leo Ramos.">
-    <meta property="og:image" content="https://ffes.site/logo novo grande.png">
+    <meta property="og:title" content="FFES | Sovereignty System">
+    <meta property="og:description" content="O sistema definitivo para destravar seu inglês. Metodologia de alta performance, sem enrolação. Clique para acessar.">
+    <meta property="og:image" content="https://ffes.site/Images/logo%20novo%20grande.webp">
 
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://ffes.site/">
-    <meta property="twitter:title" content="FFES Exclusive | Plataforma de Aceleração">
-    <meta property="twitter:description" content="Treinamento tático de inglês. Foco em eficiência e soberania de aprendizado.">
-    <meta property="twitter:image" content="https://ffes.site/logo novo grande.png">
-
-    <meta name="theme-color" content="#0A2342">
-    <link rel="shortcut icon" href="logo novo grande.webp" type="image/x-icon">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="logo novo grande.png">
+    <meta property="twitter:title" content="FFES | Sovereignty System">
+    <meta property="twitter:description" content="Inglês de Alta Performance. Domine a estrutura e a lógica do idioma agora.">
+    <meta property="twitter:image" content="https://ffes.site/Images/logo%20novo%20grande.webp">
     
+    <link rel="canonical" href="https://ffes.site/">
+
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* === ESTILOS ESPECÍFICOS DA INDEX E INSTALAÇÃO === */
+
+        /* Botão de Instalação Permanente (Sempre Visível) */
+        #install-btn-permanent {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #FFD700, #B8860B);
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-weight: 900;
+            font-size: 0.9rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4), 0 0 15px rgba(255, 215, 0, 0.4);
+            z-index: 9999;
+            cursor: pointer;
+            display: flex; /* Garante que aparece sempre */
+            align-items: center;
+            gap: 10px;
+            text-transform: uppercase;
+            transition: transform 0.2s;
+            border: 2px solid #fff;
+            animation: pulse-gold 2s infinite;
+        }
+
+        #install-btn-permanent:active { transform: scale(0.95); }
+
+        @keyframes pulse-gold {
+            0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+        }
+
+        /* Modal de Instruções iOS */
+        #ios-modal {
+            display: none; /* Escondido por padrão, ativado via JS */
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: rgba(26, 26, 26, 0.9);
+            border: 2px solid #B8860B;
+            border-radius: 24px;
+            padding: 30px;
+            max-width: 400px;
+            text-align: center;
+            color: #fff;
+            box-shadow: 0 0 30px rgba(184, 134, 11, 0.3);
+        }
+
+        .step { 
+            margin: 20px 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            text-align: left;
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 12px;
+        }
+        
+        .step-icon { 
+            background: #B8860B; 
+            color: #000; 
+            width: 30px; height: 30px; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            flex-shrink: 0; 
+            font-weight: bold; 
+        }
+        
+        .close-modal {
+            margin-top: 20px;
+            background: transparent;
+            border: 1px solid #B8860B;
+            color: #B8860B;
+            padding: 12px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+        
+        .close-modal:hover { background: #B8860B; color: #000; }
+
+        /* Estilo do Grid (Complemento ao CSS original para garantir visual) */
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 80px auto 100px; /* Margem para header e footer */
+            padding: 20px;
+        }
+
+        .grid-comandos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .card-glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-glass:hover {
+            transform: translateY(-5px);
+            border-color: #B8860B;
+            background: rgba(184, 134, 11, 0.1);
+        }
+
+        .icon-glow { font-size: 2.5rem; margin-bottom: 5px; }
+        
+        /* Destaque para o Card XP */
+        .destaque-gold-card {
+            border: 2px solid #FFD700;
+            background: rgba(255, 215, 0, 0.05);
+        }
+        
+        .gold-pulse { animation: icon-pulse 2s infinite; }
+        @keyframes icon-pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+    </style>
 
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@graph": [
-        {
-          "@type": "EducationalOrganization",
-          "@id": "https://ffes.site/#organization",
-          "name": "FFES - Teacher Leo Ramos",
-          "url": "https://ffes.site",
-          "logo": {
-            "@type": "ImageObject",
-            "url": "https://ffes.site/logo novo grande.png",
-            "width": 512,
-            "height": 512
-          },
-          "sameAs": [
-            "https://www.instagram.com/seu_instagram_aqui", 
-            "https://www.linkedin.com/in/seu_linkedin_aqui"
-          ]
-        },
-        {
-          "@type": "WebSite",
-          "@id": "https://ffes.site/#website",
-          "url": "https://ffes.site",
-          "name": "FFES Exclusive Platform",
-          "description": "Plataforma tática de ensino de língua inglesa focado em alta performance.",
-          "publisher": {
-            "@id": "https://ffes.site/#organization"
-          },
-          "inLanguage": "pt-BR"
-        }
-      ]
+      "@type": "EducationalOrganization",
+      "name": "FFES - Fast & Effective System",
+      "url": "https://ffes.site",
+      "logo": "https://ffes.site/Images/logo%20novo%20grande.webp",
+      "description": "Metodologia de inglês focada em estrutura gramatical e fluência rápida."
     }
     </script>
 </head>
-
 <body>
 
     <div class="background-glow glow-1"></div>
-    <div class="background-glow glow-2"></div>
-
 
     <header class="glass-header">
-    <p class="subtitle">
-        <a href="https://teacherleoramos.com.br" class="clean-link">
-            LeoLingo by <span class="text-gold-sub">Teacher Leo Ramos</span>
+        <a href="https://teacherleoramos.com.br" target="_blank" style="text-decoration: none; color: inherit; display: block;">
+            <h1>FFES <span style="color: var(--accent-gold);">APP</span></h1>
+            <p class="subtitle">LeoLingo by Teacher Leo Ramos</p>
         </a>
-    </p>
-    <button id="bt-install" class="btn-gold">
-        ⬇ INSTALL
-    </button>
     </header>
 
     <main class="dashboard-container">
@@ -166,41 +281,99 @@
     </main>
 
     <footer class="glass-footer">
-        <p>&copy; 2026 FFES - Teacher Leo Ramos | Sovereignty System v2.1</p>
+        © 2026 FFES - Sovereignty System v2.5
     </footer>
 
+    <div id="ios-modal">
+        <div class="modal-content">
+            <h2 style="color: #FFD700; margin-bottom: 10px;">Instalar no iPhone</h2>
+            <p style="font-size: 0.9rem; opacity: 0.9;">O iOS exige instalação manual. Siga os passos:</p>
+            
+            <div class="step">
+                <div class="step-icon">1</div>
+                <div>Toque no botão <strong>Compartilhar</strong> no Safari (quadrado com seta pra cima).</div>
+            </div>
+            
+            <div class="step">
+                <div class="step-icon">2</div>
+                <div>Role para baixo e toque em <strong>"Adicionar à Tela de Início"</strong>.</div>
+            </div>
+
+            <div class="step">
+                <div class="step-icon">3</div>
+                <div>Toque em <strong>"Adicionar"</strong> no topo direito.</div>
+            </div>
+
+            <button class="close-modal" onclick="closeIosModal()">ENTENDI</button>
+        </div>
+    </div>
+
+    <button id="install-btn-permanent">
+        <span>INSTALL</span>
+    </button>
+
     <script>
+        // === 1. REGISTRO DO SERVICE WORKER ===
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
-            .then(() => console.log('FFES PWA: Service Worker Operante.'))
-            .catch(err => console.error('FFES PWA: Erro no SW.', err));
+            .then(() => console.log("SW FFES: Sistema Operacional Ativo"))
+            .catch((err) => console.error("SW Erro:", err));
         }
 
+        // === 2. LÓGICA DE INSTALAÇÃO INTELIGENTE ===
         let deferredPrompt;
-        const installBtn = document.getElementById('bt-install');
+        const installBtn = document.getElementById('install-btn-permanent');
+        const iosModal = document.getElementById('ios-modal');
 
-        // Captura o evento, mas não esconde o botão
+        // Detectar se é dispositivo Apple (iPhone/iPad)
+        const isIos = () => {
+            const userAgent = window.navigator.userAgent.toLowerCase();
+            return /iphone|ipad|ipod/.test(userAgent);
+        }
+        
+        // Detectar se já está rodando como APP (Standalone)
+        const isInStandaloneMode = () => {
+            return ('standalone' in window.navigator) && (window.navigator.standalone) || 
+                   (window.matchMedia('(display-mode: standalone)').matches);
+        }
+
+        // Configuração do Botão
+        installBtn.addEventListener('click', async () => {
+            if (isIos()) {
+                // Se for iPhone, abre o manual de instruções
+                iosModal.style.display = 'flex';
+            } else if (deferredPrompt) {
+                // Se for Android com suporte a PWA, dispara o prompt nativo
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    deferredPrompt = null;
+                }
+            } else {
+                // Caso genérico (PC ou Android antigo/incompatível)
+                alert("Para instalar: \n\nNo Chrome: Menu (3 pontos) -> Instalar Aplicativo.\nNo Safari: Compartilhar -> Tela de Início.");
+            }
+        });
+
+        // Capturar evento do Android para salvar o prompt de instalação
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            console.log('FFES PWA: Pronto para instalação.');
+            console.log("FFES: Prompt de instalação capturado.");
         });
 
-        installBtn.addEventListener('click', (e) => {
-            // Se o prompt estiver disponível, dispara.
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    console.log('FFES PWA: Escolha do usuário:', choiceResult.outcome);
-                    // Não resetamos o deferredPrompt para null imediatamente, 
-                    // caso ele cancele e queira tentar de novo depois.
-                });
-            } else {
-                 // Fallback simples caso o app já esteja instalado ou não suportado
-                alert('Se você já instalou o App, abra-o diretamente pela sua tela inicial. Caso contrário, verifique se seu navegador suporta instalação PWA.');
-            }
-        });
+        // Fechar Modal iOS
+        function closeIosModal() {
+            iosModal.style.display = 'none';
+        }
+
+        // (OPCIONAL) Se quiser esconder o botão quando JÁ estiver instalado:
+        if (isInStandaloneMode()) {
+            // Comente a linha abaixo se quiser que o botão apareça MESMO dentro do app
+            installBtn.style.display = 'none'; 
+        }
     </script>
-    <script src="script.js"></script>
+
+
 </body>
 </html>
