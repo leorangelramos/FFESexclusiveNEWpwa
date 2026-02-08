@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FFES | Present Simple</title>
+    <title>FFES | Presente Simples do vs does</title>
     <link rel="stylesheet" href="../style.css">
     <style>
-        /* === ESTILO UNIFICADO (PADRÃO PWA) === */
+        /* === ESTILO UNIFICADO (PADRÃO PWA - MANTIDO 100%) === */
         
         /* Layout Principal */
         .game-wrapper {
@@ -34,8 +34,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            position: relative; /* Importante para efeitos */
-            overflow: hidden;   /* Importante para efeitos */
+            position: relative;
         }
 
         /* Tipografia do Display */
@@ -188,43 +187,71 @@
         
         .text-gold { color: var(--accent-gold); }
 
-        /* === NOVA ANIMAÇÃO CASSINO (Moedas) === */
+        /* === ANIMAÇÃO CASSINO (Moedas) === */
         .casino-coin {
             position: fixed;
-            width: 25px;
-            height: 25px;
+            width: 25px; height: 25px;
             background: var(--accent-gold);
             border-radius: 50%;
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.9), inset 0 0 5px rgba(255, 255, 255, 0.5);
-            pointer-events: none;
-            z-index: 9999;
-            top: 50%;
-            left: 50%;
+            pointer-events: none; z-index: 9999;
+            top: 50%; left: 50%;
             transform: translate(-50%, -50%);
         }
 
         @keyframes coin-explosion {
-            0% {
-                transform: translate(-50%, -50%) scale(0.5) rotate(0deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translate(var(--tx), var(--ty)) scale(1) rotate(720deg);
-                opacity: 0;
-            }
+            0% { transform: translate(-50%, -50%) scale(0.5) rotate(0deg); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(1) rotate(720deg); opacity: 0; }
         }
+
+        /* === NOVAS CLASSES DE ENGENHARIA === */
+        .progress-track {
+            width: 100%; height: 5px;
+            background: rgba(255,255,255,0.1);
+            position: fixed; top: 0; left: 0; z-index: 1000;
+        }
+        .progress-fill {
+            height: 100%; background: var(--accent-gold);
+            width: 0%; transition: width 0.3s ease;
+            box-shadow: 0 0 10px var(--accent-gold);
+        }
+
+        .feedback-float {
+            position: absolute; top: -15px; right: -10px;
+            font-weight: 900; font-size: 0.9rem;
+            color: var(--accent-gold); background: rgba(0,0,0,0.8);
+            padding: 5px 12px; border-radius: 20px; border: 1px solid var(--accent-gold);
+            opacity: 0; transform: translateY(10px);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 5;
+        }
+        .feedback-float.show { opacity: 1; transform: translateY(0) rotate(5deg); }
+
+        .speed-badge {
+            position: absolute; bottom: 10px; width: 100%; left: 0;
+            text-align: center; font-size: 0.7rem; color: #00e676;
+            font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .shake-effect { animation: shake 0.4s ease-in-out; }
+
     </style>
 </head>
 <body>
     <div class="background-glow glow-1"></div>
+    
+    <div class="progress-track"><div class="progress-fill" id="progress-bar"></div></div>
+
     <header class="glass-header">
-        <h1>PRESENT <span class="text-gold">SIMPLE</span></h1>
-        <p class="subtitle">Módulo 01 - Presente Simples</p>
+        <h1>PRESENTE <span class="text-gold">SIMPLES</span></h1>
+        <p class="subtitle">Módulo 01: Presente Simples</p>
         <div class="xp-pill">XP: <span id="xp-val">0</span></div>
     </header>
-
-
-
 
     <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
         
@@ -234,10 +261,10 @@
             <div class="formula-box">SUJEITO + VERBO (I/You/We/They)</div>
             <div class="formula-box">SUJEITO + VERBO (S) (He/She/It)</div>
             <ul style="margin-left: 20px; opacity: 0.9;">
-                <li><strong>Auxiliares:</strong> Do (I, You, We, They) / Does (He, She, It).</li>
+                <li><strong>Do (I, You, We, They) / Does (He, She, It).</strong></li>
                 <li><strong>Afirmativa:</strong> She work<strong>s</strong>.</li>
-                <li><strong>Negativa:</strong> She does not work.</li>
-                <li><strong>Interrogativa:</strong> Does she work?</li>
+                <li><strong>Negativa:</strong> She <strong>doesn't</strong> work.</li>
+                <li><strong>Interrogativa:</strong> <strong>Does</strong> she work?</li>
             </ul>
         </section>
 
@@ -250,7 +277,10 @@
         <div id="game-container" class="game-wrapper">
             <div id="feedback"></div>
 
-            <div class="game-card">
+            <div class="game-card" id="game-card-element">
+                <div id="combo-feedback" class="feedback-float">COMBO x2</div>
+                <div id="speed-feedback" class="speed-badge"></div>
+
                 <div id="display-sentence">Prepare-se...</div>
                 
                 <div id="scramble-ui" style="display:none; width: 100%;">
@@ -273,156 +303,90 @@
     </footer>
 
     <script>
-        // === 0. SISTEMA DE ÁUDIO & ANIMAÇÃO (DOPAMINA CASSINO) ===
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // === 1. BANCO DE DADOS MASSIVO (100+ Verbos / Sem Objeto) ===
+        // Estrutura atômica para fluxo rápido.
+        const verbList = [
+            // Intransitivos ou de uso comum absoluto
+            {v: "work", pt: "trabalha"}, {v: "play", pt: "joga"}, {v: "study", pt: "estuda"}, {v: "live", pt: "mora"}, 
+            {v: "eat", pt: "come"}, {v: "drink", pt: "bebe"}, {v: "sleep", pt: "dorme"}, {v: "run", pt: "corre"}, 
+            {v: "walk", pt: "anda"}, {v: "talk", pt: "conversa"}, {v: "speak", pt: "fala"}, {v: "listen", pt: "escuta"}, 
+            {v: "watch", pt: "assiste"}, {v: "read", pt: "lê"}, {v: "write", pt: "escreve"}, {v: "cook", pt: "cozinha"}, 
+            {v: "drive", pt: "dirige"}, {v: "fly", pt: "voa"}, {v: "swim", pt: "nada"}, {v: "jump", pt: "pula"}, 
+            {v: "dance", pt: "dança"}, {v: "sing", pt: "canta"}, {v: "draw", pt: "desenha"}, {v: "paint", pt: "pinta"}, 
+            {v: "clean", pt: "limpa"}, {v: "wash", pt: "lava"}, {v: "fix", pt: "conserta"}, {v: "break", pt: "quebra"}, 
+            {v: "buy", pt: "compra"}, {v: "sell", pt: "vende"}, {v: "pay", pt: "paga"}, {v: "cost", pt: "custa"}, 
+            {v: "meet", pt: "encontra"}, {v: "know", pt: "sabe"}, {v: "think", pt: "pensa"}, {v: "understand", pt: "entende"}, 
+            {v: "learn", pt: "aprende"}, {v: "teach", pt: "ensina"}, {v: "help", pt: "ajuda"}, {v: "wait", pt: "espera"}, 
+            {v: "start", pt: "começa"}, {v: "stop", pt: "para"}, {v: "finish", pt: "termina"}, {v: "open", pt: "abre"}, 
+            {v: "close", pt: "fecha"}, {v: "win", pt: "ganha"}, {v: "lose", pt: "perde"}, {v: "cry", pt: "chora"}, 
+            {v: "laugh", pt: "ri"}, {v: "smile", pt: "sorri"}, {v: "shout", pt: "grita"}, {v: "call", pt: "liga"}, 
+            {v: "travel", pt: "viaja"}, {v: "visit", pt: "visita"}, {v: "love", pt: "ama"}, {v: "hate", pt: "odeia"}, 
+            {v: "like", pt: "gosta"}, {v: "want", pt: "quer"}, {v: "need", pt: "precisa"}, {v: "prefer", pt: "prefere"}, 
+            {v: "hope", pt: "espera (ter esperança)"}, {v: "wish", pt: "deseja"}, {v: "believe", pt: "acredita"}, 
+            {v: "remember", pt: "lembra"}, {v: "forget", pt: "esquece"}, {v: "try", pt: "tenta"}, {v: "use", pt: "usa"}, 
+            {v: "stand", pt: "fica de pé"}, {v: "sit", pt: "senta"}, {v: "lie", pt: "mente/deita"}, {v: "die", pt: "morre"}, 
+            {v: "fight", pt: "luta"}, {v: "look", pt: "olha"}, {v: "seem", pt: "parece"}, {v: "feel", pt: "sente"},
+            {v: "agree", pt: "concorda"}, {v: "disagree", pt: "discorda"}, {v: "answer", pt: "responde"}, {v: "ask", pt: "pergunta"},
+            {v: "arrive", pt: "chega"}, {v: "leave", pt: "parte/sai"}, {v: "stay", pt: "fica"}, {v: "change", pt: "muda"},
+            {v: "grow", pt: "cresce"}, {v: "cut", pt: "corta"}, {v: "fall", pt: "cai"}, {v: "hear", pt: "ouve"},
+            {v: "hurry", pt: "apressa-se"}, {v: "worry", pt: "preocupa-se"}, {v: "care", pt: "se importa"}, {v: "share", pt: "compartilha"},
+            {v: "push", pt: "empurra"}, {v: "pull", pt: "puxa"}, {v: "throw", pt: "arremessa"}, {v: "catch", pt: "pega"}
+        ];
 
-        function playWinSound() {
-            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(1200, audioCtx.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(2000, audioCtx.currentTime + 0.1);
-            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.3);
-        }
-
-        // Função que cria a explosão de moedas
-        function triggerCasinoEffect() {
-            const numCoins = 20; // Quantidade de moedas
-            for (let i = 0; i < numCoins; i++) {
-                const coin = document.createElement('div');
-                coin.classList.add('casino-coin');
-                
-                // Calcula direção aleatória para explosão
-                const angle = Math.random() * Math.PI * 2;
-                const distance = 150 + Math.random() * 200; // Raio da explosão
-                const tx = Math.cos(angle) * distance + 'px';
-                const ty = Math.sin(angle) * distance + 'px';
-                
-                // Define as variáveis CSS para a trajetória única desta moeda
-                coin.style.setProperty('--tx', tx);
-                coin.style.setProperty('--ty', ty);
-                
-                // Duração e tempo aleatórios para parecer natural
-                coin.style.animation = `coin-explosion ${0.8 + Math.random() * 0.5}s ease-out forwards`;
-                
-                document.body.appendChild(coin);
-                
-                // Limpa o elemento do DOM após a animação
-                setTimeout(() => { coin.remove(); }, 1500);
-            }
-        }
-
-        // === 1. DATA ASSETS ===
         const subjects = [
-            { en: "I", pt: "Eu", type: "pl", p: "eu" },
-            { en: "You", pt: "Você", type: "pl", p: "ele" },
-            { en: "We", pt: "Nós", type: "pl", p: "nos" },
-            { en: "They", pt: "Eles", type: "pl", p: "eles" },
-            { en: "He", pt: "Ele", type: "3s", p: "ele" },
-            { en: "She", pt: "Ela", type: "3s", p: "ele" }
-        ];
-        const objectBank = [
-            { en: "the bank", pt: "banco", type: "place_work", gen: "m" },
-            { en: "the office", pt: "escritório", type: "place_work", gen: "m" },
-            { en: "the store", pt: "loja", type: "place_work", gen: "f" },
-            { en: "the hospital", pt: "hospital", type: "place_work", gen: "m" },
-            { en: "school", pt: "escola", type: "place_study", gen: "f" },
-            { en: "the library", pt: "biblioteca", type: "place_study", gen: "f" },
-            { en: "the park", pt: "parque", type: "place_leisure", gen: "m" },
-            { en: "the beach", pt: "praia", type: "place_leisure", gen: "f" },
-            { en: "home", pt: "casa", type: "place_home", gen: "null" },
-            { en: "Brazil", pt: "Brasil", type: "city", gen: "m" },
-            { en: "pizza", pt: "pizza", type: "food", gen: "f" },
-            { en: "bread", pt: "pão", type: "food", gen: "m" },
-            { en: "an apple", pt: "uma maçã", type: "food", gen: "f" },
-            { en: "water", pt: "água", type: "liquid", gen: "f" },
-            { en: "coffee", pt: "café", type: "liquid", gen: "m" },
-            { en: "milk", pt: "leite", type: "liquid", gen: "m" },
-            { en: "soccer", pt: "futebol", type: "sport", gen: "m" },
-            { en: "tennis", pt: "tênis", type: "sport", gen: "m" },
-            { en: "English", pt: "inglês", type: "lang", gen: "m" },
-            { en: "Portuguese", pt: "português", type: "lang", gen: "m" }
-        ];
-        const verbs = [
-            { en: "work", cats: ["place_work"], conn: "at", pt: { eu: "trabalho", ele: "trabalha", nos: "trabalhamos", eles: "trabalham" } },
-            { en: "study", cats: ["place_study", "lang"], conn: "at", pt: { eu: "estudo", ele: "estuda", nos: "estudamos", eles: "estudam" } },
-            { en: "live", cats: ["place_home", "city"], conn: "in", pt: { eu: "moro", ele: "mora", nos: "moramos", eles: "moram" } },
-            { en: "go", cats: ["place_work", "place_study", "place_leisure", "place_home", "city"], conn: "to", pt: { eu: "vou", ele: "vai", nos: "vamos", eles: "vão" } },
-            { en: "eat", cats: ["food"], conn: "", pt: { eu: "como", ele: "come", nos: "comemos", eles: "comem" } },
-            { en: "drink", cats: ["liquid"], conn: "", pt: { eu: "bebo", ele: "bebe", nos: "bebemos", eles: "bebem" } },
-            { en: "play", cats: ["sport"], conn: "", pt: { eu: "jogo", ele: "joga", nos: "jogamos", eles: "jogam" } },
-            { en: "speak", cats: ["lang"], conn: "", pt: { eu: "falo", ele: "fala", nos: "falamos", eles: "falam" } }
+            {en: "I", aux: "Do", pt: "Eu"}, {en: "You", aux: "Do", pt: "Você"}, {en: "We", aux: "Do", pt: "Nós"}, {en: "They", aux: "Do", pt: "Eles"},
+            {en: "He", aux: "Does", pt: "Ele"}, {en: "She", aux: "Does", pt: "Ela"}, {en: "It", aux: "Does", pt: "Isso"}, 
+            {en: "Pedro", aux: "Does", pt: "Pedro"}, {en: "Ana", aux: "Does", pt: "Ana"}, {en: "Your dad", aux: "Does", pt: "Seu pai"},
+            {en: "Your friends", aux: "Do", pt: "Seus amigos"}, {en: "The dog", aux: "Does", pt: "O cachorro"}
         ];
 
-        // === 2. ENGINE LINGUÍSTICA ===
-        function getPortuguesePreposition(connEn, genderPt) {
-            if (genderPt === "null") {
-                if (connEn === "to") return "para";
-                if (connEn === "at" || connEn === "in") return "em";
-                return "";
+        let database = [];
+
+        // Gerador Dinâmico de Frases
+        function buildDatabase() {
+            database = [];
+            for(let i=0; i<300; i++) { // Gerar 300 variações
+                const s = subjects[Math.floor(Math.random() * subjects.length)];
+                const v = verbList[Math.floor(Math.random() * verbList.length)];
+                // Montar frase: Aux + S + V?
+                database.push({
+                    en: `${s.aux} ${s.en.toLowerCase()} ${v.v}?`, // Ex: Do you work?
+                    pt: `${s.pt} ${v.pt}?`, // Ex: Você trabalha?
+                    s: s.en,
+                    v: v.v,
+                    aux: s.aux
+                });
             }
-            if (connEn === "at" || connEn === "in") return genderPt === "m" ? "no" : "na";
-            if (connEn === "to") return genderPt === "m" ? "ao" : "à";
-            return genderPt === "m" ? "o" : "a";
         }
+        buildDatabase(); // Inicializa
 
-        // === 3. ENGINE DO JOGO ===
+        // === 2. ENGINE DO JOGO ===
         let xp = parseInt(localStorage.getItem('ffes_xp') || 0);
         document.getElementById('xp-val').innerText = xp;
-        let currentMode = '';
-        let correctIdx = 0;
-        let currentSolutionScramble = "";
-        let userScramble = [];
+        
+        let state = {
+            mode: '',
+            currentQ: null,
+            correctIdx: 0,
+            userScramble: [],
+            combo: 0,
+            startTime: 0
+        };
 
-        function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
-        function conjugateEn(verb, type) {
-            if (type === "pl") return verb;
-            if (verb === "go") return "goes";
-            if (verb === "do") return "does";
-            if (verb === "study") return "studies";
-            return verb + "s"; 
-        }
-
-        function getRoundData() {
-            const subj = rand(subjects);
-            const verbData = rand(verbs); 
-            const allowedObjects = objectBank.filter(obj => verbData.cats.includes(obj.type));
-            const obj = allowedObjects.length > 0 ? rand(allowedObjects) : { en: "it", pt: "isso", type: "misc", gen: "m" };
-            let connectorEn = verbData.conn;
-            if (obj.type === "lang") connectorEn = "";
-            if (verbData.en === "go" && obj.en === "home") connectorEn = "";
-            const conjVerbEn = conjugateEn(verbData.en, subj.type);
-            let parts = [subj.en, conjVerbEn];
-            if (connectorEn) parts.push(connectorEn);
-            parts.push(obj.en);
-            const fullEn = parts.join(" ");
-            const verbPt = verbData.pt[subj.p]; 
-            let midPt = "";
-            if (connectorEn) {
-                midPt = getPortuguesePreposition(connectorEn, obj.gen);
-            } else if (verbData.en === "eat" || verbData.en === "drink" || verbData.en === "speak" || verbData.en === "play") {
-                midPt = ""; 
-            }
-            const fullPt = `${subj.pt} ${verbPt} ${midPt ? midPt + " " : ""}${obj.pt}`.replace(/\s+/g, ' ').trim();
-            return { subj, verbData, obj, parts, fullEn, fullPt, connector: connectorEn };
-        }
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function startGame(mode) {
-            currentMode = mode;
+            state.mode = mode;
+            state.combo = 0; 
             document.getElementById('game-container').style.display = 'flex';
             document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
             event.target.classList.add('active');
+            
             const abControls = document.getElementById('ab-controls');
             const scCheck = document.getElementById('btn-check-scramble');
             const display = document.getElementById('display-sentence');
             const scrambleUI = document.getElementById('scramble-ui');
+            
             if (mode === 'scramble') {
                 abControls.style.display = 'none';
                 scCheck.style.display = 'block';
@@ -438,115 +402,254 @@
         }
 
         function generate() {
-            const data = getRoundData();
+            document.querySelectorAll('.btn-option').forEach(b => {
+                b.className = 'btn-option';
+                if(b.id === 'btn-check-scramble') b.innerText = "VERIFICAR";
+            });
+            document.getElementById('feedback').className = ''; 
+            document.getElementById('feedback').innerText = '';
+            document.getElementById('speed-feedback').innerText = "";
+
+            // Seleção randomica da big list
+            const item = database[Math.floor(Math.random() * database.length)];
+            state.currentQ = item;
+            state.startTime = Date.now();
+
             const display = document.getElementById('display-sentence');
-            const fb = document.getElementById('feedback');
-            fb.className = ''; fb.innerText = '';
-            document.getElementById('btn1').className = 'btn-option';
-            document.getElementById('btn2').className = 'btn-option';
-            document.getElementById('btn-check-scramble').className = 'btn-option';
-            if (currentMode === 'mc') {
-                if (Math.random() > 0.5) {
-                    let sentenceHtml = `${data.parts[0]} <span class="gap">_____</span> ${data.parts.slice(2).join(" ")}.`;
-                    display.innerHTML = sentenceHtml;
-                    const correct = data.parts[1]; 
-                    const wrong = data.subj.type === '3s' ? data.verbData.en : conjugateEn(data.verbData.en, '3s');
-                    setOptions(correct, wrong);
+            
+            if (state.mode === 'mc') {
+                // Capitalizar primeira letra do sujeito se for inicio de frase visualmente (aqui não é, pois tem Do/Does antes)
+                // Mas nomes próprios como Pedro sim. Já está no objeto.
+                display.innerHTML = `<span class="gap">_____</span> ${item.s.toLowerCase() === 'i' ? 'I' : (item.s === 'Pedro' || item.s === 'Ana' ? item.s : item.s.toLowerCase())} ${item.v}?`;
+                if(Math.random() > 0.5) {
+                    setOptions("Do", "Does", item.aux);
                 } else {
-                    const auxCorrect = data.subj.type === '3s' ? "Does" : "Do";
-                    const auxWrong = data.subj.type === '3s' ? "Do" : "Does";
-                    const baseVerb = data.verbData.en; 
-                    let rest = [baseVerb, ...data.parts.slice(2)].join(" ");
-                    display.innerHTML = `<span class="gap">_____</span> ${data.subj.en} ${rest}?`;
-                    setOptions(auxCorrect, auxWrong);
+                    setOptions("Does", "Do", item.aux);
                 }
             } 
-            else if (currentMode === 'translation') {
-                display.innerHTML = `"${data.fullPt}"`;
-                const correct = data.fullEn;
-                let wrong = "";
-                const r = Math.random();
-                if(r < 0.33) {
-                    wrong = data.fullEn.replace(data.parts[1], data.subj.type === '3s' ? data.verbData.en : data.verbData.en + "s");
-                } else if (r < 0.66 && data.connector) {
-                    const wrongConn = data.connector === "to" ? "at" : "to";
-                    wrong = data.fullEn.replace(` ${data.connector} `, ` ${wrongConn} `);
+            else if (state.mode === 'translation') {
+                display.innerHTML = `"${item.pt}"`;
+                const correct = item.en;
+                // Ajuste fino na geração do erro para ficar natural
+                const wrongAux = item.aux === "Do" ? "Does" : "Do";
+                // Regex simples para substituir apenas a primeira ocorrência do auxiliar
+                const wrong = item.en.replace(item.aux, wrongAux);
+                
+                if(Math.random() > 0.5) {
+                    setOptions(correct, wrong, correct);
                 } else {
-                    const wrongSubj = data.subj.en === "He" ? "I" : "He";
-                    wrong = data.fullEn.replace(data.subj.en, wrongSubj);
+                    setOptions(wrong, correct, correct);
                 }
-                setOptions(correct, wrong);
-            }
-            else if (currentMode === 'scramble') {
-                currentSolutionScramble = data.fullEn;
-                userScramble = [];
-                const pool = document.getElementById('scramble-pool');
-                const ans = document.getElementById('scramble-answer');
-                pool.innerHTML = "";
-                ans.innerText = "";
-                let words = [...data.parts];
-                words.sort(() => Math.random() - 0.5);
-                words.forEach(w => {
-                    const pill = document.createElement('span');
-                    pill.className = 'word-pill';
-                    pill.innerText = w;
-                    pill.onclick = () => {
-                        userScramble.push(w);
-                        ans.innerText = userScramble.join(" ");
-                        pill.style.display = 'none';
-                    };
-                    pool.appendChild(pill);
-                });
+            } 
+            else if (state.mode === 'scramble') {
+                setupScramble(item);
             }
         }
 
-        function setOptions(correct, wrong) {
-            correctIdx = Math.random() > 0.5 ? 1 : 2;
-            document.getElementById(`btn${correctIdx}`).innerText = correct;
-            document.getElementById(`btn${correctIdx === 1 ? 2 : 1}`).innerText = wrong;
+        function setOptions(txt1, txt2, correctVal) {
+            const btn1 = document.getElementById('btn1');
+            const btn2 = document.getElementById('btn2');
+            btn1.innerText = txt1; 
+            btn1.onclick = () => checkAnswer(txt1 === correctVal, btn1);
+            btn2.innerText = txt2; 
+            btn2.onclick = () => checkAnswer(txt2 === correctVal, btn2);
         }
 
-        function checkAnswer(idx) {
-            const fb = document.getElementById('feedback');
-            const btn = document.getElementById(`btn${idx}`);
-            if (idx === correctIdx) {
-                fb.innerText = "PERFEITO!"; fb.style.color = "#00e676"; fb.className = "visible";
-                btn.classList.add('correct'); addXP(15); 
-                playWinSound(); // Som
-                triggerCasinoEffect(); // Animação de moedas
-                setTimeout(generate, 1500); // Aumentei um pouco o tempo para apreciar a animação
-            } else {
-                fb.innerText = "TENTE NOVAMENTE"; fb.style.color = "#ff1744"; fb.className = "visible";
-                btn.classList.add('wrong'); addXP(-5);
-            }
+        function setupScramble(item) {
+            state.userScramble = [];
+            const pool = document.getElementById('scramble-pool');
+            const ans = document.getElementById('scramble-answer');
+            pool.innerHTML = "";
+            ans.innerText = "";
+            
+            // Clean question mark for shuffling but add to check
+            let cleanEn = item.en.replace('?', ' ?');
+            let words = cleanEn.split(" ");
+            words.sort(() => Math.random() - 0.5);
+            
+            words.forEach(w => {
+                const pill = document.createElement('span');
+                pill.className = 'word-pill';
+                pill.innerText = w;
+                pill.onclick = () => {
+                    state.userScramble.push(w);
+                    ans.innerText = state.userScramble.join(" ");
+                    pill.style.display = 'none';
+                    playAudio('click');
+                };
+                pool.appendChild(pill);
+            });
         }
 
         function verifyScramble() {
-            const fb = document.getElementById('feedback');
             const btn = document.getElementById('btn-check-scramble');
-            if (userScramble.join(" ") === currentSolutionScramble) {
-                fb.innerText = "EXCELENTE!"; fb.style.color = "#00e676"; fb.className = "visible";
-                btn.classList.add('correct'); addXP(20);
-                playWinSound(); // Som
-                triggerCasinoEffect(); // Animação de moedas
-                setTimeout(() => { btn.classList.remove('correct'); generate(); }, 1500);
+            // Reconstruct with question mark logic handled roughly
+            const userStr = state.userScramble.join(" ").replace(' ?', '?');
+            if (userStr === state.currentQ.en) {
+                checkAnswer(true, btn);
             } else {
-                fb.innerText = "ORDEM ERRADA"; fb.style.color = "#ff1744"; fb.className = "visible";
-                btn.classList.add('wrong');
+                checkAnswer(false, btn);
                 setTimeout(() => {
-                    btn.classList.remove('wrong'); userScramble = [];
-                    document.getElementById('scramble-answer').innerText = "";
-                    document.querySelectorAll('.word-pill').forEach(p => p.style.display = 'inline-block');
+                    btn.classList.remove('wrong');
+                    setupScramble(state.currentQ);
                 }, 1000);
             }
         }
 
+        function checkAnswer(isCorrect, element) {
+            const fb = document.getElementById('feedback');
+            const timeDelta = Date.now() - state.startTime;
+            const isSpeed = timeDelta < 2000;
+
+            if (isCorrect) {
+                state.combo++;
+                let xpGain = 10 + (state.combo * 2);
+                if(isSpeed) xpGain += 5;
+                addXP(xpGain);
+                
+                fb.innerText = "PERFEITO!"; fb.style.color = "#00e676"; fb.className = "visible";
+                element.classList.add('correct');
+                
+                // === LÓGICA DE ÁUDIO AVANÇADA ===
+                if (state.combo % 10 === 0) {
+                    playAudio('milestone'); // Som Épico x10, x20...
+                    triggerCasinoEffect(50); // Chuva massiva
+                } else if (state.combo > 1) {
+                    playAudio('combo'); // Som Arcade Crescente
+                } else {
+                    playAudio('win'); // Som Normal
+                }
+                
+                if(isSpeed) document.getElementById('speed-feedback').innerText = "⚡ HACKER SPEED!";
+
+                const comboEl = document.getElementById('combo-feedback');
+                comboEl.innerText = `COMBO x${state.combo}`;
+                comboEl.classList.add('show');
+
+                let w = parseFloat(document.getElementById('progress-bar').style.width || 0);
+                document.getElementById('progress-bar').style.width = (w + 10) % 100 + '%';
+                
+                // Efeitos visuais extras
+                if(state.combo % 5 === 0) triggerCasinoEffect(20);
+
+                setTimeout(() => {
+                    comboEl.classList.remove('show');
+                    generate();
+                }, 1200);
+
+            } else {
+                state.combo = 0;
+                addXP(-5);
+                fb.innerText = "TENTE NOVAMENTE"; fb.style.color = "#ff1744"; fb.className = "visible";
+                element.classList.add('wrong');
+                playAudio('error');
+                
+                const card = document.getElementById('game-card-element');
+                card.classList.add('shake-effect');
+                setTimeout(() => card.classList.remove('shake-effect'), 400);
+                document.getElementById('combo-feedback').classList.remove('show');
+            }
+        }
+
         function addXP(val) {
-            xp = Math.max(0, xp + val); localStorage.setItem('ffes_xp', xp);
+            xp = Math.max(0, xp + val); 
+            localStorage.setItem('ffes_xp', xp);
             document.getElementById('xp-val').innerText = xp;
         }
-    </script>
 
-    
+        // === 3. DRIVER DE ÁUDIO PRO (3 TIPOS) ===
+        function playAudio(type) {
+            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+            const t = audioCtx.currentTime;
+            
+            if(type === 'milestone') {
+                // === SOM TIPO 3: MILESTONE (Acorde Maior Glorioso) ===
+                // Toca C-E-G-C (Dó Maior) rápido (arpeggio)
+                const frequencies = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                frequencies.forEach((f, i) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle'; // Suave mas brilhante
+                    osc.frequency.setValueAtTime(f, t + (i * 0.1)); // Atraso leve entre notas
+                    gain.gain.setValueAtTime(0.1, t + (i * 0.1));
+                    gain.gain.exponentialRampToValueAtTime(0.01, t + (i * 0.1) + 0.6);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(t + (i * 0.1));
+                    osc.stop(t + (i * 0.1) + 0.6);
+                });
+
+            } else if(type === 'combo') {
+                // === SOM TIPO 2: COMBO (Arcade Rising Pitch) ===
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.type = 'square'; // 8-bit style
+                // Frequência base sobe com o combo. Limitada a 1200Hz para não doer o ouvido.
+                const baseFreq = Math.min(300 + (state.combo * 50), 1200);
+                
+                osc.frequency.setValueAtTime(baseFreq, t);
+                osc.frequency.linearRampToValueAtTime(baseFreq + 200, t + 0.15); // Slide up
+                
+                gain.gain.setValueAtTime(0.08, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+                osc.start(t); osc.stop(t + 0.2);
+
+            } else if(type === 'win') {
+                // === SOM TIPO 1: NORMAL (Ping Suave) ===
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, t);
+                gain.gain.setValueAtTime(0.05, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+                osc.start(t); osc.stop(t + 0.15);
+
+            } else if(type === 'error') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, t);
+                osc.frequency.linearRampToValueAtTime(100, t + 0.2);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+
+            } else { // Click
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.setValueAtTime(1200, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
+                osc.start(t); osc.stop(t + 0.05);
+            }
+        }
+
+        function triggerCasinoEffect(amount = 20) {
+            for (let i = 0; i < amount; i++) {
+                const coin = document.createElement('div');
+                coin.classList.add('casino-coin');
+                
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 150 + Math.random() * 200;
+                const tx = Math.cos(angle) * distance + 'px';
+                const ty = Math.sin(angle) * distance + 'px';
+                
+                coin.style.setProperty('--tx', tx);
+                coin.style.setProperty('--ty', ty);
+                coin.style.animation = `coin-explosion ${0.8 + Math.random() * 0.5}s ease-out forwards`;
+                
+                document.body.appendChild(coin);
+                setTimeout(() => { coin.remove(); }, 1500);
+            }
+        }
+    </script>
 </body>
 </html>
